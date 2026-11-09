@@ -1,12 +1,13 @@
 import React from 'react';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { BirdProfile, Button } from '@/components/ui';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
-import { serif } from '@/constants/fonts';
+import { Feather } from '@expo/vector-icons';
+import { sans, serif } from '@/constants/fonts';
 
 export default function BirdDetail() {
   const c = useColors();
@@ -20,7 +21,7 @@ export default function BirdDetail() {
     try {
       await remove(String(id));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-      router.back();
+      router.navigate('/');
     } catch { /* error surfaced in context */ }
   };
   const confirmDelete = () => {
@@ -36,7 +37,13 @@ export default function BirdDetail() {
 
   return (
     <View style={{ flex: 1, backgroundColor: c.background }}>
-      <Stack.Screen options={{ title: bird?.name ?? 'Journal entry' }} />
+      <Stack.Screen options={{ title: bird?.name ?? 'Journal entry', headerRight: () => (
+        <Pressable testID="detail-home" accessibilityRole="button" accessibilityLabel="Back to home" hitSlop={10} onPress={() => router.navigate('/')}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, paddingHorizontal: 4 }}>
+          <Feather name="home" size={18} color={c.primary} />
+          <Text style={{ fontFamily: sans.medium, fontSize: 14, color: c.primary }}>Home</Text>
+        </Pressable>
+      ) }} />
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }} contentInsetAdjustmentBehavior="automatic">
         {bird ? (
           <>
@@ -47,7 +54,7 @@ export default function BirdDetail() {
         ) : loaded ? (
           <View style={s.missing}>
             <Text style={[s.title, { color: c.foreground }]}>This page is missing.</Text>
-            <Button testID="missing-back" label="Back to collection" variant="outline" onPress={() => router.back()} style={{ marginTop: 16 }} />
+            <Button testID="missing-back" label="Back to home" icon="home" variant="outline" onPress={() => router.navigate('/')} style={{ marginTop: 16 }} />
           </View>
         ) : null}
       </ScrollView>

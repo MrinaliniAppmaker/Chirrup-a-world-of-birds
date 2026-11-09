@@ -14,13 +14,14 @@ function NativeTabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
+        <NativeTabs.Trigger.Icon sf={{ default: 'house', selected: 'house.fill' }} />
+        <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="create">
         <NativeTabs.Trigger.Icon sf={{ default: 'pencil.and.outline', selected: 'pencil.and.outline' }} />
         <NativeTabs.Trigger.Label>Create</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="library">
-        <NativeTabs.Trigger.Icon sf={{ default: 'book', selected: 'book.fill' }} />
-        <NativeTabs.Trigger.Label>Collection</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="library" hidden />
     </NativeTabs>
   );
 }
@@ -54,15 +55,18 @@ function ClassicTabLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{
+        title: 'Home',
+        tabBarButtonTestID: 'tab-home',
+        tabBarAccessibilityLabel: 'Home, your collection',
+        tabBarIcon: ({ color }) => isIOS ? <SymbolView name="house" tintColor={color as string} size={24} /> : <Feather name="home" size={22} color={color as string} />,
+      }} />
+      <Tabs.Screen name="create" options={{
         title: 'Create',
         tabBarButtonTestID: 'tab-create',
+        tabBarAccessibilityLabel: 'Create a bird',
         tabBarIcon: ({ color }) => isIOS ? <SymbolView name="pencil.and.outline" tintColor={color as string} size={24} /> : <Feather name="feather" size={22} color={color as string} />,
       }} />
-      <Tabs.Screen name="library" options={{
-        title: 'Collection',
-        tabBarButtonTestID: 'tab-library',
-        tabBarIcon: ({ color }) => isIOS ? <SymbolView name="book" tintColor={color as string} size={24} /> : <Feather name="book-open" size={22} color={color as string} />,
-      }} />
+      <Tabs.Screen name="library" options={{ href: null }} />
     </Tabs>
   );
 }

@@ -1,12 +1,13 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { Image } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import type { GeneratedBird } from '@workspace/api-client-react';
 import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
 import { TRAIT_LABELS, TraitKey, TraitOption } from '@/constants/traits';
+import { TraitIllustration } from './TraitIllustration';
 
 export const tap = () => { Haptics.selectionAsync().catch(() => {}); };
 
@@ -53,7 +54,7 @@ export function TraitTile({ option, selected, onPress, testID }: { option: Trait
       testID={testID}
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={option.label}
+      accessibilityLabel={`${option.label}${option.description ? `. ${option.description}` : ''}`}
       onPress={() => { tap(); onPress(); }}
       style={({ pressed }) => [s.tile, {
         borderRadius: c.radius,
@@ -67,11 +68,11 @@ export function TraitTile({ option, selected, onPress, testID }: { option: Trait
           {option.swatch.map((h) => <View key={h} style={[s.swatch, { backgroundColor: h }]} />)}
         </View>
       ) : (
-        <MaterialCommunityIcons name={(option.icon ?? 'bird') as keyof typeof MaterialCommunityIcons.glyphMap} size={30} color={c.primary} />
+        <TraitIllustration name={option.illustration ?? ''} />
       )}
       <View style={s.tileLabelRow}>
         {selected ? <Feather name="check" size={11} color={c.primary} /> : null}
-        <Text numberOfLines={1} style={[s.tileLabel, { color: selected ? c.primary : c.mutedForeground, fontFamily: selected ? sans.semibold : sans.regular }]}>{option.label}</Text>
+        <Text numberOfLines={2} style={[s.tileLabel, { color: selected ? c.primary : c.mutedForeground, fontFamily: selected ? sans.semibold : sans.regular }]}>{option.label}</Text>
       </View>
     </Pressable>
   );

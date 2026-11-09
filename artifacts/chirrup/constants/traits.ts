@@ -4,7 +4,8 @@ export interface TraitOption {
   id: string;
   label: string;
   value: string;
-  icon?: string; // MaterialCommunityIcons name
+  illustration?: string;
+  description?: string;
   swatch?: string[];
 }
 
@@ -19,23 +20,29 @@ export const TRAIT_GROUPS: TraitGroup[] = [
   {
     key: 'body', title: 'Body shape', hint: 'Start here',
     options: [
-      { id: 'songbird', label: 'Songbird', value: 'small, compact songbird body', icon: 'bird' },
-      { id: 'waterfowl', label: 'Waterfowl', value: 'buoyant waterfowl body, broad and low', icon: 'duck' },
-      { id: 'raptor', label: 'Raptor', value: 'muscular raptor body with broad shoulders', icon: 'bird' },
-      { id: 'wader', label: 'Wader', value: 'slender long-necked wading bird body', icon: 'feather' },
-      { id: 'hummingbird', label: 'Hummer', value: 'tiny hovering hummingbird body', icon: 'flower-tulip-outline' },
-      { id: 'owl', label: 'Owl', value: 'rounded upright owl body with large head', icon: 'owl' },
+      { id: 'songbird', label: 'Songbird', value: 'small, compact songbird body', illustration: 'songbird', description: 'Small & perching' },
+      { id: 'waterfowl', label: 'Waterfowl', value: 'buoyant waterfowl body, broad and low', illustration: 'waterfowl', description: 'Rounded & buoyant' },
+      { id: 'pheasant', label: 'Pheasant', value: 'full pheasant body with trailing tail', illustration: 'pheasant', description: 'Full body, trailing tail' },
+      { id: 'raptor', label: 'Raptor', value: 'muscular raptor body with broad shoulders', illustration: 'raptor', description: 'Broad chest, strong stance' },
+      { id: 'wader', label: 'Wader', value: 'slender long-necked wading bird body', illustration: 'wader', description: 'Long neck & slender legs' },
+      { id: 'owl', label: 'Owl', value: 'rounded upright owl body with large head', illustration: 'owl', description: 'Upright & round-headed' },
+      { id: 'hummingbird', label: 'Hummingbird', value: 'tiny hovering hummingbird body', illustration: 'hummingbird', description: 'Tiny & streamlined' },
+      { id: 'pigeon', label: 'Pigeon', value: 'plump pigeon body with small head', illustration: 'pigeon', description: 'Plump, with a small head' },
+      { id: 'woodpecker', label: 'Woodpecker', value: 'upright woodpecker body with braced tail', illustration: 'woodpecker', description: 'Upright, with a braced tail' },
     ],
   },
   {
     key: 'beak', title: 'Beak', hint: 'How it feeds',
     options: [
-      { id: 'conical', label: 'Conical', value: 'short conical seed-cracking beak', icon: 'triangle-outline' },
-      { id: 'hooked', label: 'Hooked', value: 'sharp hooked raptor beak', icon: 'hook' },
-      { id: 'flat', label: 'Flat bill', value: 'flat broad duck-like bill', icon: 'minus-thick' },
-      { id: 'probe', label: 'Long probe', value: 'long thin probing beak', icon: 'needle' },
-      { id: 'thin', label: 'Fine tip', value: 'fine pointed insect-catching beak', icon: 'pencil-outline' },
-      { id: 'casque', label: 'Casqued', value: 'large curved beak with a casque', icon: 'banana' },
+      { id: 'conical', label: 'Conical', value: 'short conical seed-cracking beak', illustration: 'conical', description: 'Short & seed-cracking' },
+      { id: 'hooked', label: 'Raptor', value: 'sharp hooked raptor beak', illustration: 'hooked', description: 'Hooked & powerful' },
+      { id: 'flat', label: 'Duckbill', value: 'flat broad duck-like bill', illustration: 'flat', description: 'Broad & flattened' },
+      { id: 'probe', label: 'Needle', value: 'long thin nectar-reaching beak', illustration: 'probe', description: 'Slender & nectar-reaching' },
+      { id: 'chisel', label: 'Chisel', value: 'straight wood-tapping chisel beak', illustration: 'chisel', description: 'Straight & wood-tapping' },
+      { id: 'spear', label: 'Spear', value: 'long sharply pointed spear beak', illustration: 'spear', description: 'Long & sharply pointed' },
+      { id: 'downcurved', label: 'Downcurved', value: 'downcurved probing beak', illustration: 'downcurved', description: 'Curved for probing' },
+      { id: 'upcurved', label: 'Upcurved', value: 'slender upcurved sweep-feeding beak', illustration: 'upcurved', description: 'Slender & sweep-feeding' },
+      { id: 'crossbill', label: 'Crossbill', value: 'crossed bill tips for opening cones', illustration: 'crossbill', description: 'Crossed tips for cones' },
     ],
   },
   {
@@ -52,12 +59,15 @@ export const TRAIT_GROUPS: TraitGroup[] = [
   {
     key: 'feathers', title: 'Feather types', hint: 'Texture',
     options: [
-      { id: 'flight', label: 'Down + flight', value: 'soft down with crisp flight feathers', icon: 'feather' },
-      { id: 'contour', label: 'Contour', value: 'sleek tight contour feathers', icon: 'waves' },
-      { id: 'crest', label: 'Crested', value: 'tall upright crest of plumes', icon: 'crown-outline' },
-      { id: 'streamers', label: 'Streamers', value: 'long ornamental tail streamers', icon: 'tailwind' },
-      { id: 'fluffy', label: 'Fluffy', value: 'fluffy puffed-out plumage', icon: 'cloud-outline' },
-      { id: 'scaled', label: 'Scalloped', value: 'scalloped scale-like patterning', icon: 'texture' },
+      { id: 'flight', label: 'Down + flight', value: 'soft down with crisp flight feathers', illustration: 'basic', description: 'Soft body, defined wings' },
+      { id: 'contour', label: 'Contour', value: 'sleek tight contour feathers', illustration: 'basic', description: 'Smooth, layered coverage' },
+      { id: 'fine-down', label: 'Fine down', value: 'fine delicate fluffy down feathers', illustration: 'basic', description: 'Delicate, fluffy softness' },
+      { id: 'flight-feathers', label: 'Flight feathers', value: 'long structured flight feathers', illustration: 'flightFeather', description: 'Long, structured vanes' },
+      { id: 'tail-feathers', label: 'Tail feathers', value: 'broad balanced tail feathers', illustration: 'tailFeather', description: 'Balance & steering' },
+      { id: 'semiplume', label: 'Semiplume', value: 'loose semiplume feathers with soft barbs', illustration: 'semiplume', description: 'Soft, loosely branched' },
+      { id: 'powder-down', label: 'Powder down', value: 'powder-producing down feathers', illustration: 'powderDown', description: 'Fine, protective down' },
+      { id: 'bristles', label: 'Bristles', value: 'stiff protective bristle feathers around the beak', illustration: 'bristles', description: 'Stiff, protective shafts' },
+      { id: 'filoplumes', label: 'Filoplumes', value: 'hairlike filoplume feathers with sparse tips', illustration: 'filoplumes', description: 'Fine, hairlike shafts' },
     ],
   },
 ];
