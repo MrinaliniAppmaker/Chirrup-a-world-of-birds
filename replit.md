@@ -1,10 +1,11 @@
-# [Project name]
+# CHIRRUP
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A mobile bird-creation studio: combine traits, generate an imagined bird portrait and field notes, and keep a private on-device journal.
 
 ## Run & Operate
 
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/chirrup run dev` — managed Expo mobile preview
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
@@ -26,11 +27,13 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Collections stay on the user's device, without accounts or a server-side database. Native portraits are separate document files to avoid AsyncStorage row limits.
+- Generated birds are fictional; portraits and field notes must be labeled as imagined, not real species identification.
+- Figma's field-studio visual identity is adapted for phone screens, not copied as a desktop layout.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Choose bird traits visually or type them, review choices, generate a real AI portrait with appearance, habitat, diet and behavior, and save/search/remove creations in a local journal.
 
 ## User preferences
 

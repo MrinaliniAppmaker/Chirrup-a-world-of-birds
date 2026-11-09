@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/"
+title = "CHIRRUP"
+description = "A mobile bird creation studio based on the CHIRRUP Figma design. Combine bird features, generate an original bird portrait and imaginative natural-history description, and save your creations."
+version = "1.0.0"
+id = "artifacts/chirrup"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/" ]
+localPort = 20188
+
+[services.development]
+run = "pnpm --filter @workspace/chirrup run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/chirrup", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/chirrup", "run", "serve" ]
+
+[services.env]
+PORT = "20188"
+BASE_PATH = "/"

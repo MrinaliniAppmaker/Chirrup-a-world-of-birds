@@ -5,6 +5,8 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
+// One trusted hop: the managed reverse proxy immediately in front of Express.
+app.set("trust proxy", 1);
 
 app.use(
   pinoHttp({

@@ -11,6 +11,30 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /birds/generate:
+    post:
+      operationId: generateBird
+      tags: [birds]
+      summary: Generate an imagined bird from selected traits
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirdTraits"
+      responses:
+        "200":
+          description: Generated bird portrait and field notes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedBird"
+        "400":
+          description: Invalid traits
+        "429":
+          description: Generation is busy
+        "502":
+          description: AI generation failed
   /healthz:
     get:
       operationId: healthCheck
@@ -26,6 +50,33 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    BirdTraits:
+      type: object
+      required: [body, beak, colors, feathers, legs, feet]
+      properties:
+        body: { type: string, maxLength: 120 }
+        beak: { type: string, maxLength: 120 }
+        colors: { type: string, maxLength: 120 }
+        feathers: { type: string, maxLength: 120 }
+        legs: { type: string, maxLength: 120 }
+        feet: { type: string, maxLength: 120 }
+        extra: { type: string, maxLength: 500 }
+    GeneratedBird:
+      type: object
+      required: [id, name, scientificName, tagline, appearance, habitat, diet, behavior, imageUri, createdAt, traits]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        scientificName: { type: string }
+        tagline: { type: string }
+        appearance: { type: string }
+        habitat: { type: string }
+        diet: { type: string }
+        behavior: { type: string }
+        imageUri: { type: string }
+        createdAt: { type: string }
+        traits:
+          $ref: "#/components/schemas/BirdTraits"
     HealthStatus:
       type: object
       properties:

@@ -4,6 +4,12 @@
   "files": [],
   "references": [
     {
+      "path": "./lib/integrations-gemini-ai"
+    },
+    {
+      "path": "./lib/integrations-openai-ai-server"
+    },
+    {
       "path": "./lib/db"
     },
     {
