@@ -104,13 +104,13 @@ export function BirdProfile({ bird }: { bird: GeneratedBird }) {
   return (
     <View>
       <View style={[s.photoWrap, { borderRadius: c.radius + 4, backgroundColor: c.secondary }]}>
-        <Image source={{ uri: bird.imageUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" accessibilityLabel={`Generated illustration of ${bird.name}`} />
+        <Image source={{ uri: bird.imageUri }} style={{ width: '100%', height: '100%' }} resizeMode="cover" accessibilityLabel={bird.name ? `Generated illustration of ${bird.name}` : 'Your generated bird illustration'} />
         <View style={[s.badge, { backgroundColor: 'rgba(31,42,34,0.78)' }]}>
           <Text style={[s.badgeText, { color: c.primaryForeground }]}>AI-generated image of an imagined species</Text>
         </View>
       </View>
-      <Text style={[s.name, { color: c.foreground }]}>{bird.name}</Text>
-      <Text style={[s.sci, { color: c.mutedForeground }]}>{bird.scientificName}</Text>
+      {bird.name ? <Text style={[s.name, { color: c.foreground }]}>{bird.name}</Text> : null}
+      {bird.scientificName ? <Text style={[s.sci, { color: c.mutedForeground }]}>{bird.scientificName}</Text> : null}
       {bird.tagline ? <Text style={[s.tagline, { color: c.foreground }]}>{bird.tagline}</Text> : null}
 
       <View style={[s.notice, { backgroundColor: c.secondary, borderRadius: c.radius }]}>

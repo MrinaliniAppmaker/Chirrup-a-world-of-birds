@@ -22,6 +22,55 @@ export interface BirdTraits {
   extra?: string;
 }
 
+export interface EncounterBird {
+  /**
+     * @minLength 1
+     * @maxLength 100
+     */
+  id: string;
+  /** @maxLength 100 */
+  name: string;
+  traits: BirdTraits;
+  /** @maxLength 2000 */
+  appearance: string;
+  /** @maxLength 2000 */
+  habitat: string;
+  /** @maxLength 2000 */
+  diet: string;
+  /** @maxLength 2000 */
+  behavior: string;
+}
+
+export interface EncounterRequest {
+  /**
+     * @minItems 2
+     * @maxItems 6
+     */
+  birds: EncounterBird[];
+}
+
+export type GeneratedEncounterMinutesItem = {
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  minute: number;
+  title: string;
+  description: string;
+};
+
+export interface GeneratedEncounter {
+  title: string;
+  habitat: string;
+  summary: string;
+  imageUri: string;
+  /**
+     * @minItems 5
+     * @maxItems 5
+     */
+  minutes: GeneratedEncounterMinutesItem[];
+}
+
 export interface GeneratedBird {
   id: string;
   name: string;

@@ -21,7 +21,14 @@ function NativeTabLayout() {
         <NativeTabs.Trigger.Icon sf={{ default: 'pencil.and.outline', selected: 'pencil.and.outline' }} />
         <NativeTabs.Trigger.Label>Create</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="library" hidden />
+      <NativeTabs.Trigger name="library">
+        <NativeTabs.Trigger.Icon sf={{ default: 'books.vertical', selected: 'books.vertical.fill' }} />
+        <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="interactions">
+        <NativeTabs.Trigger.Icon sf={{ default: 'bird', selected: 'bird.fill' }} />
+        <NativeTabs.Trigger.Label>Interactions</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
@@ -57,7 +64,7 @@ function ClassicTabLayout() {
       <Tabs.Screen name="index" options={{
         title: 'Home',
         tabBarButtonTestID: 'tab-home',
-        tabBarAccessibilityLabel: 'Home, your collection',
+        tabBarAccessibilityLabel: 'Home',
         tabBarIcon: ({ color }) => isIOS ? <SymbolView name="house" tintColor={color as string} size={24} /> : <Feather name="home" size={22} color={color as string} />,
       }} />
       <Tabs.Screen name="create" options={{
@@ -66,7 +73,18 @@ function ClassicTabLayout() {
         tabBarAccessibilityLabel: 'Create a bird',
         tabBarIcon: ({ color }) => isIOS ? <SymbolView name="pencil.and.outline" tintColor={color as string} size={24} /> : <Feather name="feather" size={22} color={color as string} />,
       }} />
-      <Tabs.Screen name="library" options={{ href: null }} />
+      <Tabs.Screen name="library" options={{
+        title: 'Library',
+        tabBarButtonTestID: 'tab-library',
+        tabBarAccessibilityLabel: 'Library, your saved birds',
+        tabBarIcon: ({ color }) => isIOS ? <SymbolView name="books.vertical" tintColor={color as string} size={24} /> : <Feather name="book-open" size={22} color={color as string} />,
+      }} />
+      <Tabs.Screen name="interactions" options={{
+        title: 'Interactions',
+        tabBarButtonTestID: 'tab-interactions',
+        tabBarAccessibilityLabel: 'Imagine an encounter between birds',
+        tabBarIcon: ({ color }) => isIOS ? <SymbolView name="bird" tintColor={color as string} size={24} /> : <Feather name="users" size={22} color={color as string} />,
+      }} />
     </Tabs>
   );
 }

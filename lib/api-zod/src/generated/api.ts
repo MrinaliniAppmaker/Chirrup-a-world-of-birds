@@ -9,6 +9,80 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Imagine a five-minute encounter between selected birds
+ */
+export const simulateEncounterBodyBirdsItemIdMax = 100;
+
+export const simulateEncounterBodyBirdsItemNameMax = 100;
+
+export const simulateEncounterBodyBirdsItemTraitsBodyMax = 120;
+
+export const simulateEncounterBodyBirdsItemTraitsBeakMax = 120;
+
+export const simulateEncounterBodyBirdsItemTraitsColorsMax = 120;
+
+export const simulateEncounterBodyBirdsItemTraitsFeathersMax = 120;
+
+export const simulateEncounterBodyBirdsItemTraitsLegsMax = 120;
+
+export const simulateEncounterBodyBirdsItemTraitsFeetMax = 120;
+
+export const simulateEncounterBodyBirdsItemTraitsExtraMax = 500;
+
+export const simulateEncounterBodyBirdsItemAppearanceMax = 2000;
+
+export const simulateEncounterBodyBirdsItemHabitatMax = 2000;
+
+export const simulateEncounterBodyBirdsItemDietMax = 2000;
+
+export const simulateEncounterBodyBirdsItemBehaviorMax = 2000;
+
+export const simulateEncounterBodyBirdsMin = 2;
+export const simulateEncounterBodyBirdsMax = 6;
+
+
+
+export const SimulateEncounterBody = zod.object({
+  "birds": zod.array(zod.object({
+  "id": zod.string().min(1).max(simulateEncounterBodyBirdsItemIdMax),
+  "name": zod.string().max(simulateEncounterBodyBirdsItemNameMax),
+  "traits": zod.object({
+  "body": zod.string().max(simulateEncounterBodyBirdsItemTraitsBodyMax),
+  "beak": zod.string().max(simulateEncounterBodyBirdsItemTraitsBeakMax),
+  "colors": zod.string().max(simulateEncounterBodyBirdsItemTraitsColorsMax),
+  "feathers": zod.string().max(simulateEncounterBodyBirdsItemTraitsFeathersMax),
+  "legs": zod.string().max(simulateEncounterBodyBirdsItemTraitsLegsMax),
+  "feet": zod.string().max(simulateEncounterBodyBirdsItemTraitsFeetMax),
+  "extra": zod.string().max(simulateEncounterBodyBirdsItemTraitsExtraMax).optional()
+}),
+  "appearance": zod.string().max(simulateEncounterBodyBirdsItemAppearanceMax),
+  "habitat": zod.string().max(simulateEncounterBodyBirdsItemHabitatMax),
+  "diet": zod.string().max(simulateEncounterBodyBirdsItemDietMax),
+  "behavior": zod.string().max(simulateEncounterBodyBirdsItemBehaviorMax)
+})).min(simulateEncounterBodyBirdsMin).max(simulateEncounterBodyBirdsMax)
+})
+
+export const simulateEncounterResponseMinutesItemMinuteMax = 5;
+
+export const simulateEncounterResponseMinutesMin = 5;
+export const simulateEncounterResponseMinutesMax = 5;
+
+
+
+export const SimulateEncounterResponse = zod.object({
+  "title": zod.string(),
+  "habitat": zod.string(),
+  "summary": zod.string(),
+  "imageUri": zod.string(),
+  "minutes": zod.array(zod.object({
+  "minute": zod.number().int().min(1).max(simulateEncounterResponseMinutesItemMinuteMax),
+  "title": zod.string(),
+  "description": zod.string()
+})).min(simulateEncounterResponseMinutesMin).max(simulateEncounterResponseMinutesMax)
+})
+
+
+/**
  * @summary Generate an imagined bird from selected traits
  */
 export const generateBirdBodyBodyMax = 120;

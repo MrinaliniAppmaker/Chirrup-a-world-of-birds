@@ -21,7 +21,7 @@ export default function BirdDetail() {
     try {
       await remove(String(id));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
-      router.navigate('/');
+      router.navigate('/library');
     } catch { /* error surfaced in context */ }
   };
   const confirmDelete = () => {

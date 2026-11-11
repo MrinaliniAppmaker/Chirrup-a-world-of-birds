@@ -11,6 +11,30 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /birds/interact:
+    post:
+      operationId: simulateEncounter
+      tags: [birds]
+      summary: Imagine a five-minute encounter between selected birds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EncounterRequest"
+      responses:
+        "200":
+          description: Shared habitat image and minute-by-minute imagined account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedEncounter"
+        "400":
+          description: Select between two and six birds
+        "429":
+          description: Studio is busy
+        "502":
+          description: Encounter generation failed
   /birds/generate:
     post:
       operationId: generateBird
@@ -50,6 +74,47 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 components:
   schemas:
+    EncounterRequest:
+      type: object
+      required: [birds]
+      properties:
+        birds:
+          type: array
+          minItems: 2
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/EncounterBird"
+    EncounterBird:
+      type: object
+      required: [id, name, traits, appearance, habitat, diet, behavior]
+      properties:
+        id: { type: string, minLength: 1, maxLength: 100 }
+        name: { type: string, maxLength: 100 }
+        traits:
+          $ref: "#/components/schemas/BirdTraits"
+        appearance: { type: string, maxLength: 2000 }
+        habitat: { type: string, maxLength: 2000 }
+        diet: { type: string, maxLength: 2000 }
+        behavior: { type: string, maxLength: 2000 }
+    GeneratedEncounter:
+      type: object
+      required: [title, habitat, summary, imageUri, minutes]
+      properties:
+        title: { type: string }
+        habitat: { type: string }
+        summary: { type: string }
+        imageUri: { type: string }
+        minutes:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            type: object
+            required: [minute, title, description]
+            properties:
+              minute: { type: integer, minimum: 1, maximum: 5 }
+              title: { type: string }
+              description: { type: string }
     BirdTraits:
       type: object
       required: [body, beak, colors, feathers, legs, feet]

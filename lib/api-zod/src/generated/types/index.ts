@@ -7,5 +7,9 @@
  */
 
 export * from './birdTraits';
+export * from './encounterBird';
+export * from './encounterRequest';
 export * from './generatedBird';
+export * from './generatedEncounter';
+export * from './generatedEncounterMinutesItem';
 export * from './healthStatus';

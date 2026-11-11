@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useGenerateBird, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { BirdProfile, Button, Chip, Eyebrow, TraitTile, tap } from '@/components/ui';
+import { ChirrupBrand, ChirrupLogo } from '@/components/ChirrupBrand';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
@@ -40,6 +41,7 @@ export default function CreateScreen() {
   const [showExtra, setShowExtra] = useState<boolean>(false);
   const [extra, setExtra] = useState<string>('');
   const [bird, setBird] = useState<GeneratedBird | null>(null);
+  const [birdName, setBirdName] = useState<string>('');
   const [saving, setSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -57,10 +59,12 @@ export default function CreateScreen() {
 
   const runGenerate = async () => {
     setSaveError(null);
+    setBird(null);
+    setBirdName('');
     goTo('result');
     try {
       const result = await generate.mutateAsync({ data: traits });
-      setBird(result);
+      setBird({ ...result, name: '' });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     } catch {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
@@ -69,14 +73,14 @@ export default function CreateScreen() {
 
   const reset = () => {
     setSel(DEFAULT_SEL); setTyped(EMPTY_TYPED); setExtra(''); setShowExtra(false);
-    setBird(null); generate.reset(); goTo('build');
+    setBird(null); setBirdName(''); generate.reset(); goTo('build');
   };
 
   const onSave = async () => {
-    if (!bird) return;
+    if (!bird || !birdName.trim()) return;
     setSaving(true); setSaveError(null);
     try {
-      await save(bird);
+      await save({ ...bird, name: birdName.trim() });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     } catch {
       setSaveError('Could not save to your journal. Try again.');
@@ -95,10 +99,7 @@ export default function CreateScreen() {
             <Feather name="arrow-left" size={16} color={c.foreground} />
             <Text style={{ fontFamily: sans.medium, fontSize: 13, color: c.foreground }}>Home</Text>
           </Pressable>
-          <View style={st.brandRow}>
-            <Text style={[st.brand, { color: c.foreground }]}>Chirrup</Text>
-            <Text style={[st.brandSub, { color: c.mutedForeground }]}>FIELD STUDIO</Text>
-          </View>
+          <ChirrupBrand size={24} />
         </View>
         <View style={st.steps}>
           {['Shape & features', 'Review', 'Meet your bird'].map((label, i) => (
@@ -243,7 +244,7 @@ export default function CreateScreen() {
           <View>
             <Eyebrow>Step 2 / Review details</Eyebrow>
             <Text style={[st.h1, { color: c.foreground }]}>Your field sketch, in words.</Text>
-            <Text style={[st.lede, { color: c.mutedForeground }]}>Check each trait. We will imagine a species that could plausibly carry them all.</Text>
+            <Text style={[st.lede, { color: c.mutedForeground }]}>Check each trait. Unusual combinations are welcome: your choices define this bird, not a real-world species.</Text>
             <View style={[st.reviewCard, { backgroundColor: c.card, borderColor: c.border, borderRadius: c.radius + 2 }]}>
               {KEYS.map((k, i) => (
                 <View key={k} style={[st.reviewRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border }]}>
@@ -278,13 +279,18 @@ export default function CreateScreen() {
             {generate.isSuccess && bird && (
               <View>
                 <Eyebrow style={{ marginBottom: 12 }}>Step 3 / Meet your bird</Eyebrow>
-                <BirdProfile bird={bird} />
+                <Eyebrow style={{ marginTop: 6, marginBottom: 8 }}>Name your bird</Eyebrow>
+                <TextInput testID="bird-name" accessibilityLabel="Name your bird" value={birdName} onChangeText={setBirdName}
+                  editable={!isSaved(bird.id)} maxLength={100} placeholderTextColor={c.mutedForeground}
+                  style={[st.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius, marginBottom: 16 }]} />
+                <BirdProfile bird={{ ...bird, name: birdName.trim() }} />
                 {saveError && <Text style={[st.small, { color: c.destructive, marginTop: 16 }]}>{saveError}</Text>}
                 {isSaved(bird.id) ? (
                   <Button testID="view-library" label="Saved · open in journal" icon="book-open" variant="outline" onPress={() => router.push(`/bird/${bird.id}`)} style={{ marginTop: 24 }} />
                 ) : (
-                  <Button testID="save-bird" label="Save to my journal" icon="bookmark" loading={saving} onPress={onSave} style={{ marginTop: 24 }} />
+                  <Button testID="save-bird" label="Save to my journal" icon="bookmark" loading={saving} disabled={!birdName.trim()} onPress={onSave} style={{ marginTop: 24 }} />
                 )}
+                {!birdName.trim() && <Text style={[st.small, { color: c.mutedForeground, marginTop: 8 }]}>Give your bird a name before saving it.</Text>}
                 <Button testID="regenerate" label="Imagine again with same traits" variant="outline" onPress={runGenerate} style={{ marginTop: 10 }} />
                 <Button testID="start-over" label="Start a new bird" variant="ghost" onPress={reset} style={{ marginTop: 4 }} />
               </View>
@@ -300,7 +306,7 @@ function GeneratingState() {
   const c = useColors();
   const pulse = useRef(new Animated.Value(0.4)).current;
   const [line, setLine] = useState<number>(0);
-  const lines = ['Sketching the silhouette', 'Mixing feather pigments', 'Writing field notes', 'Naming the species'];
+  const lines = ['Sketching the silhouette', 'Combining your chosen features', 'Mixing feather pigments', 'Writing field notes'];
   useEffect(() => {
     const loop = Animated.loop(Animated.sequence([
       Animated.timing(pulse, { toValue: 1, duration: 900, useNativeDriver: Platform.OS !== 'web' }),
@@ -314,7 +320,7 @@ function GeneratingState() {
     <View accessibilityLabel="Generating your bird" accessibilityLiveRegion="polite">
       <Eyebrow style={{ marginBottom: 12 }}>Imagining</Eyebrow>
       <Animated.View style={[st.skelImg, { backgroundColor: c.secondary, borderRadius: c.radius + 4, opacity: pulse }]}>
-        <Feather name="feather" size={34} color={c.primary} />
+        <ChirrupLogo size={34} />
       </Animated.View>
       <Text style={[st.h2, { color: c.foreground, marginTop: 18 }]}>{lines[line]}…</Text>
       <Text style={[st.small, { color: c.mutedForeground }]}>Drawing and describing can take up to a minute.</Text>
