@@ -27,7 +27,7 @@ export default function InteractionsScreen() {
   const [result, setResult] = useState<GeneratedEncounter | null>(null);
   const [error, setError] = useState<string | null>(null);
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
-  const bottomPad = Platform.OS === 'web' ? 34 + 84 : insets.bottom + 90;
+  const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom + 24;
 
   const candidates = useMemo<Candidate[]>(() => {
     const ref: Candidate = { id: DEFAULT_BIRD_ID, name: DEFAULT_MALLARD.name, sub: 'Reference species \u00b7 ' + DEFAULT_MALLARD.scientificName, image: MALLARD_IMAGE, isReference: true,
@@ -72,7 +72,10 @@ export default function InteractionsScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingTop: topPad + 8, paddingHorizontal: 20, paddingBottom: bottomPad }}>
-      <ChirrupBrand size={24} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <ChirrupBrand size={24} />
+        <Button testID="interactions-library" label="Library" icon="arrow-left" variant="ghost" onPress={() => router.navigate('/library')} />
+      </View>
       <Eyebrow style={{ marginTop: 18 }}>Interactions</Eyebrow>
       <Text accessibilityRole="header" style={[s.h1, { color: c.foreground }]}>{result ? result.title : 'Let their worlds meet.'}</Text>
 

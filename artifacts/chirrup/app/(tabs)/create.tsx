@@ -1,14 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useGenerateBird, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { BirdProfile, Button, Chip, Eyebrow, TraitTile, tap } from '@/components/ui';
-import { ChirrupBrand, ChirrupLogo } from '@/components/ChirrupBrand';
+import { ChirrupBrand } from '@/components/ChirrupBrand';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
@@ -44,6 +45,7 @@ export default function CreateScreen() {
   const [birdName, setBirdName] = useState<string>('');
   const [saving, setSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const generationId = useRef(0);
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 + 84 : insets.bottom + 90;
@@ -58,33 +60,42 @@ export default function CreateScreen() {
   const goTo = (s: Step) => { setStep(s);  };
 
   const runGenerate = async () => {
+    const requestId = ++generationId.current;
     setSaveError(null);
     setBird(null);
     setBirdName('');
     goTo('result');
     try {
       const result = await generate.mutateAsync({ data: traits });
+      if (requestId !== generationId.current) return;
       setBird({ ...result, name: '' });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     } catch {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
+      if (requestId === generationId.current) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error).catch(() => {});
     }
   };
 
-  const reset = () => {
+  const resetMutation = generate.reset;
+  const reset = useCallback(() => {
+    generationId.current += 1;
     setSel(DEFAULT_SEL); setTyped(EMPTY_TYPED); setExtra(''); setShowExtra(false);
-    setBird(null); setBirdName(''); generate.reset(); goTo('build');
-  };
+    setMode('visual'); setExpanded({}); setSaveError(null); setSaving(false);
+    setBird(null); setBirdName(''); resetMutation(); setStep('build');
+  }, [resetMutation]);
+
+  // Closing Create discards its draft; a late generation response must not restore it.
+  useFocusEffect(useCallback(() => () => reset(), [reset]));
 
   const onSave = async () => {
     if (!bird || !birdName.trim()) return;
+    const requestId = generationId.current;
     setSaving(true); setSaveError(null);
     try {
       await save({ ...bird, name: birdName.trim() });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-    } catch {
-      setSaveError('Could not save to your journal. Try again.');
-    } finally { setSaving(false); }
+    } catch (err) {
+      if (requestId === generationId.current) setSaveError(err instanceof Error ? err.message : 'Could not save to your journal. Try again.');
+    } finally { if (requestId === generationId.current) setSaving(false); }
   };
 
   const stepIndex = step === 'build' ? 0 : step === 'review' ? 1 : 2;
@@ -320,7 +331,9 @@ function GeneratingState() {
     <View accessibilityLabel="Generating your bird" accessibilityLiveRegion="polite">
       <Eyebrow style={{ marginBottom: 12 }}>Imagining</Eyebrow>
       <Animated.View style={[st.skelImg, { backgroundColor: c.secondary, borderRadius: c.radius + 4, opacity: pulse }]}>
-        <ChirrupLogo size={34} />
+        {Platform.OS === 'ios'
+          ? <SymbolView name="pencil.and.outline" tintColor={c.primary} size={34} />
+          : <Feather name="feather" size={34} color={c.primary} />}
       </Animated.View>
       <Text style={[st.h2, { color: c.foreground, marginTop: 18 }]}>{lines[line]}…</Text>
       <Text style={[st.small, { color: c.mutedForeground }]}>Drawing and describing can take up to a minute.</Text>

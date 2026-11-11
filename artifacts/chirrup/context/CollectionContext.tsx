@@ -1,10 +1,6 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system/legacy';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { GeneratedBird } from '@workspace/api-client-react';
-
-const KEY = 'chirrup.collection.v1';
+import { loadCollection, saveCollectionBird, removeCollectionBird, MAX_BIRDS } from '@/lib/collectionStorage';
 
 interface CollectionValue {
   birds: GeneratedBird[];
@@ -22,53 +18,57 @@ export function CollectionProvider({ children }: { children: React.ReactNode }) 
   const [birds, setBirds] = useState<GeneratedBird[]>([]);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const current = useRef<GeneratedBird[]>([]);
+  const operations = useRef<Promise<void>>(Promise.resolve());
+  const storageReady = useRef(false);
+
+  const enqueue = useCallback(<T,>(work: () => Promise<T>): Promise<T> => {
+    const result = operations.current.then(work);
+    operations.current = result.then(() => {}, () => {});
+    return result;
+  }, []);
 
   useEffect(() => {
-    AsyncStorage.getItem(KEY)
-      .then((raw) => { if (raw) setBirds(JSON.parse(raw) as GeneratedBird[]); })
+    loadCollection()
+      .then((saved) => { current.current = saved; storageReady.current = true; setBirds(saved); })
       .catch(() => setError('Could not open your journal.'))
       .finally(() => setLoaded(true));
   }, []);
 
-  const persist = useCallback(async (next: GeneratedBird[]) => {
-    try {
-      await AsyncStorage.setItem(KEY, JSON.stringify(next));
-      setBirds(next);
-      setError(null);
-    } catch {
-      setError('Storage is full or unavailable. This bird may not be kept.');
-      throw new Error('persist failed');
-    }
-  }, []);
-
-  const save = useCallback(async (bird: GeneratedBird) => {
-    if (birds.some((b) => b.id === bird.id)) return;
+  const save = useCallback((bird: GeneratedBird) => enqueue(async () => {
     if (!loaded) throw new Error('Your journal is still opening.');
-    let storedBird = bird;
-    let fileUri: string | null = null;
-    if (Platform.OS !== 'web' && bird.imageUri.startsWith('data:')) {
-      if (!FileSystem.documentDirectory) throw new Error('Device storage is unavailable.');
-      const match = bird.imageUri.match(/^data:image\/(png|jpeg|webp);base64,(.+)$/s);
-      if (!match) throw new Error('The portrait could not be saved.');
-      fileUri = `${FileSystem.documentDirectory}chirrup-${bird.id}.${match[1]}`;
-      await FileSystem.writeAsStringAsync(fileUri, match[2], { encoding: FileSystem.EncodingType.Base64 });
-      storedBird = { ...bird, imageUri: fileUri };
+    if (!storageReady.current) throw new Error('Your journal could not be opened. Reopen the app before saving.');
+    if (current.current.some((b) => b.id === bird.id)) return;
+    if (current.current.length >= MAX_BIRDS) {
+      const message = `Your library holds up to ${MAX_BIRDS} birds. Remove a bird before saving another.`;
+      setError(message);
+      throw new Error(message);
     }
     try {
-      await persist([storedBird, ...birds]);
+      const stored = await saveCollectionBird(bird, current.current);
+      current.current = [stored, ...current.current];
+      setBirds(current.current);
+      setError(null);
     } catch (err) {
-      if (fileUri) await FileSystem.deleteAsync(fileUri, { idempotent: true }).catch(() => {});
+      const message = 'Could not save this bird to device storage. Your existing library is unchanged.';
+      setError(message);
+      throw new Error(message, { cause: err });
+    }
+  }), [enqueue, loaded]);
+
+  const remove = useCallback((id: string) => enqueue(async () => {
+    if (!loaded) throw new Error('Your journal is still opening.');
+    if (!storageReady.current) throw new Error('Your journal could not be opened. Reopen the app before making changes.');
+    try {
+      await removeCollectionBird(id, current.current);
+      current.current = current.current.filter((bird) => bird.id !== id);
+      setBirds(current.current);
+      setError(null);
+    } catch (err) {
+      setError('Could not remove this bird. Your library is unchanged.');
       throw err;
     }
-  }, [birds, loaded, persist]);
-
-  const remove = useCallback(async (id: string) => {
-    const bird = birds.find((b) => b.id === id);
-    await persist(birds.filter((b) => b.id !== id));
-    if (Platform.OS !== 'web' && bird?.imageUri.startsWith('file:')) {
-      await FileSystem.deleteAsync(bird.imageUri, { idempotent: true }).catch(() => {});
-    }
-  }, [birds, persist]);
+  }), [enqueue, loaded]);
 
   const value = useMemo<CollectionValue>(() => ({
     birds, loaded, error, save, remove,

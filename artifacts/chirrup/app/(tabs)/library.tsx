@@ -8,6 +8,7 @@ import { ChirrupBrand } from '@/components/ChirrupBrand';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
+import { MAX_BIRDS } from '@/lib/collectionStorage';
 
 export const displayName = (n?: string) => (n && n.trim() ? n.trim() : 'Unnamed bird');
 
@@ -32,11 +33,12 @@ export default function LibraryScreen() {
         <ChirrupBrand size={24} />
         <Eyebrow style={{ marginTop: 18 }}>Your library</Eyebrow>
         <Text accessibilityRole="header" style={[s.h1, { color: c.foreground }]}>Field journal</Text>
+        <Button testID="library-interactions" label="Interactions" icon="users" variant="outline" onPress={() => router.push('/interactions')} style={{ marginTop: 12 }} />
         <View style={s.filterRow}>
           <View style={[s.countPill, { backgroundColor: c.primary }]}>
             <Text testID="library-count" style={{ fontFamily: sans.medium, fontSize: 12, color: c.primaryForeground }}>{'All birds \u00b7 ' + birds.length}</Text>
           </View>
-          <Text style={{ fontFamily: sans.regular, fontSize: 12, color: c.mutedForeground }}>Recently created</Text>
+          <Text testID="library-capacity" style={{ fontFamily: sans.regular, fontSize: 12, color: c.mutedForeground }}>{`${birds.length} / ${MAX_BIRDS} birds`}</Text>
         </View>
         <View style={[s.search, { backgroundColor: c.card, borderColor: c.input, borderRadius: c.radius }]}>
           <Feather name="search" size={16} color={c.mutedForeground} />

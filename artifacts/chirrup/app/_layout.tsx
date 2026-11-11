@@ -39,6 +39,7 @@ function RootLayoutNav() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="bird/[id]" options={{ title: 'Journal entry' }} />
+      <Stack.Screen name="interactions" options={{ headerShown: false }} />
     </Stack>
   );
 }

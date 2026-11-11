@@ -25,10 +25,6 @@ function NativeTabLayout() {
         <NativeTabs.Trigger.Icon sf={{ default: 'books.vertical', selected: 'books.vertical.fill' }} />
         <NativeTabs.Trigger.Label>Library</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="interactions">
-        <NativeTabs.Trigger.Icon sf={{ default: 'bird', selected: 'bird.fill' }} />
-        <NativeTabs.Trigger.Label>Interactions</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
@@ -78,12 +74,6 @@ function ClassicTabLayout() {
         tabBarButtonTestID: 'tab-library',
         tabBarAccessibilityLabel: 'Library, your saved birds',
         tabBarIcon: ({ color }) => isIOS ? <SymbolView name="books.vertical" tintColor={color as string} size={24} /> : <Feather name="book-open" size={22} color={color as string} />,
-      }} />
-      <Tabs.Screen name="interactions" options={{
-        title: 'Interactions',
-        tabBarButtonTestID: 'tab-interactions',
-        tabBarAccessibilityLabel: 'Imagine an encounter between birds',
-        tabBarIcon: ({ color }) => isIOS ? <SymbolView name="bird" tintColor={color as string} size={24} /> : <Feather name="users" size={22} color={color as string} />,
       }} />
     </Tabs>
   );
