@@ -37,3 +37,15 @@ Selected features are independent creative constraints, even when their combinat
 **Why:** The user likes the images but objects when the generator compensates selected anatomy to make a bird fit an existing avian category.
 
 **How to apply:** Body categories constrain shape only. Prioritize every selected beak, foot, leg, color and feather trait over taxonomy or biological plausibility in both image and description prompts.
+
+Anatomical realism means convincing materials and smooth, natural-looking attachment of the chosen parts, not a combination that exists in nature. Users may deliberately combine contradictory traits.
+
+**Why:** The user explicitly clarified this distinction after reporting that webbed feet were replaced to fit a songbird body and raptor beak.
+
+**How to apply:** Describe independently selected parts with concrete geometry. Keep the user's original trait data and free-form constraints intact; do not infer companion anatomy from a body or beak category.
+
+Do not use automated visual rejection and quality-retry loops as the solution to trait fidelity.
+
+**Why:** The user reported that this approach turned roughly 80% of attempts into generation errors and explicitly rejected it. Better generation instructions are required, not withholding most results.
+
+**How to apply:** Improve the generation input itself. Genuine provider failures must still be reported, but do not reintroduce an AI trait judge that blocks portraits or silently regenerates them without discussing a different approach with the user.
