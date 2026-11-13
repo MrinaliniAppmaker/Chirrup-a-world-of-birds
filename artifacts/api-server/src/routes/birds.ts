@@ -8,7 +8,7 @@ import { batchProcess } from "@workspace/integrations-openai-ai-server/batch";
 import { designPolicy } from "../lib/birdDesign";
 import { generateBirdPortrait } from "../lib/birdPortrait";
 import { generateEncounterPortrait } from "../lib/encounterPortrait";
-import { referencePart, InvalidReferenceError } from "../lib/encounterReference";
+import { anonymousParticipants, restoreBirdNames, referencePart, InvalidReferenceError } from "../lib/encounterReference";
 
 const router: IRouter = Router();
 let activeGenerations = 0;
@@ -79,7 +79,7 @@ router.post(
     try {
       // Inline image bytes belong only in the image model's multimodal input,
       // never in text narration, logs or a new persistent copy.
-      const participants = JSON.stringify(birds.map(({ referenceImage: _portrait, ...bird }) => bird));
+      const participants = JSON.stringify(anonymousParticipants(birds));
       const [notes] = await batchProcess([participants], async (description) => {
         const completion = await openai.chat.completions.create({
           model: "gpt-5.4-mini", max_completion_tokens: 8192,
@@ -112,7 +112,19 @@ router.post(
       }, { concurrency: 1, retries: 2 });
       if (!notes) throw new Error("Encounter notes were empty");
       const portrait = await generateEncounterPortrait(birds, notes.habitat, notes.minutes[1].description);
-      res.json(SimulateEncounterResponse.parse({ ...notes, imageUri: portrait }));
+      // Restore names only AFTER all AI calls. A name such as "Falcon" must
+      // never bias the scene plan or turn a referenced bird into a falcon.
+      res.json(SimulateEncounterResponse.parse({
+        title: restoreBirdNames(notes.title, birds),
+        habitat: restoreBirdNames(notes.habitat, birds),
+        summary: restoreBirdNames(notes.summary, birds),
+        minutes: notes.minutes.map((minute) => ({
+          ...minute,
+          title: restoreBirdNames(minute.title, birds),
+          description: restoreBirdNames(minute.description, birds),
+        })),
+        imageUri: portrait,
+      }));
     } catch (err) {
       req.log.error({ err }, "Encounter generation failed");
       res.status(502).json({ error: "We couldn't imagine this encounter. Your selections are kept; please try again." });

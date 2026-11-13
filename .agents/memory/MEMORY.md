@@ -1,2 +1,3 @@
 - [CHIRRUP scope](chirrup-scope.md) — Figma-led mobile bird creation; generated birds are imagined, not species identification.
 - [AI image availability](ai-image-availability.md) — documented OpenAI image model rejected by proxy; Gemini image generation verified.
+- [Input focus compatibility](input-focus-compatibility.md) — native submit behavior does not fully control browser blur; preserve intentional focus changes.

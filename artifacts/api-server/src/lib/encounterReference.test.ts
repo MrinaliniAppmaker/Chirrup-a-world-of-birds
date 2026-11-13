@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { EncounterBird } from "@workspace/api-zod";
-import { encounterParts, referencePart, InvalidReferenceError } from "./encounterReference";
+import { anonymousParticipants, restoreBirdNames, encounterParts, referencePart, InvalidReferenceError } from "./encounterReference";
 
 const png = `data:image/png;base64,${Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 1]).toString("base64")}`;
 const jpeg = `data:image/jpeg;base64,${Buffer.from([255, 216, 255, 224, 2]).toString("base64")}`;
@@ -13,12 +13,27 @@ const bird = (id: string, referenceImage: string): EncounterBird => ({
 
 test("each identity is paired with its actual portrait in selection order", () => {
   const parts = encounterParts([bird("teal", png), bird("mallard", jpeg)], "pond", "meeting");
-  assert.match(parts[1].text!, /"id":"teal"/);
+  assert.match(parts[1].text!, /scene identifier BIRD_1/);
   assert.equal(parts[2].inlineData?.data, png.split(",")[1]);
-  assert.match(parts[3].text!, /"id":"mallard"/);
+  assert.match(parts[3].text!, /scene identifier BIRD_2/);
   assert.equal(parts[4].inlineData?.data, jpeg.split(",")[1]);
   assert.match(parts[0].text!, /EXISTING INDIVIDUALS/);
   assert.match(parts[1].text!, /image takes precedence/);
+});
+
+test("renaming a bird cannot change the scene planning or image instructions", () => {
+  const original = [bird("Falcon", png), bird("Grey-and-white eagle", jpeg)];
+  const renamed = original.map((entry, index) => ({ ...entry, id: `new-id-${index}`, name: `Fluffy ${index}` }));
+  assert.deepEqual(anonymousParticipants(original), anonymousParticipants(renamed));
+  assert.deepEqual(encounterParts(original, "pond", "BIRD_1 meets BIRD_2"), encounterParts(renamed, "pond", "BIRD_1 meets BIRD_2"));
+  const allText = JSON.stringify(encounterParts(original, "pond", "BIRD_1 meets BIRD_2"));
+  assert.doesNotMatch(allText, /Falcon|Grey-and-white eagle/);
+});
+
+test("display names are restored only in returned text, without altering their spelling", () => {
+  const birds = [bird("Falcon $&", png), bird("Teal watercock", jpeg)];
+  assert.equal(restoreBirdNames("BIRD_1 watches BIRD_2; BIRD_1 waits.", birds), "Falcon $& watches Teal watercock; Falcon $& waits.");
+  assert.equal(restoreBirdNames("BIRD_10 is not a participant.", birds), "BIRD_10 is not a participant.");
 });
 
 test("all six selected birds have separate references without extra image copies", () => {

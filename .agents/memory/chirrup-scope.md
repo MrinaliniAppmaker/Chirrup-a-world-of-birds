@@ -55,3 +55,15 @@ A bird must remain the same recognizable individual across its journal portrait 
 **Why:** The user reported that birds' appearance varied greatly between the journal and other generated scenes.
 
 **How to apply:** Use each participant's actual saved portrait as a separately bound visual identity reference, not just a fresh text-to-image recreation from trait categories. Preserve markings, palette distribution, beak, feet and proportions while changing pose and setting. Do not overwrite the original journal portrait or reintroduce a visual rejection loop.
+
+User-chosen bird names are display labels, never visual or taxonomic instructions.
+
+**Why:** The user reported that birds named "falcon" were becoming slim grey-and-white raptors in interactions despite their saved portraits.
+
+**How to apply:** Keep names and user-derived identifiers out of all AI scene planning and image inputs. Use neutral participant labels throughout AI calls, restoring the exact user names only in the returned display text after image generation.
+
+Text fields should retain focus while typing and scrolling, until the user deliberately changes focus.
+
+**Why:** The user reported brief focus followed by deselection and asked for persistent selection across all typed fields.
+
+**How to apply:** Avoid timer-based blur, state-dependent component identities or route cleanup triggered by form edits. Preserve multiline newlines, deliberate field changes and accessible keyboard navigation.

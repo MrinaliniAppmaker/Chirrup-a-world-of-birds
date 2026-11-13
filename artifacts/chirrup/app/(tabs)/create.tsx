@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'react-native';
@@ -8,7 +8,9 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useGenerateBird, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
-import { BirdProfile, Button, Chip, Eyebrow, TraitTile, tap } from '@/components/ui';
+import { FieldInput } from '@/components/FieldInput';
+import { BirdProfile, Button, Eyebrow, TraitTile, tap } from '@/components/ui';
+import { TraitOptionStrip } from '@/components/TraitOptionStrip';
 import { ChirrupBrand } from '@/components/ChirrupBrand';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
@@ -84,7 +86,9 @@ export default function CreateScreen() {
   }, [resetMutation]);
 
   // Closing Create discards its draft; a late generation response must not restore it.
-  useFocusEffect(useCallback(() => () => reset(), [reset]));
+  const resetOnExit = useRef(reset);
+  resetOnExit.current = reset;
+  useFocusEffect(useCallback(() => () => resetOnExit.current(), []));
 
   const onSave = async () => {
     if (!bird || !birdName.trim()) return;
@@ -128,6 +132,8 @@ export default function CreateScreen() {
         key={step}
         contentContainerStyle={{ padding: 20, paddingBottom: bottomPad }}
         bottomOffset={24}
+        keyboardDismissMode="none"
+        keyboardShouldPersistTaps="handled"
         contentInsetAdjustmentBehavior="never"
       >
         {step === 'build' && (
@@ -197,11 +203,8 @@ export default function CreateScreen() {
                     <Text style={[st.groupTitle, { color: c.foreground, marginBottom: 10 }]}>
                       <Text style={{ color: c.mutedForeground }}>{`0${i + 5}  `}</Text>{title}
                     </Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-                      {opts.map((o) => (
-                        <Chip key={o.id} testID={`trait-${key}-${o.id}`} label={o.label} selected={sel[key] === o.id} onPress={() => setSel({ ...sel, [key]: o.id })} />
-                      ))}
-                    </ScrollView>
+                    <TraitOptionStrip trait={key} options={opts} selected={sel[key]}
+                      onSelect={(id) => setSel((current) => ({ ...current, [key]: id }))} />
                   </View>
                 ))}
               </View>
@@ -210,10 +213,10 @@ export default function CreateScreen() {
                 {KEYS.map((k, i) => (
                   <View key={k}>
                     <Text style={[st.label, { color: c.foreground }]}>{`0${i + 1}  ${TRAIT_LABELS[k]}`}</Text>
-                    <TextInput
+                    <FieldInput
                       testID={`input-${k}`}
                       value={typed[k]}
-                      onChangeText={(t) => setTyped({ ...typed, [k]: t })}
+                      onChangeText={(t) => setTyped((current) => ({ ...current, [k]: t }))}
                       placeholder={optionFor(k, DEFAULT_SEL[k])?.value}
                       placeholderTextColor={c.mutedForeground}
                       maxLength={120}
@@ -234,7 +237,7 @@ export default function CreateScreen() {
               </Pressable>
             </View>
             {showExtra && (
-              <TextInput
+              <FieldInput
                 testID="input-extra"
                 value={extra}
                 onChangeText={setExtra}
@@ -291,7 +294,7 @@ export default function CreateScreen() {
               <View>
                 <Eyebrow style={{ marginBottom: 12 }}>Step 3 / Meet your bird</Eyebrow>
                 <Eyebrow style={{ marginTop: 6, marginBottom: 8 }}>Name your bird</Eyebrow>
-                <TextInput testID="bird-name" accessibilityLabel="Name your bird" value={birdName} onChangeText={setBirdName}
+                <FieldInput testID="bird-name" accessibilityLabel="Name your bird" value={birdName} onChangeText={setBirdName}
                   editable={!isSaved(bird.id)} maxLength={100} placeholderTextColor={c.mutedForeground}
                   style={[st.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius, marginBottom: 16 }]} />
                 <BirdProfile bird={{ ...bird, name: birdName.trim() }} />

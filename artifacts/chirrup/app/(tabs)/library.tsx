@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Image, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
 import { MAX_BIRDS } from '@/lib/collectionStorage';
+import { FieldInput } from '@/components/FieldInput';
 
 export const displayName = (n?: string) => (n && n.trim() ? n.trim() : 'Unnamed bird');
 
@@ -42,7 +43,7 @@ export default function LibraryScreen() {
         </View>
         <View style={[s.search, { backgroundColor: c.card, borderColor: c.input, borderRadius: c.radius }]}>
           <Feather name="search" size={16} color={c.mutedForeground} />
-          <TextInput testID="search" value={q} onChangeText={setQ} placeholder="Find a bird in your collection" accessibilityLabel="Search your collection" placeholderTextColor={c.mutedForeground}
+          <FieldInput testID="search" value={q} onChangeText={setQ} placeholder="Find a bird in your collection" accessibilityLabel="Search your collection" placeholderTextColor={c.mutedForeground}
             style={[s.searchInput, { color: c.foreground }]} returnKeyType="search" clearButtonMode="while-editing" />
         </View>
       </View>
@@ -56,7 +57,8 @@ export default function LibraryScreen() {
           data={filtered}
           keyExtractor={(b) => b.id}
           contentContainerStyle={{ padding: 20, paddingBottom: bottomPad, gap: 12, flexGrow: 1 }}
-          keyboardDismissMode="on-drag"
+          keyboardDismissMode="none"
+          keyboardShouldPersistTaps="handled"
           renderItem={({ item }) => (
             <Pressable testID={'bird-' + item.id} accessibilityRole="button" accessibilityLabel={'Open ' + displayName(item.name)}
               onPress={() => { tap(); router.push({ pathname: '/bird/[id]', params: { id: item.id } }); }}
