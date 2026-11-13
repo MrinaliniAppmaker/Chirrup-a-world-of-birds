@@ -28,6 +28,8 @@ app.use(
   }),
 );
 app.use(cors());
+// Up to six compressed portrait references; keep other endpoints' smaller limit.
+app.use("/api/birds/interact", express.json({ limit: "9mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

@@ -49,3 +49,9 @@ Do not use automated visual rejection and quality-retry loops as the solution to
 **Why:** The user reported that this approach turned roughly 80% of attempts into generation errors and explicitly rejected it. Better generation instructions are required, not withholding most results.
 
 **How to apply:** Improve the generation input itself. Genuine provider failures must still be reported, but do not reintroduce an AI trait judge that blocks portraits or silently regenerates them without discussing a different approach with the user.
+
+A bird must remain the same recognizable individual across its journal portrait and interaction scenes.
+
+**Why:** The user reported that birds' appearance varied greatly between the journal and other generated scenes.
+
+**How to apply:** Use each participant's actual saved portrait as a separately bound visual identity reference, not just a fresh text-to-image recreation from trait categories. Preserve markings, palette distribution, beak, feet and proportions while changing pose and setting. Do not overwrite the original journal portrait or reintroduce a visual rejection loop.

@@ -86,7 +86,7 @@ components:
             $ref: "#/components/schemas/EncounterBird"
     EncounterBird:
       type: object
-      required: [id, name, traits, appearance, habitat, diet, behavior]
+      required: [id, name, traits, appearance, habitat, diet, behavior, referenceImage]
       properties:
         id: { type: string, minLength: 1, maxLength: 100 }
         name: { type: string, maxLength: 100 }
@@ -96,6 +96,11 @@ components:
         habitat: { type: string, maxLength: 2000 }
         diet: { type: string, maxLength: 2000 }
         behavior: { type: string, maxLength: 2000 }
+        referenceImage:
+          type: string
+          description: The saved portrait as an inline image, used to preserve this individual bird's visual identity.
+          maxLength: 1400000
+          pattern: '^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$'
     GeneratedEncounter:
       type: object
       required: [title, habitat, summary, imageUri, minutes]

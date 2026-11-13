@@ -37,6 +37,10 @@ export const simulateEncounterBodyBirdsItemDietMax = 2000;
 
 export const simulateEncounterBodyBirdsItemBehaviorMax = 2000;
 
+export const simulateEncounterBodyBirdsItemReferenceImageMax = 1400000;
+
+
+export const simulateEncounterBodyBirdsItemReferenceImageRegExp = new RegExp('^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$');
 export const simulateEncounterBodyBirdsMin = 2;
 export const simulateEncounterBodyBirdsMax = 6;
 
@@ -58,7 +62,8 @@ export const SimulateEncounterBody = zod.object({
   "appearance": zod.string().max(simulateEncounterBodyBirdsItemAppearanceMax),
   "habitat": zod.string().max(simulateEncounterBodyBirdsItemHabitatMax),
   "diet": zod.string().max(simulateEncounterBodyBirdsItemDietMax),
-  "behavior": zod.string().max(simulateEncounterBodyBirdsItemBehaviorMax)
+  "behavior": zod.string().max(simulateEncounterBodyBirdsItemBehaviorMax),
+  "referenceImage": zod.string().max(simulateEncounterBodyBirdsItemReferenceImageMax).regex(simulateEncounterBodyBirdsItemReferenceImageRegExp).describe('The saved portrait as an inline image, used to preserve this individual bird\'s visual identity.')
 })).min(simulateEncounterBodyBirdsMin).max(simulateEncounterBodyBirdsMax)
 })
 

@@ -11,11 +11,13 @@ import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
 import { DEFAULT_BIRD_ID, DEFAULT_MALLARD, MALLARD_IMAGE } from '@/constants/defaultBird';
+import { portraitReference } from '@/lib/portraitReference';
+import type { PortraitSource } from '@/lib/portraitReference';
 
 const MIN = 2;
 const MAX = 6;
 
-type Candidate = { id: string; name: string; sub: string; image: ImageSourcePropType; isReference: boolean; payload: EncounterBird };
+type Candidate = { id: string; name: string; sub: string; image: ImageSourcePropType; portrait: PortraitSource; isReference: boolean; payload: Omit<EncounterBird, 'referenceImage'> };
 
 export default function InteractionsScreen() {
   const c = useColors();
@@ -26,15 +28,16 @@ export default function InteractionsScreen() {
   const [picked, setPicked] = useState<string[]>([]);
   const [result, setResult] = useState<GeneratedEncounter | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 : insets.bottom + 24;
 
   const candidates = useMemo<Candidate[]>(() => {
-    const ref: Candidate = { id: DEFAULT_BIRD_ID, name: DEFAULT_MALLARD.name, sub: 'Reference species \u00b7 ' + DEFAULT_MALLARD.scientificName, image: MALLARD_IMAGE, isReference: true,
+    const ref: Candidate = { id: DEFAULT_BIRD_ID, name: DEFAULT_MALLARD.name, sub: 'Reference species \u00b7 ' + DEFAULT_MALLARD.scientificName, image: MALLARD_IMAGE, portrait: MALLARD_IMAGE, isReference: true,
       payload: { id: DEFAULT_MALLARD.id, name: DEFAULT_MALLARD.name, traits: DEFAULT_MALLARD.traits, appearance: DEFAULT_MALLARD.appearance, habitat: DEFAULT_MALLARD.habitat, diet: DEFAULT_MALLARD.diet, behavior: DEFAULT_MALLARD.behavior } };
     const mine: Candidate[] = birds.map((b) => {
       const name = b.name && b.name.trim() ? b.name.trim() : 'Unnamed bird';
-      return { id: b.id, name, sub: b.scientificName, image: { uri: b.imageUri }, isReference: false,
+      return { id: b.id, name, sub: b.scientificName, image: { uri: b.imageUri }, portrait: b.imageUri, isReference: false,
         payload: { id: b.id, name, traits: b.traits, appearance: b.appearance, habitat: b.habitat, diet: b.diet, behavior: b.behavior } };
     });
     return [ref, ...mine];
@@ -43,7 +46,7 @@ export default function InteractionsScreen() {
   // Derived reconciliation: ids no longer in the collection drop out without effects.
   const valid = useMemo(() => picked.filter((id) => candidates.some((x) => x.id === id)), [picked, candidates]);
   const selected = useMemo(() => valid.map((id) => candidates.find((x) => x.id === id)!).filter(Boolean), [valid, candidates]);
-  const pending = sim.isPending;
+  const pending = preparing || sim.isPending;
   const canRun = loaded && !pending && valid.length >= MIN && valid.length <= MAX;
 
   const toggle = (id: string) => {
@@ -60,11 +63,18 @@ export default function InteractionsScreen() {
   const run = async () => {
     if (!canRun) return;
     setError(null);
+    setPreparing(true);
     try {
-      const out = await sim.mutateAsync({ data: { birds: selected.map((x) => x.payload) } });
+      const birds: EncounterBird[] = [];
+      for (const candidate of selected) {
+        birds.push({ ...candidate.payload, referenceImage: await portraitReference(candidate.portrait) });
+      }
+      const out = await sim.mutateAsync({ data: { birds } });
       setResult(out);
     } catch {
       setError('The encounter could not be imagined just now. Your birds are still selected; try again.');
+    } finally {
+      setPreparing(false);
     }
   };
 

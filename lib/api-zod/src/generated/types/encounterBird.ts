@@ -24,4 +24,10 @@ export interface EncounterBird {
   diet: string;
   /** @maxLength 2000 */
   behavior: string;
+  /**
+     * The saved portrait as an inline image, used to preserve this individual bird's visual identity.
+     * @maxLength 1400000
+     * @pattern ^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/]+={0,2}$
+     */
+  referenceImage: string;
 }

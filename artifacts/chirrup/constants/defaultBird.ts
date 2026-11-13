@@ -3,7 +3,7 @@ import type { EncounterBird } from '@workspace/api-client-react';
 export const DEFAULT_BIRD_ID = 'reference-mallard';
 
 // Factual reference species. Never written to the user's collection.
-export const DEFAULT_MALLARD: EncounterBird & { scientificName: string } = {
+export const DEFAULT_MALLARD: Omit<EncounterBird, 'referenceImage'> & { scientificName: string } = {
   id: DEFAULT_BIRD_ID,
   name: 'Mallard',
   scientificName: 'Anas platyrhynchos',
