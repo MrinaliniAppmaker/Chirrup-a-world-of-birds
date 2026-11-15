@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { EncounterBird } from "@workspace/api-zod";
 import { anonymousParticipants, restoreBirdNames, encounterParts, referencePart, InvalidReferenceError } from "./encounterReference";
+import { encounterNarratorPrompt } from "./encounterNarrative";
 
 const png = `data:image/png;base64,${Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 1]).toString("base64")}`;
 const jpeg = `data:image/jpeg;base64,${Buffer.from([255, 216, 255, 224, 2]).toString("base64")}`;
@@ -41,6 +42,25 @@ test("all six selected birds have separate references without extra image copies
   assert.equal(parts.filter((part) => part.inlineData).length, 6);
   assert.match(parts[0].text!, /exactly 6 individual birds/);
   assert.ok(parts.every((part) => !part.text?.includes(png)));
+});
+
+test("encounters allow realistic predation without forced deaths or resurrection", () => {
+  assert.match(encounterNarratorPrompt, /capture, kill and eat/);
+  assert.match(encounterNarratorPrompt, /do not force a kill/);
+  assert.match(encounterNarratorPrompt, /Once a bird dies it stays dead/);
+  assert.match(encounterNarratorPrompt, /not necessarily alive, visible or acting in every minute/);
+});
+
+test("portrait identity does not freeze action or force every bird to stand alive", () => {
+  const action = "BIRD_1 grips BIRD_2 after a chase; BIRD_2 is dead.";
+  const parts = encounterParts([bird("one", png), bird("two", jpeg)], "marsh", action);
+  const text = parts.map((part) => part.text ?? "").join("\n");
+  assert.match(text, /APPEARANCE ONLY, not pose, position/);
+  assert.match(text, /Repose and reposition each bird freely/);
+  assert.match(text, /dead bird must not be shown standing alert/);
+  assert.match(text, /natural foreshortening and occlusion/);
+  assert.ok(text.includes(action));
+  assert.doesNotMatch(text, /Show distinct full bodies|Put ALL/);
 });
 
 test("server never fetches arbitrary URLs or accepts device-only URIs as portraits", () => {

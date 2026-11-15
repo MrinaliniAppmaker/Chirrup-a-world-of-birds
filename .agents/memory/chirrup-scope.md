@@ -67,3 +67,15 @@ Text fields should retain focus while typing and scrolling, until the user delib
 **Why:** The user reported brief focus followed by deselection and asked for persistent selection across all typed fields.
 
 **How to apply:** Avoid timer-based blur, state-dependent component identities or route cleanup triggered by form edits. Preserve multiline newlines, deliberate field changes and accessible keyboard navigation.
+
+Encounters may include realistic predation and death; survival is not guaranteed. Saved portraits preserve appearance, not starting pose or position.
+
+**Why:** The user explicitly asked for realistic predator-prey outcomes and reported that interaction images were keeping birds fixed in their portrait positions.
+
+**How to apply:** Let diet, anatomy and circumstances determine outcomes without forcing kills or universal escapes. Keep condition and movement continuous, and let image references change pose and composition freely without changing identity. Encounter deaths do not delete saved birds.
+
+Legs and Feet choices should scroll with their underside scrollbars, without large side arrows.
+
+**Why:** The user explicitly rejected the large arrow controls after trying them.
+
+**How to apply:** Retain easy horizontal swiping and scroll indicators rather than reintroducing large previous/next buttons.
