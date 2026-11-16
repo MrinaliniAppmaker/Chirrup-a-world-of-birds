@@ -1,3 +1,5 @@
+import { anatomyGuidance } from "./anatomyGuidance";
+
 export const traitKeys = ["body", "beak", "colors", "feathers", "legs", "feet"] as const;
 export type BirdTraits = Record<(typeof traitKeys)[number], string> & { extra?: string };
 
@@ -8,7 +10,8 @@ Preserve contradictory combinations exactly. Invent habitat, diet and behavior a
 
 // Expand the app's predefined category labels into geometry, preventing a body
 // or bill label from bringing along the rest of that family's anatomy.
-// Only exact predefined values are expanded; custom wording is kept intact.
+// Exact predefined values are expanded; custom wording is kept intact and
+// supplemented by shared definitions for uncommon anatomy terms.
 const bodyGeometry: Record<string, string> = {
   "small, compact songbird body": "small compact oval torso, short neck, rounded small head, tapered folded wings and narrow tail",
   "buoyant waterfowl body, broad and low": "broad low horizontal torso, buoyant rounded belly and broad folded wings",
@@ -28,14 +31,14 @@ const beakGeometry: Record<string, string> = {
   "straight wood-tapping chisel beak": "straight sturdy wedge-shaped bill ending in a chisel edge",
   "long sharply pointed spear beak": "long straight narrow spear-shaped bill with a sharply pointed tip",
   "downcurved probing beak": "elongated slender bill with a continuous downward arc",
-  "slender upcurved sweep-feeding beak": "slender elongated bill curving upward toward the tip",
+  "slender upcurved sweep-feeding beak": "slender elongated bill; both mandibles curve continuously UPWARD along the bill shaft, with the closed tip higher than the bill base while the head is level",
   "crossed bill tips for opening cones": "upper and lower mandibles crossing visibly at their tips",
 };
 const feetGeometry: Record<string, string> = {
   "fully webbed paddling feet": "broad paddling feet; three splayed forward toes on EACH foot joined by continuous fan-shaped skin membranes stretching all the way between the toes",
   "perching feet with three toes forward": "three separate forward-pointing toes and one backward-pointing toe on each foot",
   "curved grasping talons": "strong grasping toes ending in long sharply curved talons",
-  "zygodactyl climbing feet, two toes back": "two forward-pointing toes and two backward-pointing toes on each foot",
+  "zygodactyl climbing feet, two toes back": "two forward-pointing toes and two backward-pointing toes on each foot; four toes total per foot, digits II and III forward, digits I and IV backward; not three forward and one backward",
   "lobed swimming toes": "separate toes each edged with individual broad lateral skin lobes",
 };
 
@@ -43,7 +46,8 @@ export function portraitPrompt(traits: BirdTraits): string {
   const body = bodyGeometry[traits.body] ?? traits.body;
   const beak = beakGeometry[traits.beak] ?? traits.beak;
   const feet = feetGeometry[traits.feet] ?? traits.feet;
-  return `Photorealistic full-body portrait of ONE invented bird, assembled with exactly these independently specified parts.
+  const guidance = anatomyGuidance(traits);
+  return `${guidance ? `${guidance}\n\n` : ""}Photorealistic full-body portrait of ONE invented bird, assembled with exactly these independently specified parts.
 FEET: ${JSON.stringify(feet)}.
 BILL: ${JSON.stringify(beak)}.
 TORSO AND HEAD SHAPE ONLY: ${JSON.stringify(body)}.
@@ -52,7 +56,8 @@ PLUMAGE COLORS: ${JSON.stringify(traits.colors)}.
 FEATHER STRUCTURE: ${JSON.stringify(traits.feathers)}.
 ADDITIONAL FEATURES: ${JSON.stringify(traits.extra?.trim() || "none")}.
 Every listed part is equally required. Retain this exact combination even when it does not occur in nature. Each part's specification applies only to that part.
-Both feet spread flat on bare rock, bill in clear three-quarter profile, entire torso, legs and tail in frame. Show the specified foot structure prominently and sharply. Natural skin, keratin and feather texture, smooth believable joins between the chosen parts, natural light, softly blurred background. The bird looks like a living animal with these chosen parts. No text or labels.`;
+Choose a low near-side camera angle with the bird facing right, head level and the bill silhouette unobstructed, so its actual curvature is visible rather than hidden by foreshortening. Both feet on a narrow bare rock ledge with forward AND backward toes separately visible, no foliage or feathers hiding them; entire torso, legs and tail in frame. Show the specified toe directions and membranes prominently and sharply, not merely generic claws. Natural skin, keratin and feather texture, smooth believable joins between the chosen parts, natural light, softly blurred background. The bird looks like a living animal with these chosen parts. No text or labels.
+${guidance ? `The uncommon anatomy defined at the start is essential to this image. Depict its actual geometry visibly, not a typical bill or foot with an unusual label.` : ""}`;
 }
 
 export async function createPortrait(

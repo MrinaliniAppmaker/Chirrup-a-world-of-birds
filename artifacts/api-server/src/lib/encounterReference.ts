@@ -1,5 +1,6 @@
 import type { EncounterBird } from "@workspace/api-zod";
 import type { Part } from "@google/genai";
+import { anatomyGuidance } from "./anatomyGuidance";
 
 export class InvalidReferenceError extends Error {}
 
@@ -10,6 +11,7 @@ export function anonymousParticipants(birds: EncounterBird[]) {
     id: `participant-${index + 1}`,
     name: `BIRD_${index + 1}`,
     traits, appearance, habitat, diet, behavior,
+    anatomyGuidance: anatomyGuidance(traits),
   }));
 }
 

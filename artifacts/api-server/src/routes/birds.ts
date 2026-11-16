@@ -9,6 +9,7 @@ import { designPolicy } from "../lib/birdDesign";
 import { generateBirdPortrait } from "../lib/birdPortrait";
 import { generateEncounterPortrait } from "../lib/encounterPortrait";
 import { encounterNarratorPrompt } from "../lib/encounterNarrative";
+import { anatomyGuidance } from "../lib/anatomyGuidance";
 import { anonymousParticipants, restoreBirdNames, referencePart, InvalidReferenceError } from "../lib/encounterReference";
 
 const router: IRouter = Router();
@@ -157,7 +158,7 @@ router.post(
     activeGenerations += 1;
     try {
       const traits = parsed.data;
-      const traitDescription = JSON.stringify(traits);
+      const traitDescription = `${JSON.stringify(traits)}\n${anatomyGuidance(traits)}`;
       const [notes] = await batchProcess([traitDescription], async (description) => {
         const completion = await openai.chat.completions.create({
           model: "gpt-5.4-mini",
