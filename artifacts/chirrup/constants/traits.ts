@@ -16,19 +16,28 @@ export interface TraitGroup {
   options: TraitOption[];
 }
 
+// These six profiles are visible in the exported Refine Beak Silhouettes screen.
+// The remaining five source assets are not exposed in its clipped export.
+export const WATERBIRD_BEAK_OPTIONS: TraitOption[] = [
+  { id: 'spear', label: 'Spear', value: 'long, straight, sharply pointed spear-shaped beak', illustration: 'spear', description: 'Long & sharply pointed' },
+  { id: 'water-probe', label: 'Probe', value: 'long slender mud-probing beak, gently downcurved toward its fine tip', illustration: 'water-probe', description: 'Slender & mud-probing' },
+  { id: 'spoonbill', label: 'Spoonbill', value: 'long flat bill with a distinctly widened spoon-shaped tip', illustration: 'spoonbill', description: 'Flat & spoon-tipped' },
+  { id: 'pelican', label: 'Pelican', value: 'long pelican-like bill with an expandable pouch beneath the lower mandible', illustration: 'pelican', description: 'Long bill & throat pouch' },
+  { id: 'skimmer', label: 'Skimmer', value: 'laterally compressed skimmer bill with the lower mandible visibly longer than the upper mandible', illustration: 'skimmer', description: 'Extended lower mandible' },
+  { id: 'flamingo', label: 'Flamingo', value: 'deep filter-feeding bill with a pronounced downward bend halfway along its length', illustration: 'flamingo', description: 'Bent & filter-feeding' },
+];
+
 export const TRAIT_GROUPS: TraitGroup[] = [
   {
     key: 'body', title: 'Body shape', hint: 'Start here',
     options: [
-      { id: 'songbird', label: 'Songbird', value: 'small, compact songbird body', illustration: 'songbird', description: 'Small & perching' },
+      { id: 'songbird', label: 'Perching bird', value: 'small, compact perching bird body', illustration: 'songbird', description: 'Small & perching' },
       { id: 'waterfowl', label: 'Waterfowl', value: 'buoyant waterfowl body, broad and low', illustration: 'waterfowl', description: 'Rounded & buoyant' },
       { id: 'pheasant', label: 'Pheasant', value: 'full pheasant body with trailing tail', illustration: 'pheasant', description: 'Full body, trailing tail' },
       { id: 'raptor', label: 'Raptor', value: 'muscular raptor body with broad shoulders', illustration: 'raptor', description: 'Broad chest, strong stance' },
-      { id: 'wader', label: 'Wader', value: 'slender long-necked wading bird body', illustration: 'wader', description: 'Long neck & slender legs' },
-      { id: 'owl', label: 'Owl', value: 'rounded upright owl body with large head', illustration: 'owl', description: 'Upright & round-headed' },
-      { id: 'hummingbird', label: 'Hummingbird', value: 'tiny hovering hummingbird body', illustration: 'hummingbird', description: 'Tiny & streamlined' },
-      { id: 'pigeon', label: 'Pigeon', value: 'plump pigeon body with small head', illustration: 'pigeon', description: 'Plump, with a small head' },
-      { id: 'woodpecker', label: 'Woodpecker', value: 'upright woodpecker body with braced tail', illustration: 'woodpecker', description: 'Upright, with a braced tail' },
+      { id: 'wader', label: 'Wading bird', value: 'slender long-necked wading bird body', illustration: 'wader', description: 'Long-legged & long-necked' },
+      { id: 'penguin', label: 'Penguin', value: 'upright streamlined flightless penguin body with short flipper-shaped wings', illustration: 'penguin', description: 'Upright & flightless' },
+      { id: 'ratite', label: 'Ratite', value: 'large-bodied flightless ratite body with a long neck and small wings', illustration: 'ratite', description: 'Large-bodied & long-legged' },
     ],
   },
   {
@@ -39,10 +48,9 @@ export const TRAIT_GROUPS: TraitGroup[] = [
       { id: 'flat', label: 'Duckbill', value: 'flat broad duck-like bill', illustration: 'flat', description: 'Broad & flattened' },
       { id: 'probe', label: 'Needle', value: 'long thin nectar-reaching beak', illustration: 'probe', description: 'Slender & nectar-reaching' },
       { id: 'chisel', label: 'Chisel', value: 'straight wood-tapping chisel beak', illustration: 'chisel', description: 'Straight & wood-tapping' },
-      { id: 'spear', label: 'Spear', value: 'long sharply pointed spear beak', illustration: 'spear', description: 'Long & sharply pointed' },
-      { id: 'downcurved', label: 'Downcurved', value: 'downcurved probing beak', illustration: 'downcurved', description: 'Curved for probing' },
-      { id: 'upcurved', label: 'Upcurved', value: 'slender upcurved sweep-feeding beak', illustration: 'upcurved', description: 'Slender & sweep-feeding' },
+      { id: 'downcurved', label: 'Downcurved', value: 'downcurved flower-probing beak', illustration: 'downcurved', description: 'Curved & flower-probing' },
       { id: 'crossbill', label: 'Crossbill', value: 'crossed bill tips for opening cones', illustration: 'crossbill', description: 'Crossed tips for cones' },
+      { id: 'parrot', label: 'Parrot', value: 'deep curved nut-cracking parrot beak with a thick hooked upper mandible', illustration: 'parrot', description: 'Deep & nut-cracking' },
     ],
   },
   {

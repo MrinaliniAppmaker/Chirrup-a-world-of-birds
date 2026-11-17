@@ -8,6 +8,7 @@ import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
 import { TRAIT_LABELS, TraitKey, TraitOption } from '@/constants/traits';
 import { TraitIllustration } from './TraitIllustration';
+import { VISUAL_TRAIT_IMAGES } from '@/constants/visualTraits';
 
 export const tap = () => { Haptics.selectionAsync().catch(() => {}); };
 
@@ -47,7 +48,7 @@ export function Button({ label, onPress, variant = 'primary', icon, loading, dis
   );
 }
 
-export function TraitTile({ option, selected, onPress, testID }: { option: TraitOption; selected: boolean; onPress: () => void; testID?: string }) {
+export function TraitTile({ option, selected, onPress, testID, detailed = false }: { option: TraitOption; selected: boolean; onPress: () => void; testID?: string; detailed?: boolean }) {
   const c = useColors();
   return (
     <Pressable
@@ -56,7 +57,7 @@ export function TraitTile({ option, selected, onPress, testID }: { option: Trait
       accessibilityState={{ selected }}
       accessibilityLabel={`${option.label}${option.description ? `. ${option.description}` : ''}`}
       onPress={() => { tap(); onPress(); }}
-      style={({ pressed }) => [s.tile, {
+      style={({ pressed }) => [s.tile, detailed && { minHeight: 122, paddingHorizontal: 7 }, {
         borderRadius: c.radius,
         backgroundColor: selected ? c.accent : c.card,
         borderColor: selected ? c.primary : c.border,
@@ -67,13 +68,16 @@ export function TraitTile({ option, selected, onPress, testID }: { option: Trait
         <View style={s.swatches}>
           {option.swatch.map((h) => <View key={h} style={[s.swatch, { backgroundColor: h }]} />)}
         </View>
+      ) : VISUAL_TRAIT_IMAGES[option.illustration ?? ''] ? (
+        <Image source={VISUAL_TRAIT_IMAGES[option.illustration ?? '']} resizeMode="contain" tintColor={c.primary} style={{ width: 72, height: 44 }} />
       ) : (
         <TraitIllustration name={option.illustration ?? ''} />
       )}
-      <View style={s.tileLabelRow}>
+      <View style={[s.tileLabelRow, { justifyContent: 'center' }]}>
         {selected ? <Feather name="check" size={11} color={c.primary} /> : null}
-        <Text numberOfLines={2} style={[s.tileLabel, { color: selected ? c.primary : c.mutedForeground, fontFamily: selected ? sans.semibold : sans.regular }]}>{option.label}</Text>
+        <Text numberOfLines={2} style={[s.tileLabel, { flexShrink: 1, textAlign: 'center', color: selected ? c.primary : c.foreground, fontFamily: selected ? sans.semibold : sans.regular }]}>{option.label}</Text>
       </View>
+      {detailed && option.description ? <Text style={{ fontFamily: sans.regular, fontSize: 10, lineHeight: 14, textAlign: 'center', color: c.mutedForeground }}>{option.description}</Text> : null}
     </Pressable>
   );
 }

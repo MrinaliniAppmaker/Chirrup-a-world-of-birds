@@ -9,13 +9,14 @@ import { SymbolView } from 'expo-symbols';
 import { useGenerateBird, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FieldInput } from '@/components/FieldInput';
-import { BirdProfile, Button, Eyebrow, TraitTile, tap } from '@/components/ui';
+import { BirdProfile, Button, Eyebrow, tap } from '@/components/ui';
+import { TraitChoiceGrid } from '@/components/TraitChoiceGrid';
 import { TraitOptionStrip } from '@/components/TraitOptionStrip';
 import { ChirrupBrand } from '@/components/ChirrupBrand';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
-import { FEET_OPTIONS, LEG_OPTIONS, TRAIT_GROUPS, TRAIT_LABELS, TraitKey } from '@/constants/traits';
+import { FEET_OPTIONS, LEG_OPTIONS, TRAIT_GROUPS, TRAIT_LABELS, TraitKey, WATERBIRD_BEAK_OPTIONS } from '@/constants/traits';
 
 type Step = 'build' | 'review' | 'result';
 type Mode = 'visual' | 'typed';
@@ -26,6 +27,7 @@ const EMPTY_TYPED: Record<TraitKey, string> = { body: '', beak: '', colors: '', 
 function optionFor(key: TraitKey, id: string) {
   if (key === 'legs') return LEG_OPTIONS.find((o) => o.id === id);
   if (key === 'feet') return FEET_OPTIONS.find((o) => o.id === id);
+  if (key === 'beak') return [...(TRAIT_GROUPS.find((g) => g.key === key)?.options ?? []), ...WATERBIRD_BEAK_OPTIONS].find((o) => o.id === id);
   return TRAIT_GROUPS.find((g) => g.key === key)?.options.find((o) => o.id === id);
 }
 
@@ -173,8 +175,7 @@ export default function CreateScreen() {
                 {TRAIT_GROUPS.map((g, gi) => {
                   const open = !!expanded[g.key];
                   const opts = open ? g.options : g.options.slice(0, 3);
-                  const rows: typeof opts[] = [];
-                  for (let i = 0; i < opts.length; i += 3) rows.push(opts.slice(i, i + 3));
+                  const waterbirdsOpen = !!expanded['waterbird-beaks'];
                   return (
                     <View key={g.key} style={st.group}>
                       <View style={st.groupHead}>
@@ -186,15 +187,21 @@ export default function CreateScreen() {
                           <Text style={[st.more, { color: c.primary }]}>{open ? 'Less' : 'More +'}</Text>
                         </Pressable>
                       </View>
-                      <View style={{ gap: 8 }}>
-                        {rows.map((row, ri) => (
-                          <View key={ri} style={st.tileRow}>
-                            {row.map((o) => (
-                              <TraitTile key={o.id} testID={`trait-${g.key}-${o.id}`} option={o} selected={sel[g.key] === o.id} onPress={() => setSel({ ...sel, [g.key]: o.id })} />
-                            ))}
-                          </View>
-                        ))}
-                      </View>
+                      <TraitChoiceGrid trait={g.key} options={opts} selected={sel[g.key]}
+                        detailed={open && (g.key === 'body' || g.key === 'beak')}
+                        onSelect={(id) => setSel((current) => ({ ...current, [g.key]: id }))}
+                        onMore={g.key === 'beak' && open ? () => setExpanded((current) => ({ ...current, 'waterbird-beaks': !current['waterbird-beaks'] })) : undefined}
+                        moreOpen={waterbirdsOpen} />
+                      {g.key === 'beak' && WATERBIRD_BEAK_OPTIONS.some((o) => o.id === sel.beak) ? (
+                        <Text style={[st.small, { marginTop: 8, color: c.primary }]}>Selected: {optionFor('beak', sel.beak)?.label}</Text>
+                      ) : null}
+                      {g.key === 'beak' && open && waterbirdsOpen ? (
+                        <View testID="waterbird-beak-options" style={{ marginTop: 16, gap: 10 }}>
+                          <Eyebrow>Waterbird beaks</Eyebrow>
+                          <TraitChoiceGrid trait="beak" options={WATERBIRD_BEAK_OPTIONS} selected={sel.beak} detailed
+                            onSelect={(id) => setSel((current) => ({ ...current, beak: id }))} />
+                        </View>
+                      ) : null}
                     </View>
                   );
                 })}

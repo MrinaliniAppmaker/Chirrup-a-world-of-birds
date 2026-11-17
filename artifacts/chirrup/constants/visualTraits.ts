@@ -1,0 +1,26 @@
+import type { ImageSourcePropType } from 'react-native';
+
+// Silhouettes extracted from the user's selected Figma screens, not redrawn.
+export const VISUAL_TRAIT_IMAGES: Record<string, ImageSourcePropType> = {
+  songbird: require('../assets/traits/songbird.png'),
+  waterfowl: require('../assets/traits/waterfowl.png'),
+  pheasant: require('../assets/traits/pheasant.png'),
+  raptor: require('../assets/traits/raptor.png'),
+  wader: require('../assets/traits/wader.png'),
+  penguin: require('../assets/traits/penguin.png'),
+  ratite: require('../assets/traits/ratite.png'),
+  conical: require('../assets/traits/conical.png'),
+  hooked: require('../assets/traits/hooked.png'),
+  flat: require('../assets/traits/flat.png'),
+  probe: require('../assets/traits/needle.png'),
+  chisel: require('../assets/traits/chisel.png'),
+  downcurved: require('../assets/traits/downcurved.png'),
+  crossbill: require('../assets/traits/crossbill.png'),
+  parrot: require('../assets/traits/parrot.png'),
+  spear: require('../assets/traits/spear.png'),
+  'water-probe': require('../assets/traits/water-probe.png'),
+  spoonbill: require('../assets/traits/spoonbill.png'),
+  pelican: require('../assets/traits/pelican.png'),
+  skimmer: require('../assets/traits/skimmer.png'),
+  flamingo: require('../assets/traits/flamingo.png'),
+};
