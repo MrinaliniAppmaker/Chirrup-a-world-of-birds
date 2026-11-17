@@ -1,4 +1,4 @@
-import { anatomyGuidance } from "./anatomyGuidance";
+import { anatomyGuidance, requestedAnatomyFeatures } from "./anatomyGuidance";
 
 export const traitKeys = ["body", "beak", "colors", "feathers", "legs", "feet"] as const;
 export type BirdTraits = Record<(typeof traitKeys)[number], string> & { extra?: string };
@@ -47,6 +47,11 @@ export function portraitPrompt(traits: BirdTraits): string {
   const beak = beakGeometry[traits.beak] ?? traits.beak;
   const feet = feetGeometry[traits.feet] ?? traits.feet;
   const guidance = anatomyGuidance(traits);
+  const showToeTopology = requestedAnatomyFeatures(traits).some((id) =>
+    ["zygodactyl", "heterodactyl", "pamprodactyl"].includes(id));
+  const stance = showToeTopology
+    ? "Stand on a broad FLAT light matte surface, NOT gripping a narrow perch or rock edge. Feet comfortably separated and staggered, their toe joints slightly turned toward the camera so the top of BOTH feet is visible. Each rear toe must project behind its ankle with clear empty space between the rear toes, not hide behind its leg or the other foot. Use a slightly elevated three-quarter body view while keeping the head and bill in clear right-facing side profile. Allocate enough image area to both feet to distinguish every digit."
+    : "Both feet on bare rock with the requested toe structure and membranes visible. Use a near-side view with a clear bill silhouette.";
   return `${guidance ? `${guidance}\n\n` : ""}Photorealistic full-body portrait of ONE invented bird, assembled with exactly these independently specified parts.
 FEET: ${JSON.stringify(feet)}.
 BILL: ${JSON.stringify(beak)}.
@@ -56,7 +61,7 @@ PLUMAGE COLORS: ${JSON.stringify(traits.colors)}.
 FEATHER STRUCTURE: ${JSON.stringify(traits.feathers)}.
 ADDITIONAL FEATURES: ${JSON.stringify(traits.extra?.trim() || "none")}.
 Every listed part is equally required. Retain this exact combination even when it does not occur in nature. Each part's specification applies only to that part.
-Choose a low near-side camera angle with the bird facing right, head level and the bill silhouette unobstructed, so its actual curvature is visible rather than hidden by foreshortening. Both feet on a narrow bare rock ledge with forward AND backward toes separately visible, no foliage or feathers hiding them; entire torso, legs and tail in frame. Show the specified toe directions and membranes prominently and sharply, not merely generic claws. Natural skin, keratin and feather texture, smooth believable joins between the chosen parts, natural light, softly blurred background. The bird looks like a living animal with these chosen parts. No text or labels.
+The bird faces right with head level and the bill silhouette unobstructed, so its actual curvature is visible rather than hidden by foreshortening. ${stance} Entire torso, legs and tail in frame, no foliage or feathers hiding the feet. Show the specified toe directions and membranes prominently and sharply, not merely generic claws. Natural skin, keratin and feather texture, smooth believable joins between the chosen parts, natural light, softly blurred background. The bird looks like a living animal with these chosen parts. No text or labels.
 ${guidance ? `The uncommon anatomy defined at the start is essential to this image. Depict its actual geometry visibly, not a typical bill or foot with an unusual label.` : ""}`;
 }
 

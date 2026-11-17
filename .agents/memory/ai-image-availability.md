@@ -14,8 +14,8 @@ Correct anatomical wording in generated notes is not evidence that the portrait 
 
 **How to apply:** Distinguish prompt/terminology tests from visual verification. Do not claim rare anatomy is reliably fixed from passing text tests. Use structural visual guidance rather than a rejection/retry loop when wording alone fails, and verify toes separately from bill direction.
 
-Anatomy guides should depict isolated part geometry, not complete real species. Supply only guides relevant to positively requested features, alongside the unchanged user trait data.
+Anatomy guides must not import complete real species. Supply only geometry relevant to positively requested features, alongside unchanged user trait data; neutral spatial scaffolds must not override custom body shape.
 
-**Why:** The user approved visual anatomy guides after prompt-only failures. Whole-bird references risk restoring the species bias they explicitly rejected. A guided live example corrected upward bill direction, but overlapping toes were not conclusive evidence of exact toe fidelity.
+**Why:** The user approved visual anatomy guides after prompt-only failures. Whole-species references risk restoring the species bias they explicitly rejected. Their repeated tests found inconsistent bill direction and no correct zygodactyl feet. Subsequent live tests with detailed multi-view feet, higher-priority instructions and a spatial construction base consistently depicted upcurved bills but still did not establish correct 2+2 toes on both feet.
 
-**How to apply:** Keep guides monochrome and part-scoped, exclude negated or conflicting guide selections, and preserve the bird's chosen palette and unrelated anatomy. Saved journal portraits remain the identity references for interactions; do not replace them with generic anatomy diagrams.
+**How to apply:** Keep guides monochrome, exclude negated or conflicting guide selections, and preserve the chosen palette and unrelated anatomy. The current Flash image model treats references as conditioning, not hard geometry locks; do not repeatedly claim toe accuracy from stronger wording or more diagrams. Obtain agreement before changing to a more expensive image model or a materially different rendering pipeline. Saved portraits remain interaction identity references.
