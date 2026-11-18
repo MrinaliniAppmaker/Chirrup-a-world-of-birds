@@ -16,15 +16,19 @@ export interface TraitGroup {
   options: TraitOption[];
 }
 
-// These six profiles are visible in the exported Refine Beak Silhouettes screen.
-// The remaining five source assets are not exposed in its clipped export.
+// Specialist profiles from the user's expanded Refine Beak Silhouettes screen.
 export const WATERBIRD_BEAK_OPTIONS: TraitOption[] = [
   { id: 'spear', label: 'Spear', value: 'long, straight, sharply pointed spear-shaped beak', illustration: 'spear', description: 'Long & sharply pointed' },
   { id: 'water-probe', label: 'Probe', value: 'long slender mud-probing beak, gently downcurved toward its fine tip', illustration: 'water-probe', description: 'Slender & mud-probing' },
   { id: 'spoonbill', label: 'Spoonbill', value: 'long flat bill with a distinctly widened spoon-shaped tip', illustration: 'spoonbill', description: 'Flat & spoon-tipped' },
-  { id: 'pelican', label: 'Pelican', value: 'long pelican-like bill with an expandable pouch beneath the lower mandible', illustration: 'pelican', description: 'Long bill & throat pouch' },
-  { id: 'skimmer', label: 'Skimmer', value: 'laterally compressed skimmer bill with the lower mandible visibly longer than the upper mandible', illustration: 'skimmer', description: 'Extended lower mandible' },
+  { id: 'pelican', label: 'Pelican', value: 'long pelican-like bill with an expandable pouch beneath the lower mandible', illustration: 'pelican', description: 'Long with a deep pouch' },
+  { id: 'skimmer', label: 'Skimmer', value: 'laterally compressed skimmer bill with the lower mandible visibly longer than the upper mandible', illustration: 'skimmer', description: 'Long lower mandible' },
   { id: 'flamingo', label: 'Flamingo', value: 'deep filter-feeding bill with a pronounced downward bend halfway along its length', illustration: 'flamingo', description: 'Bent & filter-feeding' },
+  { id: 'shoebill', label: 'Shoebill', value: 'massive broad shoe-shaped bill with a deep upper mandible and a hooked tip', illustration: 'shoebill', description: 'Massive & shoe-shaped' },
+  { id: 'avocet', label: 'Avocet', value: 'long slender upcurved beak, with both mandibles curving upward toward the raised fine tip', illustration: 'avocet', description: 'Slender & upcurved' },
+  { id: 'openbill', label: 'Openbill', value: 'arched openbill beak with a conspicuous central gap between the closed upper and lower mandibles, meeting only at the base and tip', illustration: 'openbill', description: 'Arched with a snail gap' },
+  { id: 'merganser', label: 'Merganser', value: 'long narrow saw-toothed bill with visible fine serrations along the cutting edges of both mandibles', illustration: 'merganser', description: 'Narrow & saw-toothed' },
+  { id: 'cormorant', label: 'Cormorant', value: 'long slender mostly straight bill ending in a distinctly down-hooked upper tip', illustration: 'cormorant', description: 'Slender with a hooked tip' },
 ];
 
 export const TRAIT_GROUPS: TraitGroup[] = [

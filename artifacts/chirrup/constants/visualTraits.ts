@@ -23,4 +23,9 @@ export const VISUAL_TRAIT_IMAGES: Record<string, ImageSourcePropType> = {
   pelican: require('../assets/traits/pelican.png'),
   skimmer: require('../assets/traits/skimmer.png'),
   flamingo: require('../assets/traits/flamingo.png'),
+  shoebill: require('../assets/traits/shoebill.png'),
+  avocet: require('../assets/traits/avocet.png'),
+  openbill: require('../assets/traits/openbill.png'),
+  merganser: require('../assets/traits/merganser.png'),
+  cormorant: require('../assets/traits/cormorant.png'),
 };
