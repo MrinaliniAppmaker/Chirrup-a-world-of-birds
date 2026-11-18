@@ -1,5 +1,5 @@
 import React, { forwardRef, useState } from 'react';
-import { Platform, TextInput, type TextInputInstance, type TextInputProps } from 'react-native';
+import { Platform, StyleSheet, TextInput, type TextInputInstance, type TextInputProps } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 
 // Stable component identity across edits; focus styling never replaces the input.
@@ -22,6 +22,7 @@ export const FieldInput = forwardRef<TextInputInstance, TextInputProps>(function
       onBlur={(event) => { setFocused(false); onBlur?.(event); }}
       style={[
         style,
+        { fontSize: Math.max(16, StyleSheet.flatten(style)?.fontSize ?? 16), minHeight: 44 },
         focused && { borderColor: c.primary, backgroundColor: c.secondary },
         Platform.OS === 'web' && { outlineWidth: 0 },
       ]}

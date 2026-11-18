@@ -24,6 +24,15 @@ const KEYS: TraitKey[] = ['body', 'beak', 'colors', 'feathers', 'legs', 'feet'];
 const DEFAULT_SEL: Record<TraitKey, string> = { body: 'songbird', beak: 'conical', colors: 'olive', feathers: 'flight', legs: 'short-pink', feet: 'perching' };
 const EMPTY_TYPED: Record<TraitKey, string> = { body: '', beak: '', colors: '', feathers: '', legs: '', feet: '' };
 
+function generationFailure(error: unknown) {
+  const fallback = 'Something went wrong while imagining your bird. Your traits are kept.';
+  if (!error || typeof error !== 'object') return { invalid: false, message: fallback };
+  const invalid = 'status' in error && error.status === 400;
+  const data: unknown = 'data' in error ? error.data : null;
+  const message = data && typeof data === 'object' && 'error' in data && typeof data.error === 'string' ? data.error : fallback;
+  return { invalid, message };
+}
+
 function optionFor(key: TraitKey, id: string) {
   if (key === 'legs') return LEG_OPTIONS.find((o) => o.id === id);
   if (key === 'feet') return FEET_OPTIONS.find((o) => o.id === id);
@@ -37,6 +46,7 @@ export default function CreateScreen() {
   const router = useRouter();
   const { save, isSaved } = useCollection();
   const generate = useGenerateBird();
+  const { invalid: invalidTraits, message: generationErrorMessage } = generationFailure(generate.error);
 
   const [step, setStep] = useState<Step>('build');
   const [mode, setMode] = useState<Mode>('visual');
@@ -290,11 +300,11 @@ export default function CreateScreen() {
             {generate.isPending && <GeneratingState />}
             {generate.isError && (
               <View style={[st.errorBox, { borderColor: c.destructive, borderRadius: c.radius + 2, backgroundColor: c.card }]}>
-                <Feather name="cloud-off" size={26} color={c.destructive} />
-                <Text style={[st.h2, { color: c.foreground }]}>The sketch didn't come through.</Text>
-                <Text style={[st.lede, { color: c.mutedForeground, textAlign: 'center' }]}>Something went wrong while imagining your bird. Your traits are kept.</Text>
-                <Button testID="retry" label="Try again" icon="refresh-cw" onPress={runGenerate} style={{ alignSelf: 'stretch', marginTop: 8 }} />
-                <Button testID="error-back" label="Back to review" variant="ghost" onPress={() => { generate.reset(); goTo('review'); }} style={{ alignSelf: 'stretch' }} />
+                <Feather name={invalidTraits ? 'alert-circle' : 'cloud-off'} size={26} color={c.destructive} />
+                <Text style={[st.h2, { color: c.foreground }]}>{invalidTraits ? 'Please change these features.' : "The sketch didn't come through."}</Text>
+                <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={[st.lede, { color: c.mutedForeground, textAlign: 'center' }]}>{generationErrorMessage}</Text>
+                {!invalidTraits && <Button testID="retry" label="Try again" icon="refresh-cw" onPress={runGenerate} style={{ alignSelf: 'stretch', marginTop: 8 }} />}
+                <Button testID="error-back" label={invalidTraits ? 'Edit traits' : 'Back to review'} variant="ghost" onPress={() => { generate.reset(); goTo(invalidTraits ? 'build' : 'review'); }} style={{ alignSelf: 'stretch' }} />
               </View>
             )}
             {generate.isSuccess && bird && (

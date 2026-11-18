@@ -14,6 +14,9 @@ Preserve contradictory combinations exactly. Invent habitat, diet and behavior a
 // supplemented by shared definitions for uncommon anatomy terms.
 const bodyGeometry: Record<string, string> = {
   "small, compact songbird body": "small compact oval torso, short neck, rounded small head, tapered folded wings and narrow tail",
+  "small, compact perching bird body": "small compact oval torso, short neck, rounded small head, tapered folded wings and narrow tail",
+  "upright streamlined flightless penguin body with short flipper-shaped wings": "upright elongated streamlined torso, short neck, rounded head and short flattened flipper-shaped wings; bill, feet and leg anatomy come only from their independent selections",
+  "large-bodied flightless ratite body with a long neck and small wings": "large rounded torso, long slender neck, small head and reduced folded wings; bill, feet and leg anatomy come only from their independent selections",
   "buoyant waterfowl body, broad and low": "broad low horizontal torso, buoyant rounded belly and broad folded wings",
   "full pheasant body with trailing tail": "full elongated torso, relatively small rounded head and long trailing tail",
   "muscular raptor body with broad shoulders": "muscular deep-chested torso, broad shoulders and powerful folded wings",

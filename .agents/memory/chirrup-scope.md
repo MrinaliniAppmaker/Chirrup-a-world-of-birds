@@ -74,6 +74,18 @@ Encounters may include realistic predation and death; survival is not guaranteed
 
 **How to apply:** Let diet, anatomy and circumstances determine outcomes without forcing kills or universal escapes. Keep condition and movement continuous, and let image references change pose and composition freely without changing identity. Encounter deaths do not delete saved birds.
 
+Prey–prey encounters must stay nonfatal. Predator–prey encounters may be fatal when biologically likely; predator–predator encounters should be nonfatal most of the time.
+
+**Why:** The user explicitly distinguished these three cases rather than requesting indiscriminate dramatic deaths.
+
+**How to apply:** Assess predation from diet and circumstances, not a bird's chosen name or a raptor-shaped bill alone. Insect eating does not imply the ability to hunt another participating bird.
+
+Extra features must remain genuine bird features, even though combinations may be imaginary. Non-avian appendages and magical or mechanical features should produce an error instead of a chimera.
+
+**Why:** The user reported that “elephant trunk, catlike ears, and butterfly wings” was accepted and identified this as a major generation error.
+
+**How to apply:** Reject non-bird anatomy before image generation without silently removing it. Preserve rare avian anatomy, unusual feather colors, feathered ear tufts, and contradictory combinations of valid bird traits.
+
 Legs and Feet choices should scroll with their underside scrollbars, without large side arrows.
 
 **Why:** The user explicitly rejected the large arrow controls after trying them.

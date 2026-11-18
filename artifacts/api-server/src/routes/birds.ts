@@ -11,6 +11,9 @@ import { generateEncounterPortrait } from "../lib/encounterPortrait";
 import { encounterNarratorPrompt } from "../lib/encounterNarrative";
 import { anatomyGuidance } from "../lib/anatomyGuidance";
 import { anonymousParticipants, restoreBirdNames, referencePart, InvalidReferenceError } from "../lib/encounterReference";
+import { validateBirdTraits } from "../lib/birdTraitValidation";
+import { classifyBirdTraits } from "../lib/birdTraitClassifier";
+import { encounterMortalityPolicy } from "../lib/encounterPolicy";
 
 const router: IRouter = Router();
 let activeGenerations = 0;
@@ -82,6 +85,7 @@ router.post(
       // Inline image bytes belong only in the image model's multimodal input,
       // never in text narration, logs or a new persistent copy.
       const participants = JSON.stringify(anonymousParticipants(birds));
+      const mortalityPolicy = encounterMortalityPolicy(birds);
       const [notes] = await batchProcess([participants], async (description) => {
         const completion = await openai.chat.completions.create({
           model: "gpt-5.4-mini", max_completion_tokens: 8192,
@@ -106,7 +110,7 @@ router.post(
             },
           },
           messages: [
-            { role: "system", content: encounterNarratorPrompt },
+            { role: "system", content: `${encounterNarratorPrompt}\n\nMANDATORY OUTCOME POLICY FOR THIS ENCOUNTER:\n${mortalityPolicy}` },
             { role: "user", content: description },
           ],
         }, { timeout: 90000 });
@@ -158,6 +162,11 @@ router.post(
     activeGenerations += 1;
     try {
       const traits = parsed.data;
+      const validationError = await validateBirdTraits(traits, classifyBirdTraits);
+      if (validationError) {
+        res.status(400).json({ error: validationError });
+        return;
+      }
       const traitDescription = `${JSON.stringify(traits)}\n${anatomyGuidance(traits)}`;
       const [notes] = await batchProcess([traitDescription], async (description) => {
         const completion = await openai.chat.completions.create({
