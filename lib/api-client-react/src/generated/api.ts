@@ -24,7 +24,11 @@ import type {
   EncounterRequest,
   GeneratedBird,
   GeneratedEncounter,
-  HealthStatus
+  HealthStatus,
+  JournalBirdInput,
+  JournalInstallation,
+  JournalPortraitInput,
+  JournalPortraitUpload
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -53,6 +57,407 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getRegisterJournalInstallationUrl = () => {
+
+
+
+
+  return `/api/journal/installations`
+}
+
+/**
+ * @summary Create a private journal for this app installation
+ */
+export const registerJournalInstallation = async ( options?: Parameters<typeof customFetch>[1]): Promise<JournalInstallation> => {
+
+  return customFetch<JournalInstallation>(getRegisterJournalInstallationUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getRegisterJournalInstallationMutationKey = () => ['registerJournalInstallation'] as const;
+
+export const getRegisterJournalInstallationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerJournalInstallation>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof registerJournalInstallation>>, TError,void, TContext> => {
+
+const mutationKey = getRegisterJournalInstallationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerJournalInstallation>>, void> = () => {
+
+
+          return  registerJournalInstallation(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RegisterJournalInstallationMutationResult = NonNullable<Awaited<ReturnType<typeof registerJournalInstallation>>>
+
+    export type RegisterJournalInstallationMutationError = ErrorType<unknown>
+
+
+    /**
+ * @summary Create a private journal for this app installation
+ */
+export const useRegisterJournalInstallation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerJournalInstallation>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof registerJournalInstallation>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getRegisterJournalInstallationMutationOptions(options));
+    }
+
+export const getListJournalBirdsUrl = () => {
+
+
+
+
+  return `/api/journal/birds`
+}
+
+/**
+ * @summary List this installation's saved birds
+ */
+export const listJournalBirds = async ( options?: Parameters<typeof customFetch>[1]): Promise<GeneratedBird[]> => {
+
+  return customFetch<GeneratedBird[]>(getListJournalBirdsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListJournalBirdsQueryKey = () => {
+    return [
+    `/api/journal/birds`
+    ] as const;
+    }
+
+
+export const getListJournalBirdsQueryOptions = <TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListJournalBirdsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listJournalBirds>>> = ({ signal }) => listJournalBirds({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListJournalBirdsQueryResult = NonNullable<Awaited<ReturnType<typeof listJournalBirds>>>
+export type ListJournalBirdsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List this installation's saved birds
+ */
+
+export function useListJournalBirds<TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListJournalBirdsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSaveJournalBirdUrl = () => {
+
+
+
+
+  return `/api/journal/birds`
+}
+
+/**
+ * @summary Save a journal bird after uploading its portrait
+ */
+export const saveJournalBird = async (journalBirdInput: JournalBirdInput, options?: Parameters<typeof customFetch>[1]): Promise<GeneratedBird> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<GeneratedBird>(getSaveJournalBirdUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(journalBirdInput)
+  }
+);}
+
+
+
+
+
+export const getSaveJournalBirdMutationKey = () => ['saveJournalBird'] as const;
+
+export const getSaveJournalBirdMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveJournalBird>>, TError,SaveJournalBirdMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveJournalBird>>, TError,SaveJournalBirdMutationVariables, TContext> => {
+
+const mutationKey = getSaveJournalBirdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveJournalBird>>, SaveJournalBirdMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  saveJournalBird(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveJournalBirdMutationResult = NonNullable<Awaited<ReturnType<typeof saveJournalBird>>>
+    export type SaveJournalBirdMutationBody = BodyType<JournalBirdInput>
+    export type SaveJournalBirdMutationError = ErrorType<void>
+    export type SaveJournalBirdMutationVariables = {data: BodyType<JournalBirdInput>}
+
+    /**
+ * @summary Save a journal bird after uploading its portrait
+ */
+export const useSaveJournalBird = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveJournalBird>>, TError,SaveJournalBirdMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof saveJournalBird>>,
+        TError,
+        SaveJournalBirdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveJournalBirdMutationOptions(options));
+    }
+
+export const getRequestJournalPortraitUrl = () => {
+
+
+
+
+  return `/api/journal/portraits`
+}
+
+/**
+ * @summary Authorize direct upload of a generated journal portrait
+ */
+export const requestJournalPortrait = async (journalPortraitInput: JournalPortraitInput, options?: Parameters<typeof customFetch>[1]): Promise<JournalPortraitUpload> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<JournalPortraitUpload>(getRequestJournalPortraitUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(journalPortraitInput)
+  }
+);}
+
+
+
+
+
+export const getRequestJournalPortraitMutationKey = () => ['requestJournalPortrait'] as const;
+
+export const getRequestJournalPortraitMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestJournalPortrait>>, TError,RequestJournalPortraitMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestJournalPortrait>>, TError,RequestJournalPortraitMutationVariables, TContext> => {
+
+const mutationKey = getRequestJournalPortraitMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestJournalPortrait>>, RequestJournalPortraitMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestJournalPortrait(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestJournalPortraitMutationResult = NonNullable<Awaited<ReturnType<typeof requestJournalPortrait>>>
+    export type RequestJournalPortraitMutationBody = BodyType<JournalPortraitInput>
+    export type RequestJournalPortraitMutationError = ErrorType<unknown>
+    export type RequestJournalPortraitMutationVariables = {data: BodyType<JournalPortraitInput>}
+
+    /**
+ * @summary Authorize direct upload of a generated journal portrait
+ */
+export const useRequestJournalPortrait = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestJournalPortrait>>, TError,RequestJournalPortraitMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestJournalPortrait>>,
+        TError,
+        RequestJournalPortraitMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRequestJournalPortraitMutationOptions(options));
+    }
+
+export const getDeleteJournalBirdUrl = (birdId: string,) => {
+
+
+
+
+  return `/api/journal/birds/${birdId}`
+}
+
+/**
+ * @summary Remove only this installation's saved bird
+ */
+export const deleteJournalBird = async (birdId: string, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteJournalBirdUrl(birdId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteJournalBirdMutationKey = () => ['deleteJournalBird'] as const;
+
+export const getDeleteJournalBirdMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteJournalBird>>, TError,DeleteJournalBirdMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteJournalBird>>, TError,DeleteJournalBirdMutationVariables, TContext> => {
+
+const mutationKey = getDeleteJournalBirdMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteJournalBird>>, DeleteJournalBirdMutationVariables> = (props) => {
+          const {birdId} = props ?? {};
+
+          return  deleteJournalBird(birdId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteJournalBirdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteJournalBird>>>
+
+    export type DeleteJournalBirdMutationError = ErrorType<unknown>
+    export type DeleteJournalBirdMutationVariables = {birdId: string}
+
+    /**
+ * @summary Remove only this installation's saved bird
+ */
+export const useDeleteJournalBird = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteJournalBird>>, TError,DeleteJournalBirdMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteJournalBird>>,
+        TError,
+        DeleteJournalBirdMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteJournalBirdMutationOptions(options));
+    }
 
 export const getSimulateEncounterUrl = () => {
 

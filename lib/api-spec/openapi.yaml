@@ -11,6 +11,81 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /journal/installations:
+    post:
+      operationId: registerJournalInstallation
+      summary: Create a private journal for this app installation
+      responses:
+        "201":
+          description: Store this credential on the device; it is not recoverable without an account.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalInstallation"
+  /journal/birds:
+    get:
+      operationId: listJournalBirds
+      security: [{ journalDevice: [] }]
+      summary: List this installation's saved birds
+      responses:
+        "200":
+          description: Saved birds with temporary authorized portrait URLs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeneratedBird"
+    post:
+      operationId: saveJournalBird
+      security: [{ journalDevice: [] }]
+      summary: Save a journal bird after uploading its portrait
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalBirdInput"
+      responses:
+        "200":
+          description: Saved bird; repeated saves of the same ID are idempotent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedBird"
+        "409":
+          description: Journal holds 100 birds
+  /journal/portraits:
+    post:
+      operationId: requestJournalPortrait
+      security: [{ journalDevice: [] }]
+      summary: Authorize direct upload of a generated journal portrait
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalPortraitInput"
+      responses:
+        "200":
+          description: Private portrait path and short-lived direct upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalPortraitUpload"
+  /journal/birds/{birdId}:
+    delete:
+      operationId: deleteJournalBird
+      security: [{ journalDevice: [] }]
+      summary: Remove only this installation's saved bird
+      parameters:
+        - name: birdId
+          in: path
+          required: true
+          schema: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9_-]+$' }
+      responses:
+        "204":
+          description: Bird removed or already absent from this installation
   /birds/interact:
     post:
       operationId: simulateEncounter
@@ -73,7 +148,38 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 components:
+  securitySchemes:
+    journalDevice:
+      type: http
+      scheme: bearer
+      description: Random installation credential, never a phone hardware identifier.
   schemas:
+    JournalInstallation:
+      type: object
+      required: [installationId, token]
+      properties:
+        installationId: { type: string }
+        token: { type: string }
+    JournalPortraitInput:
+      type: object
+      required: [birdId, contentType, byteLength]
+      properties:
+        birdId: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9_-]+$' }
+        contentType: { type: string, enum: [image/png, image/jpeg, image/webp] }
+        byteLength: { type: integer, minimum: 1, maximum: 8388608 }
+    JournalPortraitUpload:
+      type: object
+      required: [uploadUrl, portraitPath]
+      properties:
+        uploadUrl: { type: string }
+        portraitPath: { type: string, maxLength: 350 }
+    JournalBirdInput:
+      type: object
+      required: [bird, portraitPath]
+      properties:
+        bird:
+          $ref: "#/components/schemas/GeneratedBird"
+        portraitPath: { type: string, minLength: 1, maxLength: 350 }
     EncounterRequest:
       type: object
       required: [birds]

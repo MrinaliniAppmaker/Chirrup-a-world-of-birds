@@ -9,6 +9,186 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Create a private journal for this app installation
+ */
+export const RegisterJournalInstallationResponse = zod.object({
+  "installationId": zod.string(),
+  "token": zod.string()
+})
+
+
+/**
+ * @summary List this installation's saved birds
+ */
+export const listJournalBirdsResponseTraitsBodyMax = 120;
+
+export const listJournalBirdsResponseTraitsBeakMax = 120;
+
+export const listJournalBirdsResponseTraitsColorsMax = 120;
+
+export const listJournalBirdsResponseTraitsFeathersMax = 120;
+
+export const listJournalBirdsResponseTraitsLegsMax = 120;
+
+export const listJournalBirdsResponseTraitsFeetMax = 120;
+
+export const listJournalBirdsResponseTraitsExtraMax = 500;
+
+
+
+export const ListJournalBirdsResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "scientificName": zod.string(),
+  "tagline": zod.string(),
+  "appearance": zod.string(),
+  "habitat": zod.string(),
+  "diet": zod.string(),
+  "behavior": zod.string(),
+  "imageUri": zod.string(),
+  "createdAt": zod.string(),
+  "traits": zod.object({
+  "body": zod.string().max(listJournalBirdsResponseTraitsBodyMax),
+  "beak": zod.string().max(listJournalBirdsResponseTraitsBeakMax),
+  "colors": zod.string().max(listJournalBirdsResponseTraitsColorsMax),
+  "feathers": zod.string().max(listJournalBirdsResponseTraitsFeathersMax),
+  "legs": zod.string().max(listJournalBirdsResponseTraitsLegsMax),
+  "feet": zod.string().max(listJournalBirdsResponseTraitsFeetMax),
+  "extra": zod.string().max(listJournalBirdsResponseTraitsExtraMax).optional()
+})
+})
+export const ListJournalBirdsResponse = zod.array(ListJournalBirdsResponseItem)
+
+
+/**
+ * @summary Save a journal bird after uploading its portrait
+ */
+export const saveJournalBirdBodyBirdTraitsBodyMax = 120;
+
+export const saveJournalBirdBodyBirdTraitsBeakMax = 120;
+
+export const saveJournalBirdBodyBirdTraitsColorsMax = 120;
+
+export const saveJournalBirdBodyBirdTraitsFeathersMax = 120;
+
+export const saveJournalBirdBodyBirdTraitsLegsMax = 120;
+
+export const saveJournalBirdBodyBirdTraitsFeetMax = 120;
+
+export const saveJournalBirdBodyBirdTraitsExtraMax = 500;
+
+export const saveJournalBirdBodyPortraitPathMax = 350;
+
+
+
+export const SaveJournalBirdBody = zod.object({
+  "bird": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "scientificName": zod.string(),
+  "tagline": zod.string(),
+  "appearance": zod.string(),
+  "habitat": zod.string(),
+  "diet": zod.string(),
+  "behavior": zod.string(),
+  "imageUri": zod.string(),
+  "createdAt": zod.string(),
+  "traits": zod.object({
+  "body": zod.string().max(saveJournalBirdBodyBirdTraitsBodyMax),
+  "beak": zod.string().max(saveJournalBirdBodyBirdTraitsBeakMax),
+  "colors": zod.string().max(saveJournalBirdBodyBirdTraitsColorsMax),
+  "feathers": zod.string().max(saveJournalBirdBodyBirdTraitsFeathersMax),
+  "legs": zod.string().max(saveJournalBirdBodyBirdTraitsLegsMax),
+  "feet": zod.string().max(saveJournalBirdBodyBirdTraitsFeetMax),
+  "extra": zod.string().max(saveJournalBirdBodyBirdTraitsExtraMax).optional()
+})
+}),
+  "portraitPath": zod.string().min(1).max(saveJournalBirdBodyPortraitPathMax)
+})
+
+export const saveJournalBirdResponseTraitsBodyMax = 120;
+
+export const saveJournalBirdResponseTraitsBeakMax = 120;
+
+export const saveJournalBirdResponseTraitsColorsMax = 120;
+
+export const saveJournalBirdResponseTraitsFeathersMax = 120;
+
+export const saveJournalBirdResponseTraitsLegsMax = 120;
+
+export const saveJournalBirdResponseTraitsFeetMax = 120;
+
+export const saveJournalBirdResponseTraitsExtraMax = 500;
+
+
+
+export const SaveJournalBirdResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "scientificName": zod.string(),
+  "tagline": zod.string(),
+  "appearance": zod.string(),
+  "habitat": zod.string(),
+  "diet": zod.string(),
+  "behavior": zod.string(),
+  "imageUri": zod.string(),
+  "createdAt": zod.string(),
+  "traits": zod.object({
+  "body": zod.string().max(saveJournalBirdResponseTraitsBodyMax),
+  "beak": zod.string().max(saveJournalBirdResponseTraitsBeakMax),
+  "colors": zod.string().max(saveJournalBirdResponseTraitsColorsMax),
+  "feathers": zod.string().max(saveJournalBirdResponseTraitsFeathersMax),
+  "legs": zod.string().max(saveJournalBirdResponseTraitsLegsMax),
+  "feet": zod.string().max(saveJournalBirdResponseTraitsFeetMax),
+  "extra": zod.string().max(saveJournalBirdResponseTraitsExtraMax).optional()
+})
+})
+
+
+/**
+ * @summary Authorize direct upload of a generated journal portrait
+ */
+export const requestJournalPortraitBodyBirdIdMax = 128;
+
+
+export const requestJournalPortraitBodyBirdIdRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+export const requestJournalPortraitBodyByteLengthMax = 8388608;
+
+
+
+export const RequestJournalPortraitBody = zod.object({
+  "birdId": zod.string().min(1).max(requestJournalPortraitBodyBirdIdMax).regex(requestJournalPortraitBodyBirdIdRegExp),
+  "contentType": zod.enum(['image/png', 'image/jpeg', 'image/webp']),
+  "byteLength": zod.number().int().min(1).max(requestJournalPortraitBodyByteLengthMax)
+})
+
+export const requestJournalPortraitResponsePortraitPathMax = 350;
+
+
+
+export const RequestJournalPortraitResponse = zod.object({
+  "uploadUrl": zod.string(),
+  "portraitPath": zod.string().max(requestJournalPortraitResponsePortraitPathMax)
+})
+
+
+/**
+ * @summary Remove only this installation's saved bird
+ */
+export const deleteJournalBirdPathBirdIdMax = 128;
+
+
+export const deleteJournalBirdPathBirdIdRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const DeleteJournalBirdParams = zod.object({
+  "birdId": zod.coerce.string().min(1).max(deleteJournalBirdPathBirdIdMax).regex(deleteJournalBirdPathBirdIdRegExp)
+})
+
+export const DeleteJournalBirdResponse = zod.void()
+
+
+/**
  * @summary Imagine a five-minute encounter between selected birds
  */
 export const simulateEncounterBodyBirdsItemIdMax = 100;

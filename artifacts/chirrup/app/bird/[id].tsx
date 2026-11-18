@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -14,22 +14,26 @@ export default function BirdDetail() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { get, remove, loaded, error } = useCollection();
+  const { get, remove, loaded, error, syncError, syncing } = useCollection();
+  const [deleting, setDeleting] = useState<boolean>(false);
   const bird = get(String(id));
 
   const doDelete = async () => {
+    if (deleting) return;
+    setDeleting(true);
     try {
       await remove(String(id));
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
       router.navigate('/library');
-    } catch { /* error surfaced in context */ }
+    } catch { /* syncError is displayed below the profile. */ }
+    finally { setDeleting(false); }
   };
   const confirmDelete = () => {
     if (Platform.OS === 'web') {
-      if (window.confirm('Remove this bird from your journal?')) doDelete();
+      if (window.confirm('Remove this bird from this phone’s journal and its backend copy?')) doDelete();
       return;
     }
-    Alert.alert('Remove this bird?', 'It will be deleted from your journal on this device.', [
+    Alert.alert('Remove this bird?', 'It will be deleted from this phone’s journal and its backend copy.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Remove', style: 'destructive', onPress: doDelete },
     ]);
@@ -48,10 +52,10 @@ export default function BirdDetail() {
         {bird ? (
           <>
             <BirdProfile bird={bird} />
-            {error ? <Text accessibilityRole="alert" style={{ color: c.destructive, marginTop: 16 }}>{error}</Text> : null}
-            <Button testID="delete-bird" label="Remove from journal" icon="trash-2" variant="danger" onPress={confirmDelete} style={{ marginTop: 28 }} />
+            {error || syncError ? <Text accessibilityRole="alert" style={{ color: c.destructive, marginTop: 16 }}>{error ?? syncError}</Text> : null}
+            <Button testID="delete-bird" label={deleting ? 'Removing…' : 'Remove from journal'} icon="trash-2" variant="danger" disabled={deleting} onPress={confirmDelete} style={{ marginTop: 28 }} />
           </>
-        ) : loaded ? (
+        ) : loaded && !syncing ? (
           <View style={s.missing}>
             <Text style={[s.title, { color: c.foreground }]}>This page is missing.</Text>
             <Button testID="missing-back" label="Back to home" icon="home" variant="outline" onPress={() => router.navigate('/')} style={{ marginTop: 16 }} />

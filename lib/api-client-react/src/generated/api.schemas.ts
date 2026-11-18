@@ -5,6 +5,41 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface JournalInstallation {
+  installationId: string;
+  token: string;
+}
+
+export type JournalPortraitInputContentType = typeof JournalPortraitInputContentType[keyof typeof JournalPortraitInputContentType];
+
+
+export const JournalPortraitInputContentType = {
+  'image/png': 'image/png',
+  'image/jpeg': 'image/jpeg',
+  'image/webp': 'image/webp',
+} as const;
+
+export interface JournalPortraitInput {
+  /**
+     * @minLength 1
+     * @maxLength 128
+     * @pattern ^[A-Za-z0-9_-]+$
+     */
+  birdId: string;
+  contentType: JournalPortraitInputContentType;
+  /**
+     * @minimum 1
+     * @maximum 8388608
+     */
+  byteLength: number;
+}
+
+export interface JournalPortraitUpload {
+  uploadUrl: string;
+  /** @maxLength 350 */
+  portraitPath: string;
+}
+
 export interface BirdTraits {
   /** @maxLength 120 */
   body: string;
@@ -20,6 +55,29 @@ export interface BirdTraits {
   feet: string;
   /** @maxLength 500 */
   extra?: string;
+}
+
+export interface GeneratedBird {
+  id: string;
+  name: string;
+  scientificName: string;
+  tagline: string;
+  appearance: string;
+  habitat: string;
+  diet: string;
+  behavior: string;
+  imageUri: string;
+  createdAt: string;
+  traits: BirdTraits;
+}
+
+export interface JournalBirdInput {
+  bird: GeneratedBird;
+  /**
+     * @minLength 1
+     * @maxLength 350
+     */
+  portraitPath: string;
 }
 
 export interface EncounterBird {
@@ -75,20 +133,6 @@ export interface GeneratedEncounter {
      * @maxItems 5
      */
   minutes: GeneratedEncounterMinutesItem[];
-}
-
-export interface GeneratedBird {
-  id: string;
-  name: string;
-  scientificName: string;
-  tagline: string;
-  appearance: string;
-  habitat: string;
-  diet: string;
-  behavior: string;
-  imageUri: string;
-  createdAt: string;
-  traits: BirdTraits;
 }
 
 export interface HealthStatus {

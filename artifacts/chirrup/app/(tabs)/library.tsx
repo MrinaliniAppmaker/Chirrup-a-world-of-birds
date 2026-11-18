@@ -17,7 +17,7 @@ export default function LibraryScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { birds, loaded, error } = useCollection();
+  const { birds, loaded, error, syncing, syncError, retrySync } = useCollection();
   const [q, setQ] = useState<string>('');
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 + 84 : insets.bottom + 90;
@@ -45,6 +45,18 @@ export default function LibraryScreen() {
           <Feather name="search" size={16} color={c.mutedForeground} />
           <FieldInput testID="search" value={q} onChangeText={setQ} placeholder="Find a bird in your collection" accessibilityLabel="Search your collection" placeholderTextColor={c.mutedForeground}
             style={[s.searchInput, { color: c.foreground }]} returnKeyType="search" clearButtonMode="while-editing" />
+        </View>
+        <View testID="journal-sync-status" style={s.syncRow} accessibilityLiveRegion="polite">
+          <Feather name={syncError ? 'cloud-off' : 'cloud'} size={14} color={syncError ? c.destructive : c.mutedForeground} />
+          <Text style={[s.syncText, { color: syncError ? c.destructive : c.mutedForeground }]}>
+            {syncing ? 'Syncing this phone’s journal…' : syncError ?? 'Private journal for this app installation.'}
+          </Text>
+          <Pressable testID="retry-journal-sync" accessibilityRole="button"
+            accessibilityLabel={syncing ? 'Journal sync in progress' : 'Retry journal sync'}
+            disabled={syncing} onPress={() => { void retrySync(); }}
+            style={[s.syncAction, { opacity: syncing ? 0.4 : 1 }]}>
+            <Feather name="refresh-cw" size={17} color={c.primary} />
+          </Pressable>
         </View>
       </View>
       {error ? <Text style={[s.err, { color: c.destructive }]}>{error}</Text> : null}
@@ -100,6 +112,9 @@ const s = StyleSheet.create({
   countPill: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 99 },
   search: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1, paddingHorizontal: 12, marginTop: 12, minHeight: 44 },
   searchInput: { flex: 1, fontFamily: sans.regular, fontSize: 15, paddingVertical: 10 },
+  syncRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 },
+  syncText: { flex: 1, fontFamily: sans.regular, fontSize: 12, lineHeight: 17 },
+  syncAction: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' },
   err: { fontFamily: sans.medium, fontSize: 13, paddingHorizontal: 20, paddingTop: 10 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1, padding: 10 },
   thumb: { width: 76, height: 76 },

@@ -5,6 +5,13 @@ import type { GeneratedBird } from '@workspace/api-client-react';
 const KEY = 'chirrup.collection.v1';
 export const MAX_BIRDS = 100;
 
+export async function hasLocalPortrait(bird: GeneratedBird): Promise<boolean> {
+  if (bird.imageUri.startsWith('data:')) return true;
+  if (!bird.imageUri.startsWith('file:')) return false;
+  const info = await FileSystem.getInfoAsync(bird.imageUri);
+  return info.exists && !info.isDirectory;
+}
+
 export async function loadCollection(): Promise<GeneratedBird[]> {
   const raw = await AsyncStorage.getItem(KEY);
   const birds = raw ? JSON.parse(raw) : [];
@@ -29,6 +36,28 @@ export async function saveCollectionBird(bird: GeneratedBird, current: Generated
   } catch (err) {
     if (fileUri) await FileSystem.deleteAsync(fileUri, { idempotent: true }).catch(() => {});
     throw err;
+  }
+}
+
+export async function replaceCollection(birds: GeneratedBird[]): Promise<GeneratedBird[]> {
+  const stored: GeneratedBird[] = [];
+  const newFiles: string[] = [];
+  try {
+    for (const bird of birds) {
+      if (!bird.imageUri.startsWith('https:')) { stored.push(bird); continue; }
+      if (!FileSystem.documentDirectory) throw new Error('Device storage is unavailable.');
+      const uri = `${FileSystem.documentDirectory}chirrup-cloud-${encodeURIComponent(bird.id)}-${Date.now()}.img`;
+      newFiles.push(uri);
+      const result = await FileSystem.downloadAsync(bird.imageUri, uri);
+      if (result.status !== 200) throw new Error('The saved portrait could not be downloaded.');
+      stored.push({ ...bird, imageUri: uri });
+    }
+    // Do not replace the old journal until all recovered portraits are local.
+    await AsyncStorage.setItem(KEY, JSON.stringify(stored));
+    return stored;
+  } catch (error) {
+    await Promise.all(newFiles.map(uri => FileSystem.deleteAsync(uri, { idempotent: true }).catch(() => {})));
+    throw error;
   }
 }
 

@@ -13,3 +13,8 @@ export * from './generatedBird';
 export * from './generatedEncounter';
 export * from './generatedEncounterMinutesItem';
 export * from './healthStatus';
+export * from './journalBirdInput';
+export * from './journalInstallation';
+export * from './journalPortraitInput';
+export * from './journalPortraitInputContentType';
+export * from './journalPortraitUpload';

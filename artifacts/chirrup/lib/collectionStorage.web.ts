@@ -8,6 +8,10 @@ type StoredBird = GeneratedBird & { imageBlob?: Blob };
 let database: Promise<IDBDatabase> | undefined;
 const imageUrls = new Map<string, string>();
 
+export async function hasLocalPortrait(bird: GeneratedBird): Promise<boolean> {
+  return /^(data:|blob:)/.test(bird.imageUri);
+}
+
 function openDatabase(): Promise<IDBDatabase> {
   if (!database) {
     database = new Promise<IDBDatabase>((resolve, reject) => {
@@ -47,7 +51,7 @@ function read<T>(request: IDBRequest<T>): Promise<T> {
 }
 
 async function encodeBird(bird: GeneratedBird): Promise<StoredBird> {
-  if (!bird.imageUri.startsWith('data:') && !bird.imageUri.startsWith('blob:')) return bird;
+  if (!/^(data:|blob:|https:)/.test(bird.imageUri)) return bird;
   const response = await fetch(bird.imageUri);
   if (!response.ok) throw new Error('The bird portrait could not be read for saving.');
   return { ...bird, imageUri: '', imageBlob: await response.blob() };
@@ -109,4 +113,22 @@ export async function removeCollectionBird(id: string, _current: GeneratedBird[]
   const uri = imageUrls.get(id);
   if (uri) URL.revokeObjectURL(uri);
   imageUrls.delete(id);
+}
+
+export async function replaceCollection(birds: GeneratedBird[]): Promise<GeneratedBird[]> {
+  const rows: StoredBird[] = [];
+  // Limit downloads when recovering portraits into an empty local cache.
+  for (let start = 0; start < birds.length; start += 4) {
+    rows.push(...await Promise.all(birds.slice(start, start + 4).map(encodeBird)));
+  }
+  const db = await openDatabase();
+  const transaction = db.transaction('birds', 'readwrite');
+  const committed = complete(transaction);
+  transaction.objectStore('birds').clear();
+  rows.forEach(row => transaction.objectStore('birds').put(row));
+  await committed;
+  for (const [id, uri] of imageUrls) {
+    if (!rows.some(row => row.id === id)) { URL.revokeObjectURL(uri); imageUrls.delete(id); }
+  }
+  return rows.map(decodeBird);
 }
