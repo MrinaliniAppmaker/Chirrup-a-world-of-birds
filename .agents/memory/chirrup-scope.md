@@ -26,6 +26,12 @@ The library is intended to hold up to 100 saved birds.
 
 **How to apply:** Retain existing birds when improving storage, support the 100th save, and block additional saves clearly without deleting older birds.
 
+Backend collections are per app installation and contain saved journal birds only, not every generated bird.
+
+**Why:** The user requested backend storage per phone and explicitly chose “Saved journal birds” rather than retaining all generations.
+
+**How to apply:** Keep collections private to their respective installation, preserve existing on-device journals during migration, and do not automatically archive discarded or unnamed generations. Accounts and cross-device collection sharing are not part of this request.
+
 Only users name their birds. The name field starts blank; generation must not invent or prefill names. The editor belongs below the generated photograph and becomes a single displayed name on deliberate blur, without a duplicate live heading.
 
 **Why:** The user explicitly said users name their birds, moved the editor below the photo, and rejected showing the typed name twice.
