@@ -26,11 +26,17 @@ The library is intended to hold up to 100 saved birds.
 
 **How to apply:** Retain existing birds when improving storage, support the 100th save, and block additional saves clearly without deleting older birds.
 
-Only users name their birds. The name field starts blank; generation must not invent or prefill names.
+Only users name their birds. The name field starts blank; generation must not invent or prefill names. The editor belongs below the generated photograph and becomes a single displayed name on deliberate blur, without a duplicate live heading.
 
-**Why:** The user explicitly said the name bar should be blank as in the original prototype because users name the birds.
+**Why:** The user explicitly said users name their birds, moved the editor below the photo, and rejected showing the typed name twice.
 
-**How to apply:** Keep model-generated common and scientific names out of newly generated birds. Preserve names already saved by users.
+**How to apply:** Keep model-generated common and scientific names out of newly generated birds. Preserve names already saved by users. Keep draft editing separate from the displayed name; deliberate blur finishes a nonempty name, and tapping the displayed unsaved name permits corrections.
+
+Saving an unnamed bird should open a naming popup, not disable Save or show a permanent naming reminder underneath it.
+
+**Why:** The user explicitly requested an actionable naming popup when saving an unnamed bird.
+
+**How to apply:** Require a nonblank name before persistence, preserve the generated bird and entered name on cancellation or save failure, and close the popup only after a successful save.
 
 Selected features are independent creative constraints, even when their combination does not occur in real avian families.
 

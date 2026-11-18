@@ -97,7 +97,7 @@ export function Chip({ label, selected, onPress, testID }: { label: string; sele
   );
 }
 
-export function BirdProfile({ bird, afterImage }: { bird: GeneratedBird; afterImage?: React.ReactNode }) {
+export function BirdProfile({ bird, afterImage, onNamePress }: { bird: GeneratedBird; afterImage?: React.ReactNode; onNamePress?: () => void }) {
   const c = useColors();
   const sections: [string, string][] = [
     ['Appearance', bird.appearance],
@@ -114,7 +114,13 @@ export function BirdProfile({ bird, afterImage }: { bird: GeneratedBird; afterIm
         </View>
       </View>
       {afterImage}
-      {bird.name ? <Text style={[s.name, { color: c.foreground }]}>{bird.name}</Text> : null}
+      {bird.name ? (onNamePress ? (
+        <Pressable testID="edit-bird-name" accessibilityRole="button" accessibilityLabel={`Edit bird name: ${bird.name}`}
+          onPress={onNamePress} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 18 }}>
+          <Text style={[s.name, { color: c.foreground, marginTop: 0, flexShrink: 1 }]}>{bird.name}</Text>
+          <Feather name="edit-2" size={16} color={c.mutedForeground} />
+        </Pressable>
+      ) : <Text style={[s.name, { color: c.foreground }]}>{bird.name}</Text>) : null}
       {bird.scientificName ? <Text style={[s.sci, { color: c.mutedForeground }]}>{bird.scientificName}</Text> : null}
       {bird.tagline ? <Text style={[s.tagline, { color: c.foreground }]}>{bird.tagline}</Text> : null}
 

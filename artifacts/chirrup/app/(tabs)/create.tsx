@@ -9,6 +9,7 @@ import { SymbolView } from 'expo-symbols';
 import { useGenerateBird, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FieldInput } from '@/components/FieldInput';
+import { BirdNameDialog } from '@/components/BirdNameDialog';
 import { BirdProfile, Button, Eyebrow, tap } from '@/components/ui';
 import { TraitChoiceGrid } from '@/components/TraitChoiceGrid';
 import { TraitOptionStrip } from '@/components/TraitOptionStrip';
@@ -57,6 +58,10 @@ export default function CreateScreen() {
   const [extra, setExtra] = useState<string>('');
   const [bird, setBird] = useState<GeneratedBird | null>(null);
   const [birdName, setBirdName] = useState<string>('');
+  const [nameDraft, setNameDraft] = useState<string>('');
+  const [editingName, setEditingName] = useState<boolean>(true);
+  const [showNameDialog, setShowNameDialog] = useState<boolean>(false);
+  const [popupName, setPopupName] = useState<string>('');
   const [saving, setSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const generationId = useRef(0);
@@ -78,6 +83,7 @@ export default function CreateScreen() {
     setSaveError(null);
     setBird(null);
     setBirdName('');
+    setNameDraft(''); setEditingName(true); setShowNameDialog(false); setPopupName('');
     goTo('result');
     try {
       const result = await generate.mutateAsync({ data: traits });
@@ -94,7 +100,8 @@ export default function CreateScreen() {
     generationId.current += 1;
     setSel(DEFAULT_SEL); setTyped(EMPTY_TYPED); setExtra(''); setShowExtra(false);
     setMode('visual'); setExpanded({}); setSaveError(null); setSaving(false);
-    setBird(null); setBirdName(''); resetMutation(); setStep('build');
+    setBird(null); setBirdName(''); setNameDraft(''); setEditingName(true);
+    setShowNameDialog(false); setPopupName(''); resetMutation(); setStep('build');
   }, [resetMutation]);
 
   // Closing Create discards its draft; a late generation response must not restore it.
@@ -102,12 +109,22 @@ export default function CreateScreen() {
   resetOnExit.current = reset;
   useFocusEffect(useCallback(() => () => resetOnExit.current(), []));
 
-  const onSave = async () => {
-    if (!bird || !birdName.trim()) return;
+  const commitName = () => {
+    const name = nameDraft.trim();
+    setBirdName(name);
+    if (name) setEditingName(false);
+  };
+
+  const onSave = async (requestedName?: string) => {
+    if (!bird || saving || isSaved(bird.id)) return;
+    const name = (requestedName ?? (editingName ? nameDraft : birdName)).trim();
+    if (!name) { setSaveError(null); setShowNameDialog(true); return; }
+    setBirdName(name); setNameDraft(name); setEditingName(false);
     const requestId = generationId.current;
     setSaving(true); setSaveError(null);
     try {
-      await save({ ...bird, name: birdName.trim() });
+      await save({ ...bird, name });
+      if (requestId === generationId.current) setShowNameDialog(false);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
     } catch (err) {
       if (requestId === generationId.current) setSaveError(err instanceof Error ? err.message : 'Could not save to your journal. Try again.');
@@ -310,21 +327,23 @@ export default function CreateScreen() {
             {generate.isSuccess && bird && (
               <View>
                 <Eyebrow style={{ marginBottom: 12 }}>Step 3 / Meet your bird</Eyebrow>
-                <BirdProfile bird={{ ...bird, name: birdName.trim() }} afterImage={
+                <BirdProfile bird={{ ...bird, name: editingName ? '' : birdName }}
+                  onNamePress={!editingName && !isSaved(bird.id) ? () => { setNameDraft(birdName); setEditingName(true); } : undefined}
+                  afterImage={editingName && !isSaved(bird.id) ? (
                   <View style={{ marginTop: 18 }}>
                     <Eyebrow style={{ marginBottom: 8 }}>Name your bird</Eyebrow>
-                    <FieldInput testID="bird-name" accessibilityLabel="Name your bird" value={birdName} onChangeText={setBirdName}
-                      editable={!isSaved(bird.id)} maxLength={100} placeholderTextColor={c.mutedForeground}
+                    <FieldInput testID="bird-name" accessibilityLabel="Name your bird" value={nameDraft} onChangeText={setNameDraft}
+                      onEditingComplete={commitName} autoFocus={!!birdName}
+                      editable={!saving} maxLength={100} placeholderTextColor={c.mutedForeground}
                       style={[st.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius, marginBottom: 16 }]} />
                   </View>
-                } />
-                {saveError && <Text style={[st.small, { color: c.destructive, marginTop: 16 }]}>{saveError}</Text>}
+                ) : undefined} />
+                {saveError && !showNameDialog && <Text accessibilityRole="alert" style={[st.small, { color: c.destructive, marginTop: 16 }]}>{saveError}</Text>}
                 {isSaved(bird.id) ? (
                   <Button testID="view-library" label="Saved · open in journal" icon="book-open" variant="outline" onPress={() => router.push(`/bird/${bird.id}`)} style={{ marginTop: 24 }} />
                 ) : (
-                  <Button testID="save-bird" label="Save to my journal" icon="bookmark" loading={saving} disabled={!birdName.trim()} onPress={onSave} style={{ marginTop: 24 }} />
+                  <Button testID="save-bird" label="Save to my journal" icon="bookmark" loading={saving} onPress={() => { void onSave(); }} style={{ marginTop: 24 }} />
                 )}
-                {!birdName.trim() && <Text style={[st.small, { color: c.mutedForeground, marginTop: 8 }]}>Give your bird a name before saving it.</Text>}
                 <Button testID="regenerate" label="Imagine again with same traits" variant="outline" onPress={runGenerate} style={{ marginTop: 10 }} />
                 <Button testID="start-over" label="Start a new bird" variant="ghost" onPress={reset} style={{ marginTop: 4 }} />
               </View>
@@ -332,6 +351,9 @@ export default function CreateScreen() {
           </View>
         )}
       </KeyboardAwareScrollViewCompat>
+      <BirdNameDialog visible={showNameDialog} value={popupName} onChange={setPopupName}
+        onCancel={() => { setShowNameDialog(false); setSaveError(null); }}
+        onSave={() => { void onSave(popupName); }} saving={saving} error={saveError} />
     </View>
   );
 }

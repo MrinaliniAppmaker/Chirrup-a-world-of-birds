@@ -4,8 +4,8 @@ import { useColors } from '@/hooks/useColors';
 
 // Stable component identity across edits; focus styling never replaces the input.
 // Enter submits without blurring. Only normal user focus changes dismiss it.
-export const FieldInput = forwardRef<TextInputInstance, TextInputProps>(function FieldInput(
-  { style, onFocus, onBlur, submitBehavior, blurOnSubmit = false, ...props }, ref,
+export const FieldInput = forwardRef<TextInputInstance, TextInputProps & { onEditingComplete?: () => void }>(function FieldInput(
+  { style, onFocus, onBlur, onEditingComplete, submitBehavior, blurOnSubmit = false, ...props }, ref,
 ) {
   const c = useColors();
   const [focused, setFocused] = useState(false);
@@ -19,7 +19,7 @@ export const FieldInput = forwardRef<TextInputInstance, TextInputProps>(function
       selectionColor={c.primary}
       cursorColor={c.primary}
       onFocus={(event) => { setFocused(true); onFocus?.(event); }}
-      onBlur={(event) => { setFocused(false); onBlur?.(event); }}
+      onBlur={(event) => { setFocused(false); onBlur?.(event); onEditingComplete?.(); }}
       style={[
         style,
         { fontSize: Math.max(16, StyleSheet.flatten(style)?.fontSize ?? 16), minHeight: 44 },

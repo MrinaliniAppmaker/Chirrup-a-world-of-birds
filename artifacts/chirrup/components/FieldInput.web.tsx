@@ -9,8 +9,8 @@ export function FieldInput({
   value, defaultValue, onChangeText, style, multiline = false, editable = true,
   testID, accessibilityLabel, placeholder, placeholderTextColor, maxLength,
   autoCapitalize = 'sentences', autoCorrect = true, keyboardType, returnKeyType,
-  autoFocus, secureTextEntry, selectTextOnFocus,
-}: TextInputProps) {
+  autoFocus, secureTextEntry, selectTextOnFocus, onEditingComplete,
+}: TextInputProps & { onEditingComplete?: () => void }) {
   const c = useColors();
   const element = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const [focused, setFocused] = useState(false);
@@ -85,7 +85,7 @@ export function FieldInput({
       setFocused(true);
       if (selectTextOnFocus) event.currentTarget.select();
     },
-    onBlur: () => setFocused(false),
+    onBlur: () => { setFocused(false); onEditingComplete?.(); },
     onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChangeText?.(event.currentTarget.value),
   };
   return <>
