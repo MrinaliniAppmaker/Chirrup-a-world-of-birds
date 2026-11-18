@@ -91,3 +91,9 @@ Legs and Feet choices should scroll with their underside scrollbars, without lar
 **Why:** The user explicitly rejected the large arrow controls after trying them.
 
 **How to apply:** Retain easy horizontal swiping and scroll indicators rather than reintroducing large previous/next buttons.
+
+Feet illustrations must be detailed side-view silhouettes, comparable to the other bird drawings in Create.
+
+**Why:** The user rejected the first feet diagrams for their overhead angle and schematic level of detail, explicitly asking for side views and detailed silhouettes.
+
+**How to apply:** Focus on the foot; at most a short natural ankle stub is allowed, never a long leg. Give each type genuinely distinct, natural contours: slender perching toes, a broad webbed paddle, heavy hooked talons, opposed climbing toes, and individually lobed swimming toes. Use real anatomical references and organic continuous contours. The user explicitly rejected segmented worm-like toes; do not substitute top-down toe-count symbols, a symmetric climbing-foot X, stick diagrams, or the same generic foot with minor variations.
