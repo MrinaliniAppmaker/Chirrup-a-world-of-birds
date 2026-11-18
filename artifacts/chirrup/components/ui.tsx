@@ -126,7 +126,7 @@ export function BirdProfile({ bird, afterImage, onNamePress }: { bird: Generated
 
       <View style={[s.notice, { backgroundColor: c.secondary, borderRadius: c.radius }]}>
         <Feather name="info" size={14} color={c.secondaryForeground} />
-        <Text style={[s.noticeText, { color: c.secondaryForeground }]}>An imagined bird. These field notes are invention, not scientific fact.</Text>
+        <Text style={[s.noticeText, { color: c.secondaryForeground }]}>An imagined bird. These field notes are imaginary, not scientific fact.</Text>
       </View>
 
       {sections.map(([title, body]) => (
