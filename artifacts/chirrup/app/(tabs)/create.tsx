@@ -310,11 +310,14 @@ export default function CreateScreen() {
             {generate.isSuccess && bird && (
               <View>
                 <Eyebrow style={{ marginBottom: 12 }}>Step 3 / Meet your bird</Eyebrow>
-                <Eyebrow style={{ marginTop: 6, marginBottom: 8 }}>Name your bird</Eyebrow>
-                <FieldInput testID="bird-name" accessibilityLabel="Name your bird" value={birdName} onChangeText={setBirdName}
-                  editable={!isSaved(bird.id)} maxLength={100} placeholderTextColor={c.mutedForeground}
-                  style={[st.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius, marginBottom: 16 }]} />
-                <BirdProfile bird={{ ...bird, name: birdName.trim() }} />
+                <BirdProfile bird={{ ...bird, name: birdName.trim() }} afterImage={
+                  <View style={{ marginTop: 18 }}>
+                    <Eyebrow style={{ marginBottom: 8 }}>Name your bird</Eyebrow>
+                    <FieldInput testID="bird-name" accessibilityLabel="Name your bird" value={birdName} onChangeText={setBirdName}
+                      editable={!isSaved(bird.id)} maxLength={100} placeholderTextColor={c.mutedForeground}
+                      style={[st.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius, marginBottom: 16 }]} />
+                  </View>
+                } />
                 {saveError && <Text style={[st.small, { color: c.destructive, marginTop: 16 }]}>{saveError}</Text>}
                 {isSaved(bird.id) ? (
                   <Button testID="view-library" label="Saved · open in journal" icon="book-open" variant="outline" onPress={() => router.push(`/bird/${bird.id}`)} style={{ marginTop: 24 }} />

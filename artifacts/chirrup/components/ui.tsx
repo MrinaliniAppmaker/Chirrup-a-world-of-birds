@@ -97,7 +97,7 @@ export function Chip({ label, selected, onPress, testID }: { label: string; sele
   );
 }
 
-export function BirdProfile({ bird }: { bird: GeneratedBird }) {
+export function BirdProfile({ bird, afterImage }: { bird: GeneratedBird; afterImage?: React.ReactNode }) {
   const c = useColors();
   const sections: [string, string][] = [
     ['Appearance', bird.appearance],
@@ -113,6 +113,7 @@ export function BirdProfile({ bird }: { bird: GeneratedBird }) {
           <Text style={[s.badgeText, { color: c.primaryForeground }]}>AI-generated image of an imagined species</Text>
         </View>
       </View>
+      {afterImage}
       {bird.name ? <Text style={[s.name, { color: c.foreground }]}>{bird.name}</Text> : null}
       {bird.scientificName ? <Text style={[s.sci, { color: c.mutedForeground }]}>{bird.scientificName}</Text> : null}
       {bird.tagline ? <Text style={[s.tagline, { color: c.foreground }]}>{bird.tagline}</Text> : null}
