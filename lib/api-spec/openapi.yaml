@@ -11,6 +11,59 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /journal/profile:
+    patch:
+      operationId: renameAccountProfile
+      summary: Rename only the signed-in user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileName"
+      responses:
+        "200":
+          description: Updated profile name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileName"
+        "401":
+          description: Sign in required
+  /journal/account:
+    get:
+      operationId: getAccountJournal
+      summary: Open the signed-in account journal
+      responses:
+        "200":
+          description: Account journal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalAccount"
+        "401":
+          description: Sign in required
+  /journal/claim:
+    post:
+      operationId: claimJournal
+      summary: Transfer an installation journal to the signed-in account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JournalClaim"
+      responses:
+        "200":
+          description: Journal transferred without changing portraits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JournalAccount"
+        "401":
+          description: Sign in required
+        "409":
+          description: Already claimed or exceeds journal capacity
   /journal/installations:
     post:
       operationId: registerJournalInstallation
@@ -154,6 +207,30 @@ components:
       scheme: bearer
       description: Random installation credential, never a phone hardware identifier.
   schemas:
+    ProfileName:
+      type: object
+      additionalProperties: false
+      required: [displayName]
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 60
+    JournalAccount:
+      type: object
+      required: [installationId]
+      properties:
+        installationId:
+          type: string
+          format: uuid
+    JournalClaim:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+          minLength: 64
+          maxLength: 64
     JournalInstallation:
       type: object
       required: [installationId, token]

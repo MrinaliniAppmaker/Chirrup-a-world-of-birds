@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Button, Eyebrow, tap } from '@/components/ui';
 import { ChirrupBrand, ChirrupLogo } from '@/components/ChirrupBrand';
+import { AccountChip } from '@/components/AccountMenu';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
@@ -25,7 +26,10 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: c.background }} contentContainerStyle={{ paddingTop: topPad + 8, paddingHorizontal: 20, paddingBottom: bottomPad }}>
-      <ChirrupBrand testID="home-brand" />
+      <View style={s.header}>
+        <ChirrupBrand testID="home-brand" style={{ flexShrink: 1 }} />
+        <AccountChip />
+      </View>
       <View style={[s.hero, { backgroundColor: c.card, borderColor: c.border, borderRadius: c.radius + 4 }]}>
         <View style={[s.mark, { backgroundColor: c.secondary }]}><ChirrupLogo size={44} /></View>
         <Eyebrow style={{ marginTop: 18 }}>Welcome to the field studio</Eyebrow>
@@ -53,6 +57,7 @@ export default function HomeScreen() {
 }
 
 const s = StyleSheet.create({
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   hero: { marginTop: 18, padding: 20, borderWidth: 1 },
   mark: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
   h1: { fontFamily: serif, fontSize: 32, lineHeight: 38, marginTop: 6 },

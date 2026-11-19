@@ -25,10 +25,13 @@ import type {
   GeneratedBird,
   GeneratedEncounter,
   HealthStatus,
+  JournalAccount,
   JournalBirdInput,
+  JournalClaim,
   JournalInstallation,
   JournalPortraitInput,
-  JournalPortraitUpload
+  JournalPortraitUpload,
+  ProfileName
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -57,6 +60,259 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getRenameAccountProfileUrl = () => {
+
+
+
+
+  return `/api/journal/profile`
+}
+
+/**
+ * @summary Rename only the signed-in user's profile
+ */
+export const renameAccountProfile = async (profileName: ProfileName, options?: Parameters<typeof customFetch>[1]): Promise<ProfileName> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ProfileName>(getRenameAccountProfileUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(profileName)
+  }
+);}
+
+
+
+
+
+export const getRenameAccountProfileMutationKey = () => ['renameAccountProfile'] as const;
+
+export const getRenameAccountProfileMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof renameAccountProfile>>, TError,RenameAccountProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof renameAccountProfile>>, TError,RenameAccountProfileMutationVariables, TContext> => {
+
+const mutationKey = getRenameAccountProfileMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof renameAccountProfile>>, RenameAccountProfileMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  renameAccountProfile(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RenameAccountProfileMutationResult = NonNullable<Awaited<ReturnType<typeof renameAccountProfile>>>
+    export type RenameAccountProfileMutationBody = BodyType<ProfileName>
+    export type RenameAccountProfileMutationError = ErrorType<void>
+    export type RenameAccountProfileMutationVariables = {data: BodyType<ProfileName>}
+
+    /**
+ * @summary Rename only the signed-in user's profile
+ */
+export const useRenameAccountProfile = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof renameAccountProfile>>, TError,RenameAccountProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof renameAccountProfile>>,
+        TError,
+        RenameAccountProfileMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRenameAccountProfileMutationOptions(options));
+    }
+
+export const getGetAccountJournalUrl = () => {
+
+
+
+
+  return `/api/journal/account`
+}
+
+/**
+ * @summary Open the signed-in account journal
+ */
+export const getAccountJournal = async ( options?: Parameters<typeof customFetch>[1]): Promise<JournalAccount> => {
+
+  return customFetch<JournalAccount>(getGetAccountJournalUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAccountJournalQueryKey = () => {
+    return [
+    `/api/journal/account`
+    ] as const;
+    }
+
+
+export const getGetAccountJournalQueryOptions = <TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAccountJournalQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAccountJournal>>> = ({ signal }) => getAccountJournal({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAccountJournalQueryResult = NonNullable<Awaited<ReturnType<typeof getAccountJournal>>>
+export type GetAccountJournalQueryError = ErrorType<void>
+
+
+/**
+ * @summary Open the signed-in account journal
+ */
+
+export function useGetAccountJournal<TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAccountJournalQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getClaimJournalUrl = () => {
+
+
+
+
+  return `/api/journal/claim`
+}
+
+/**
+ * @summary Transfer an installation journal to the signed-in account
+ */
+export const claimJournal = async (journalClaim: JournalClaim, options?: Parameters<typeof customFetch>[1]): Promise<JournalAccount> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<JournalAccount>(getClaimJournalUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(journalClaim)
+  }
+);}
+
+
+
+
+
+export const getClaimJournalMutationKey = () => ['claimJournal'] as const;
+
+export const getClaimJournalMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimJournal>>, TError,ClaimJournalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof claimJournal>>, TError,ClaimJournalMutationVariables, TContext> => {
+
+const mutationKey = getClaimJournalMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof claimJournal>>, ClaimJournalMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  claimJournal(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ClaimJournalMutationResult = NonNullable<Awaited<ReturnType<typeof claimJournal>>>
+    export type ClaimJournalMutationBody = BodyType<JournalClaim>
+    export type ClaimJournalMutationError = ErrorType<void>
+    export type ClaimJournalMutationVariables = {data: BodyType<JournalClaim>}
+
+    /**
+ * @summary Transfer an installation journal to the signed-in account
+ */
+export const useClaimJournal = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimJournal>>, TError,ClaimJournalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof claimJournal>>,
+        TError,
+        ClaimJournalMutationVariables,
+        TContext
+      > => {
+      return useMutation(getClaimJournalMutationOptions(options));
+    }
 
 export const getRegisterJournalInstallationUrl = () => {
 

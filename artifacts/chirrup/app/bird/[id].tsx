@@ -30,10 +30,10 @@ export default function BirdDetail() {
   };
   const confirmDelete = () => {
     if (Platform.OS === 'web') {
-      if (window.confirm('Remove this bird from this phone’s journal and its backend copy?')) doDelete();
+      if (window.confirm('Remove this bird from your account journal on all devices? This cannot be undone.')) doDelete();
       return;
     }
-    Alert.alert('Remove this bird?', 'It will be deleted from this phone’s journal and its backend copy.', [
+    Alert.alert('Remove this bird?', 'It will be deleted from your account journal on all devices. This cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Remove', style: 'destructive', onPress: doDelete },
     ]);

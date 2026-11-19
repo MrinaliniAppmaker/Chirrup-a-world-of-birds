@@ -49,7 +49,7 @@ export default function LibraryScreen() {
         <View testID="journal-sync-status" style={s.syncRow} accessibilityLiveRegion="polite">
           <Feather name={syncError ? 'cloud-off' : 'cloud'} size={14} color={syncError ? c.destructive : c.mutedForeground} />
           <Text style={[s.syncText, { color: syncError ? c.destructive : c.mutedForeground }]}>
-            {syncing ? 'Syncing this phone’s journal…' : syncError ?? 'Private journal for this app installation.'}
+            {syncing ? 'Syncing your account journal…' : syncError ?? 'Private journal, saved to your account.'}
           </Text>
           <Pressable testID="retry-journal-sync" accessibilityRole="button"
             accessibilityLabel={syncing ? 'Journal sync in progress' : 'Retry journal sync'}

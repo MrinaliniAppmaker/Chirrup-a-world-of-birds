@@ -9,6 +9,51 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Rename only the signed-in user's profile
+ */
+export const renameAccountProfileBodyDisplayNameMax = 60;
+
+
+
+export const RenameAccountProfileBody = zod.object({
+  "displayName": zod.string().min(1).max(renameAccountProfileBodyDisplayNameMax)
+})
+
+export const renameAccountProfileResponseDisplayNameMax = 60;
+
+
+
+export const RenameAccountProfileResponse = zod.object({
+  "displayName": zod.string().min(1).max(renameAccountProfileResponseDisplayNameMax)
+})
+
+
+/**
+ * @summary Open the signed-in account journal
+ */
+export const GetAccountJournalResponse = zod.object({
+  "installationId": zod.string().uuid()
+})
+
+
+/**
+ * @summary Transfer an installation journal to the signed-in account
+ */
+export const claimJournalBodyTokenMin = 64;
+export const claimJournalBodyTokenMax = 64;
+
+
+
+export const ClaimJournalBody = zod.object({
+  "token": zod.string().min(claimJournalBodyTokenMin).max(claimJournalBodyTokenMax)
+})
+
+export const ClaimJournalResponse = zod.object({
+  "installationId": zod.string().uuid()
+})
+
+
+/**
  * @summary Create a private journal for this app installation
  */
 export const RegisterJournalInstallationResponse = zod.object({

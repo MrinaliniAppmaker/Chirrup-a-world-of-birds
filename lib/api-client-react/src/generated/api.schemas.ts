@@ -5,6 +5,26 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface ProfileName {
+  /**
+     * @minLength 1
+     * @maxLength 60
+     */
+  displayName: string;
+}
+
+export interface JournalAccount {
+  installationId: string;
+}
+
+export interface JournalClaim {
+  /**
+     * @minLength 64
+     * @maxLength 64
+     */
+  token: string;
+}
+
 export interface JournalInstallation {
   installationId: string;
   token: string;

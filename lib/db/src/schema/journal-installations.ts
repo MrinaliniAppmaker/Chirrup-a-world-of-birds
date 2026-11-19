@@ -5,6 +5,8 @@ import type { z } from "zod/v4";
 export const journalInstallations = pgTable("journal_installations", {
   id: uuid("id").primaryKey().defaultRandom(),
   tokenHash: text("token_hash").notNull().unique(),
+  accountId: text("account_id").unique(),
+  claimedBy: text("claimed_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

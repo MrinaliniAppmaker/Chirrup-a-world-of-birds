@@ -4,3 +4,4 @@
 - [Figma visual choices](figma-visual-choices.md) — updated body and beak artwork overlays hidden legacy vectors; use the visible selected screens.
 - [Anatomy diagram portability](anatomy-diagram-portability.md) — use explicit SVG rotation centers and visually verify every foot type; type checks alone missed detached lobes.
 - [App Storage compatibility](storage-sidecar-compatibility.md) — SDK major updates must support Replit's bucket-scoped sidecar; signed uploads alone do not prove reads work.
+- [Account profile compatibility](account-profile-compatibility.md) — typed Clerk name fields can be disabled in frontend requests; keep verified, narrowly scoped profile updates.

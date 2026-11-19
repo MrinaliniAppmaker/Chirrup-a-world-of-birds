@@ -5,34 +5,35 @@ export const MAX_BIRDS = 100;
 const LEGACY_KEY = 'chirrup.collection.v1';
 const DB_NAME = 'chirrup-collection';
 type StoredBird = GeneratedBird & { imageBlob?: Blob };
-let database: Promise<IDBDatabase> | undefined;
+const databases = new Map<string, Promise<IDBDatabase>>();
 const imageUrls = new Map<string, string>();
 
 export async function hasLocalPortrait(bird: GeneratedBird): Promise<boolean> {
   return /^(data:|blob:)/.test(bird.imageUri);
 }
 
-function openDatabase(): Promise<IDBDatabase> {
-  if (!database) {
-    database = new Promise<IDBDatabase>((resolve, reject) => {
+function openDatabase(owner?: string): Promise<IDBDatabase> {
+  const name = owner ? `${DB_NAME}-account-${owner}` : DB_NAME;
+  if (!databases.has(name)) {
+    databases.set(name, new Promise<IDBDatabase>((resolve, reject) => {
       if (typeof indexedDB === 'undefined') {
         reject(new Error('Browser image storage is unavailable. Enable site storage to save birds.'));
         return;
       }
-      const request = indexedDB.open(DB_NAME, 1);
+      const request = indexedDB.open(name, 1);
       request.onupgradeneeded = () => {
         request.result.createObjectStore('birds', { keyPath: 'id' });
         request.result.createObjectStore('settings');
       };
       request.onsuccess = () => {
-        request.result.onversionchange = () => { request.result.close(); database = undefined; };
+        request.result.onversionchange = () => { request.result.close(); databases.delete(name); };
         resolve(request.result);
       };
       request.onerror = () => reject(request.error ?? new Error('Could not open browser image storage.'));
       request.onblocked = () => reject(new Error('Close other CHIRRUP tabs and try opening the library again.'));
-    }).catch((error) => { database = undefined; throw error; });
+    }).catch((error) => { databases.delete(name); throw error; }));
   }
-  return database;
+  return databases.get(name)!;
 }
 
 function complete(transaction: IDBTransaction): Promise<void> {
@@ -57,25 +58,26 @@ async function encodeBird(bird: GeneratedBird): Promise<StoredBird> {
   return { ...bird, imageUri: '', imageBlob: await response.blob() };
 }
 
-function decodeBird(row: StoredBird): GeneratedBird {
+function decodeBird(row: StoredBird, owner?: string): GeneratedBird {
   const { imageBlob, ...bird } = row;
   if (!imageBlob) return bird;
-  const previous = imageUrls.get(bird.id);
+  const key = `${owner ?? 'legacy'}:${bird.id}`;
+  const previous = imageUrls.get(key);
   if (previous) URL.revokeObjectURL(previous);
   const imageUri = URL.createObjectURL(imageBlob);
-  imageUrls.set(bird.id, imageUri);
+  imageUrls.set(key, imageUri);
   return { ...bird, imageUri };
 }
 
-export async function loadCollection(): Promise<GeneratedBird[]> {
-  const db = await openDatabase();
+export async function loadCollection(owner?: string): Promise<GeneratedBird[]> {
+  const db = await openDatabase(owner);
   const transaction = db.transaction(['birds', 'settings'], 'readonly');
   const [existing, migrated] = await Promise.all([
     read<StoredBird[]>(transaction.objectStore('birds').getAll()),
     read(transaction.objectStore('settings').get('legacy-migrated')),
   ]);
   let rows = existing;
-  if (!migrated) {
+  if (!owner && !migrated) {
     const raw = await AsyncStorage.getItem(LEGACY_KEY);
     const legacy: GeneratedBird[] = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(legacy)) throw new Error('The existing journal could not be read. No birds were changed.');
@@ -91,44 +93,47 @@ export async function loadCollection(): Promise<GeneratedBird[]> {
     // The committed migration marker prevents deleted legacy birds being reimported.
     if (raw) await AsyncStorage.removeItem(LEGACY_KEY);
   }
-  return rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(decodeBird);
+  return rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)).map(row => decodeBird(row, owner));
 }
 
-export async function saveCollectionBird(bird: GeneratedBird, _current: GeneratedBird[]): Promise<GeneratedBird> {
+export async function saveCollectionBird(bird: GeneratedBird, _current: GeneratedBird[], owner?: string): Promise<GeneratedBird> {
   const row = await encodeBird(bird);
-  const db = await openDatabase();
+  const db = await openDatabase(owner);
   const transaction = db.transaction('birds', 'readwrite');
   const committed = complete(transaction);
   transaction.objectStore('birds').put(row);
   await committed;
-  return decodeBird(row);
+  return decodeBird(row, owner);
 }
 
-export async function removeCollectionBird(id: string, _current: GeneratedBird[]): Promise<void> {
-  const db = await openDatabase();
+export async function removeCollectionBird(id: string, _current: GeneratedBird[], owner?: string): Promise<void> {
+  const db = await openDatabase(owner);
   const transaction = db.transaction('birds', 'readwrite');
   const committed = complete(transaction);
   transaction.objectStore('birds').delete(id);
   await committed;
-  const uri = imageUrls.get(id);
+  const key = `${owner ?? 'legacy'}:${id}`;
+  const uri = imageUrls.get(key);
   if (uri) URL.revokeObjectURL(uri);
-  imageUrls.delete(id);
+  imageUrls.delete(key);
 }
 
-export async function replaceCollection(birds: GeneratedBird[]): Promise<GeneratedBird[]> {
+export async function replaceCollection(birds: GeneratedBird[], owner?: string): Promise<GeneratedBird[]> {
   const rows: StoredBird[] = [];
   // Limit downloads when recovering portraits into an empty local cache.
   for (let start = 0; start < birds.length; start += 4) {
     rows.push(...await Promise.all(birds.slice(start, start + 4).map(encodeBird)));
   }
-  const db = await openDatabase();
+  const db = await openDatabase(owner);
   const transaction = db.transaction('birds', 'readwrite');
   const committed = complete(transaction);
   transaction.objectStore('birds').clear();
   rows.forEach(row => transaction.objectStore('birds').put(row));
   await committed;
   for (const [id, uri] of imageUrls) {
-    if (!rows.some(row => row.id === id)) { URL.revokeObjectURL(uri); imageUrls.delete(id); }
+    if (id.startsWith(`${owner ?? 'legacy'}:`) && !rows.some(row => `${owner ?? 'legacy'}:${row.id}` === id)) {
+      URL.revokeObjectURL(uri); imageUrls.delete(id);
+    }
   }
-  return rows.map(decodeBird);
+  return rows.map(row => decodeBird(row, owner));
 }

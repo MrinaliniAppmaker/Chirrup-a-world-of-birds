@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { useEffect, useRef } from 'react';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,14 +13,18 @@ import {
 } from '@expo-google-fonts/inter';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { setBaseUrl } from '@workspace/api-client-react';
+import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/expo';
+import { tokenCache } from '@clerk/expo/token-cache';
+import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 import { CollectionProvider } from '@/context/CollectionContext';
 import colors from '@/constants/colors';
 import { serif } from '@/constants/fonts';
 
 setBaseUrl(`https://${process.env.EXPO_PUBLIC_DOMAIN}`);
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
+const proxyUrl = process.env.EXPO_PUBLIC_CLERK_PROXY_URL || undefined;
+
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
@@ -40,8 +44,33 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="bird/[id]" options={{ title: 'Journal entry' }} />
       <Stack.Screen name="interactions" options={{ headerShown: false }} />
+      <Stack.Screen name="(auth)" options={{ headerShown: false, presentation: 'modal' }} />
+      <Stack.Screen name="profile" options={{ title: 'Your profile' }} />
     </Stack>
   );
+}
+
+/** Wires bearer tokens into the API client and isolates per-identity memory. */
+function AuthBoundary({ children }: { children: React.ReactNode }) {
+  const { getToken, userId, isLoaded } = useAuth();
+  const qc = useQueryClient();
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
+  const prevUser = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    setAuthTokenGetter(() => getTokenRef.current());
+    return () => setAuthTokenGetter(null);
+  }, []);
+
+  const current = isLoaded ? (userId ?? null) : undefined;
+  useEffect(() => {
+    if (current === undefined) return;
+    if (prevUser.current !== undefined && prevUser.current !== current) qc.clear();
+    prevUser.current = current;
+  }, [current, qc]);
+
+  return <CollectionProvider key={userId ?? 'guest'}>{children}</CollectionProvider>;
 }
 
 export default function RootLayout() {
@@ -64,13 +93,17 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <GestureHandlerRootView>
-            <KeyboardProvider>
-              <CollectionProvider>
-                <RootLayoutNav />
-              </CollectionProvider>
-            </KeyboardProvider>
-          </GestureHandlerRootView>
+          <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache} proxyUrl={proxyUrl}>
+            <ClerkLoaded>
+              <GestureHandlerRootView>
+                <KeyboardProvider>
+                  <AuthBoundary>
+                    <RootLayoutNav />
+                  </AuthBoundary>
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </ClerkLoaded>
+          </ClerkProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
