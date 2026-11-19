@@ -16,15 +16,21 @@ Across every typing field, an unrequested blur is not the user's permission to f
 
 One passing focus test does not disprove intermittent browser or mobile keyboard problems.
 
-**Why:** The user continued reporting brief focus loss across naming, extra traits and other typed fields after earlier desktop checks could not reproduce it, and confirmed the affected environment was the browser preview.
+**Why:** The user continued reporting brief focus loss across naming, extra traits and other typed fields after earlier desktop checks could not reproduce it, and confirmed the affected environment was the Chrome browser preview.
 
-**How to apply:** Cover touch input, idle pauses, viewport changes, input zoom, cursor edits and deliberate dismissal. Report browser emulation and native bundle checks separately from physical-device verification; never promise every phone has been tested.
+**How to apply:** Cover touch input, idle pauses, viewport changes, input zoom, cursor edits and deliberate dismissal. Do not treat Safari's small-font zoom as a proven explanation for the reported Chrome fault. Browser name alone does not establish device or engine, since Chrome on iOS differs from desktop/Android Chrome. Report browser emulation and native bundle checks separately from physical-device verification; never promise every phone has been tested.
 
 Focus retention and caret stability are separate requirements.
 
 **Why:** Testing once caught text being inserted at the beginning after a pause even though the same field remained focused and emitted no blur/focus event. Immediate replays did not reproduce it, so focus-only checks are insufficient and the original cause was not conclusively established.
 
 **How to apply:** Check exact resulting text and selection position across pauses and parent rerenders, not just the active element. Avoid redundant value writes during an active browser edit while preserving explicit parent resets/prefills. Do not describe an intermittent caret issue as conclusively solved solely because a few replays pass.
+
+Do not diagnose missing characters solely from an immediate React fiber snapshot.
+
+**Why:** An input's inspected prop once appeared one character behind its DOM value immediately after typing. A settled read through the committed root matched the complete text. The original snapshot did not establish actual data loss; it could have observed an alternate fiber or an unfinished commit.
+
+**How to apply:** Prefer checking the actual review/submission value. If internal inspection is necessary, locate the component through the root's current tree and allow the update to commit before comparing it with the DOM. Keep a transient diagnostic observation separate from a verified user-visible failure.
 
 Adding a platform-specific input file can require one Metro restart before browser imports resolve to it.
 
