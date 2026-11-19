@@ -6,6 +6,7 @@ import * as Haptics from 'expo-haptics';
 import { BirdProfile, Button } from '@/components/ui';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
+export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
 import { Feather } from '@expo/vector-icons';
 import { sans, serif } from '@/constants/fonts';
 

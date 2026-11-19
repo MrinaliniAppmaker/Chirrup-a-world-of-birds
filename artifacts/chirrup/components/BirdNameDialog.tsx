@@ -7,6 +7,7 @@ import { FieldInput } from './FieldInput';
 import { Button, Eyebrow } from './ui';
 import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
+import { noteInputTouch } from '@/lib/inputFocus';
 
 export function BirdNameDialog({ visible, value, onChange, onCancel, onSave, saving, error }: {
   visible: boolean;
@@ -28,7 +29,7 @@ export function BirdNameDialog({ visible, value, onChange, onCancel, onSave, sav
             paddingTop: Platform.OS === 'web' ? 67 : insets.top + 20,
             paddingBottom: Platform.OS === 'web' ? 34 : insets.bottom + 20,
           }]}>
-          <View testID="bird-name-dialog" accessibilityViewIsModal
+          <View testID="bird-name-dialog" accessibilityViewIsModal onStartShouldSetResponderCapture={noteInputTouch}
             style={[s.card, { backgroundColor: c.card, borderColor: c.border, borderRadius: c.radius + 4 }]}>
             <View style={s.heading}>
               <Text accessibilityRole="header" style={[s.title, { color: c.foreground }]}>Name your bird</Text>

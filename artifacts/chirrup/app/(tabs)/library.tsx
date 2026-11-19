@@ -10,6 +10,7 @@ import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
 import { MAX_BIRDS } from '@/lib/collectionStorage';
 import { FieldInput } from '@/components/FieldInput';
+export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
 
 export const displayName = (n?: string) => (n && n.trim() ? n.trim() : 'Unnamed bird');
 

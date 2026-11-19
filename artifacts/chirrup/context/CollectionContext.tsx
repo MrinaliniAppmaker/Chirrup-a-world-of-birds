@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { importBirdShare, type GeneratedBird } from '@workspace/api-client-react';
+import { importBirdShareBatch, type GeneratedBird } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@clerk/expo';
 import { hasLocalPortrait, loadCollection, saveCollectionBird, removeCollectionBird, replaceCollection, MAX_BIRDS } from '@/lib/collectionStorage';
@@ -17,7 +17,7 @@ interface CollectionValue {
   retrySync: () => Promise<void>;
   isSaved: (id: string) => boolean;
   save: (bird: GeneratedBird) => Promise<void>;
-  importShared: (token: string) => Promise<GeneratedBird>;
+  importShared: (token: string) => Promise<GeneratedBird[]>;
   remove: (id: string) => Promise<void>;
   get: (id: string) => GeneratedBird | undefined;
 }
@@ -173,26 +173,28 @@ export function CollectionProvider({ children }: { children: React.ReactNode }) 
     const session = await getSession();
     const accessToken = await session.getToken!();
     if (!accessToken) throw new Error('Sign in again to add this shared bird.');
-    const remote = await importBirdShare({ token }, {
+    const remote = await importBirdShareBatch({ token }, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     ensureOwner();
     // The server already saved the copy. An offline-cache failure must not tell
     // the user to re-import or suggest that their committed bird was lost.
+    const merged = [
+      ...remote.map(bird => current.current.find(cached => cached.id === bird.id) ?? bird),
+      ...current.current.filter(bird => !remote.some(imported => imported.id === bird.id)),
+    ];
     try {
       if (!storageReady.current) throw new Error('Offline storage not ready.');
-      const existing = current.current.find(bird => bird.id === remote.id);
-      const stored = existing ?? await saveCollectionBird(remote, current.current, owner);
-      current.current = existing ? current.current : [stored, ...current.current];
+      const stored = await replaceCollection(merged, owner);
+      current.current = stored;
       setBirds(current.current);
       setError(null);
       setSyncError(migrationWarning.current);
-      return stored;
+      return remote.map(bird => stored.find(cached => cached.id === bird.id)!);
     } catch {
-      current.current = current.current.some(bird => bird.id === remote.id)
-        ? current.current : [remote, ...current.current];
+      current.current = merged;
       setBirds(current.current);
-      setSyncError('The shared bird is saved to your account. Retry sync to keep an offline copy.');
+      setSyncError('The shared birds are saved to your account. Retry sync to keep offline copies.');
       return remote;
     }
   }), [enqueue, ensureOwner, userId, getSession, owner]);

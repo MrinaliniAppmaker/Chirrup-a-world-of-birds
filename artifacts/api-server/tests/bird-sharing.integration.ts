@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { randomBytes, randomUUID } from "node:crypto";
 import { eq, inArray } from "drizzle-orm";
 import { birdShares, db, journalBirds, journalInstallations, pool } from "@workspace/db";
-import { BirdShareUnavailable, createBirdShareLink, findBirdShare, importSharedBird } from "../src/lib/birdShares";
+import { BirdShareUnavailable, createBirdShareLink, findBirdShare, importSharedBird,
+  createBirdShareBatchLink, findSharedBirds, importSharedBirdBatch } from "../src/lib/birdShares";
 import { accountJournal, deleteSavedBird, JournalFullError, listSavedBirds, persistSavedBird, presentSavedBird } from "../src/lib/journalRepository";
 import { authorizePortrait, deletePortrait } from "../src/lib/journalPortraits";
 
@@ -61,19 +62,53 @@ try {
   assert.equal((await importSharedBird(recipientId, anotherLink.token)).birdId, imported.birdId);
   assert.equal((await listSavedBirds(recipientId)).length, 1, "different links to same original must not duplicate");
 
-  await db.insert(journalBirds).values(Array.from({ length: 100 }, (_, i) => ({
+  const secondId = `${id}-second`;
+  const secondUpload = await authorizePortrait(sourceId, secondId);
+  portraits.add(secondUpload.portraitPath);
+  const secondPut = await fetch(secondUpload.uploadUrl, { method: "PUT", headers: { "Content-Type": "image/png" }, body: png });
+  assert.ok(secondPut.ok);
+  await persistSavedBird(sourceId, { ...metadata, id: secondId, name: "Second shared bird" }, secondUpload.portraitPath);
+  await assert.rejects(createBirdShareBatchLink(strangerId, [id, secondId]), BirdShareUnavailable);
+  await assert.rejects(createBirdShareBatchLink(sourceId, [id, id]), BirdShareUnavailable);
+  const batch = await createBirdShareBatchLink(sourceId, [id, secondId]);
+  assert.deepEqual((await findSharedBirds(batch.token)).birds.map(bird => bird.birdId), [id, secondId]);
+  const batchCopies = await Promise.all([
+    importSharedBirdBatch(recipientId, batch.token), importSharedBirdBatch(recipientId, batch.token),
+  ]);
+  batchCopies[0].forEach(bird => portraits.add(bird.portraitPath));
+  assert.equal(batchCopies[0].length, 2);
+  assert.equal((await listSavedBirds(recipientId)).length, 2, "batch retries reuse existing individual copies");
+  assert.deepEqual(batchCopies[0].map(bird => bird.birdId), batchCopies[1].map(bird => bird.birdId));
+  // A missing later portrait must roll back earlier copies, not import half a batch.
+  await db.update(journalBirds).set({ portraitPath: `sharing-tests/${run}/missing` })
+    .where(eq(journalBirds.portraitPath, secondUpload.portraitPath));
+  await assert.rejects(importSharedBirdBatch(strangerId, batch.token));
+  assert.equal((await listSavedBirds(strangerId)).length, 0);
+  await db.update(journalBirds).set({ portraitPath: secondUpload.portraitPath })
+    .where(eq(journalBirds.portraitPath, `sharing-tests/${run}/missing`));
+
+  await db.insert(journalBirds).values(Array.from({ length: 99 }, (_, i) => ({
     installationId: fullId, birdId: `capacity-${i}`, metadata: { id: `capacity-${i}` },
     portraitPath: `sharing-tests/${run}/capacity-${i}`,
   })));
+  await assert.rejects(importSharedBirdBatch(fullId, batch.token), JournalFullError);
+  assert.equal((await listSavedBirds(fullId)).length, 99, "insufficient room must import none of a batch");
+  await db.insert(journalBirds).values({
+    installationId: fullId, birdId: "capacity-99", metadata: { id: "capacity-99" },
+    portraitPath: `sharing-tests/${run}/capacity-99`,
+  });
   await assert.rejects(importSharedBird(fullId, link.token), JournalFullError);
   assert.equal((await listSavedBirds(fullId)).length, 100);
   // Existing imports remain retryable even when a recipient is at capacity.
-  await db.insert(journalBirds).values(Array.from({ length: 99 }, (_, i) => ({
+  await db.insert(journalBirds).values(Array.from({ length: 98 }, (_, i) => ({
     installationId: recipientId, birdId: `recipient-capacity-${i}`, metadata: { id: `recipient-capacity-${i}` },
     portraitPath: `sharing-tests/${run}/recipient-capacity-${i}`,
   })));
   assert.equal((await importSharedBird(recipientId, link.token)).birdId, imported.birdId);
   assert.equal((await listSavedBirds(recipientId)).length, 100);
+  assert.equal((await importSharedBirdBatch(recipientId, batch.token)).length, 2);
+  assert.equal((await importSharedBirdBatch(sourceId, batch.token)).length, 2);
+  assert.equal((await importSharedBirdBatch(sourceId, link.token)).length, 1, "legacy links remain supported");
 
   const expired = await findBirdShare(anotherLink.token);
   await db.update(birdShares).set({ expiresAt: new Date(Date.now() - 1000) })
@@ -83,10 +118,11 @@ try {
   await deleteSavedBird(sourceId, id);
   await deletePortrait(upload.portraitPath);
   await assert.rejects(findBirdShare(link.token), BirdShareUnavailable, "deleting source revokes link");
+  await assert.rejects(findSharedBirds(batch.token), BirdShareUnavailable, "removing an included bird disables the batch");
   const independent = await presentSavedBird((await listSavedBirds(recipientId)).find(b => b.birdId === imported.birdId)!);
   const afterDeletion = await fetch(independent.imageUri);
   assert.deepEqual(Buffer.from(await afterDeletion.arrayBuffer()), png, "sender deletion cannot break recipient copy");
-  process.stdout.write("PASS: ownership, private preview, exact photo/traits, concurrent and cross-link idempotency, 100-bird limit, expiration, source deletion revocation, independent recipient portraits.\n");
+  process.stdout.write("PASS: single and multi-bird ownership, exact photo/traits, concurrent deduplication, atomic capacity/copy-failure rollback, legacy links, expiration and independent recipient portraits.\n");
 } finally {
   await Promise.all([...portraits].map(path => deletePortrait(path).catch(() => {})));
   if (journals.length) await db.delete(journalInstallations).where(inArray(journalInstallations.id, journals));

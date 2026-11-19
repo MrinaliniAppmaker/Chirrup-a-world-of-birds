@@ -23,6 +23,7 @@ import type {
   BirdShareClaim,
   BirdShareInput,
   BirdShareLink,
+  BirdShareSelection,
   BirdTraits,
   EncounterRequest,
   GeneratedBird,
@@ -66,6 +67,182 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getCreateBirdShareBatchUrl = () => {
+
+
+
+
+  return `/api/bird-shares/batch`
+}
+
+/**
+ * @summary Create one seven-day link for selected saved birds
+ */
+export const createBirdShareBatch = async (birdShareSelection: BirdShareSelection, options?: Parameters<typeof customFetch>[1]): Promise<BirdShareLink> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<BirdShareLink>(getCreateBirdShareBatchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(birdShareSelection)
+  }
+);}
+
+
+
+
+
+export const getCreateBirdShareBatchMutationKey = () => ['createBirdShareBatch'] as const;
+
+export const getCreateBirdShareBatchMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBirdShareBatch>>, TError,CreateBirdShareBatchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBirdShareBatch>>, TError,CreateBirdShareBatchMutationVariables, TContext> => {
+
+const mutationKey = getCreateBirdShareBatchMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBirdShareBatch>>, CreateBirdShareBatchMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createBirdShareBatch(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBirdShareBatchMutationResult = NonNullable<Awaited<ReturnType<typeof createBirdShareBatch>>>
+    export type CreateBirdShareBatchMutationBody = BodyType<BirdShareSelection>
+    export type CreateBirdShareBatchMutationError = ErrorType<void>
+    export type CreateBirdShareBatchMutationVariables = {data: BodyType<BirdShareSelection>}
+
+    /**
+ * @summary Create one seven-day link for selected saved birds
+ */
+export const useCreateBirdShareBatch = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBirdShareBatch>>, TError,CreateBirdShareBatchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createBirdShareBatch>>,
+        TError,
+        CreateBirdShareBatchMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateBirdShareBatchMutationOptions(options));
+    }
+
+export const getImportBirdShareBatchUrl = () => {
+
+
+
+
+  return `/api/bird-shares/import-batch`
+}
+
+/**
+ * @summary Import all shared birds atomically or import none if capacity is insufficient
+ */
+export const importBirdShareBatch = async (birdShareClaim: BirdShareClaim, options?: Parameters<typeof customFetch>[1]): Promise<GeneratedBird[]> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<GeneratedBird[]>(getImportBirdShareBatchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(birdShareClaim)
+  }
+);}
+
+
+
+
+
+export const getImportBirdShareBatchMutationKey = () => ['importBirdShareBatch'] as const;
+
+export const getImportBirdShareBatchMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importBirdShareBatch>>, TError,ImportBirdShareBatchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof importBirdShareBatch>>, TError,ImportBirdShareBatchMutationVariables, TContext> => {
+
+const mutationKey = getImportBirdShareBatchMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importBirdShareBatch>>, ImportBirdShareBatchMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  importBirdShareBatch(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportBirdShareBatchMutationResult = NonNullable<Awaited<ReturnType<typeof importBirdShareBatch>>>
+    export type ImportBirdShareBatchMutationBody = BodyType<BirdShareClaim>
+    export type ImportBirdShareBatchMutationError = ErrorType<void>
+    export type ImportBirdShareBatchMutationVariables = {data: BodyType<BirdShareClaim>}
+
+    /**
+ * @summary Import all shared birds atomically or import none if capacity is insufficient
+ */
+export const useImportBirdShareBatch = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importBirdShareBatch>>, TError,ImportBirdShareBatchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof importBirdShareBatch>>,
+        TError,
+        ImportBirdShareBatchMutationVariables,
+        TContext
+      > => {
+      return useMutation(getImportBirdShareBatchMutationOptions(options));
+    }
 
 export const getCreateBirdShareUrl = () => {
 

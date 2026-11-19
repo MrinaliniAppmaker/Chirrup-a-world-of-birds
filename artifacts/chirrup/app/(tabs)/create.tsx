@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
+import { useAuth } from '@clerk/expo';
+import { discardCreateRecoveryDraft, getCreateRecoveryDraft, keepCreateRecoveryDraft } from '@/lib/createRecovery';
 import { SymbolView } from 'expo-symbols';
 import { useGenerateBird, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
@@ -20,6 +22,7 @@ import { sans, serif } from '@/constants/fonts';
 import { FEET_OPTIONS, LEG_OPTIONS, TRAIT_GROUPS, TRAIT_LABELS, TraitKey, WATERBIRD_BEAK_OPTIONS } from '@/constants/traits';
 
 type Step = 'build' | 'review' | 'result';
+export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
 type Mode = 'visual' | 'typed';
 const KEYS: TraitKey[] = ['body', 'beak', 'colors', 'feathers', 'legs', 'feet'];
 const DEFAULT_SEL: Record<TraitKey, string> = { body: 'songbird', beak: 'conical', colors: 'olive', feathers: 'flight', legs: 'short-pink', feet: 'perching' };
@@ -45,26 +48,37 @@ export default function CreateScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigation = useNavigation();
+  const { userId } = useAuth();
+  const owner = userId ?? 'guest';
+  const recovered = useRef(getCreateRecoveryDraft(owner)).current;
   const { save, isSaved } = useCollection();
   const generate = useGenerateBird();
   const { invalid: invalidTraits, message: generationErrorMessage } = generationFailure(generate.error);
 
-  const [step, setStep] = useState<Step>('build');
-  const [mode, setMode] = useState<Mode>('visual');
-  const [sel, setSel] = useState<Record<TraitKey, string>>(DEFAULT_SEL);
-  const [typed, setTyped] = useState<Record<TraitKey, string>>(EMPTY_TYPED);
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
-  const [showExtra, setShowExtra] = useState<boolean>(false);
-  const [extra, setExtra] = useState<string>('');
-  const [bird, setBird] = useState<GeneratedBird | null>(null);
-  const [birdName, setBirdName] = useState<string>('');
-  const [nameDraft, setNameDraft] = useState<string>('');
-  const [editingName, setEditingName] = useState<boolean>(true);
-  const [showNameDialog, setShowNameDialog] = useState<boolean>(false);
-  const [popupName, setPopupName] = useState<string>('');
+  const [step, setStep] = useState<Step>(recovered?.step ?? 'build');
+  const [mode, setMode] = useState<Mode>(recovered?.mode ?? 'visual');
+  const [sel, setSel] = useState<Record<TraitKey, string>>(recovered?.sel ?? DEFAULT_SEL);
+  const [typed, setTyped] = useState<Record<TraitKey, string>>(recovered?.typed ?? EMPTY_TYPED);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(recovered?.expanded ?? {});
+  const [showExtra, setShowExtra] = useState<boolean>(recovered?.showExtra ?? false);
+  const [extra, setExtra] = useState<string>(recovered?.extra ?? '');
+  const [bird, setBird] = useState<GeneratedBird | null>(recovered?.bird ?? null);
+  const [birdName, setBirdName] = useState<string>(recovered?.birdName ?? '');
+  const [nameDraft, setNameDraft] = useState<string>(recovered?.nameDraft ?? '');
+  const [editingName, setEditingName] = useState<boolean>(recovered?.editingName ?? true);
+  const [showNameDialog, setShowNameDialog] = useState<boolean>(recovered?.showNameDialog ?? false);
+  const [popupName, setPopupName] = useState<string>(recovered?.popupName ?? '');
   const [saving, setSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const generationId = useRef(0);
+  useLayoutEffect(() => {
+    keepCreateRecoveryDraft(owner, {
+      step: step === 'result' && !bird ? 'review' : step,
+      mode, sel, typed, expanded, showExtra, extra, bird, birdName, nameDraft,
+      editingName, showNameDialog, popupName,
+    });
+  }, [owner, step, mode, sel, typed, expanded, showExtra, extra, bird, birdName, nameDraft, editingName, showNameDialog, popupName]);
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 + 84 : insets.bottom + 90;
@@ -104,10 +118,14 @@ export default function CreateScreen() {
     setShowNameDialog(false); setPopupName(''); resetMutation(); setStep('build');
   }, [resetMutation]);
 
-  // Closing Create discards its draft; a late generation response must not restore it.
+  // A real navigation blur discards the draft. An error-boundary unmount does not.
   const resetOnExit = useRef(reset);
   resetOnExit.current = reset;
-  useFocusEffect(useCallback(() => () => resetOnExit.current(), []));
+  useEffect(() => navigation.addListener('blur', () => {
+    discardCreateRecoveryDraft(owner);
+    resetOnExit.current();
+  }), [navigation, owner]);
+  useEffect(() => () => { generationId.current += 1; }, []);
 
   const commitName = () => {
     const name = nameDraft.trim();
@@ -324,7 +342,7 @@ export default function CreateScreen() {
                 <Button testID="error-back" label={invalidTraits ? 'Edit traits' : 'Back to review'} variant="ghost" onPress={() => { generate.reset(); goTo(invalidTraits ? 'build' : 'review'); }} style={{ alignSelf: 'stretch' }} />
               </View>
             )}
-            {generate.isSuccess && bird && (
+            {bird && (
               <View>
                 <Eyebrow style={{ marginBottom: 12 }}>Step 3 / Meet your bird</Eyebrow>
                 <BirdProfile bird={{ ...bird, name: editingName ? '' : birdName }}

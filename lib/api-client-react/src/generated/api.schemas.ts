@@ -5,6 +5,17 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface BirdShareSelection {
+  /**
+     * @minItems 1
+     * @maxItems 100
+     * @items.minLength 1
+     * @items.maxLength 128
+     * @items.pattern ^[A-Za-z0-9_-]+$
+     */
+  birdIds: string[];
+}
+
 export interface BirdShareInput {
   /**
      * @minLength 1
@@ -56,6 +67,7 @@ export interface GeneratedBird {
 }
 
 export interface SharedBirdPreview {
+  birds?: GeneratedBird[];
   bird: GeneratedBird;
   expiresAt: string;
 }

@@ -11,6 +11,48 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /bird-shares/batch:
+    post:
+      operationId: createBirdShareBatch
+      summary: Create one seven-day link for selected saved birds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirdShareSelection"
+      responses:
+        "201":
+          description: Link authorizing only the selected birds
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirdShareLink"
+        "400": { description: Select between 1 and 100 distinct birds }
+        "401": { description: Sign in required }
+        "404": { description: A selected bird is not in your journal }
+  /bird-shares/import-batch:
+    post:
+      operationId: importBirdShareBatch
+      summary: Import all shared birds atomically or import none if capacity is insufficient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirdShareClaim"
+      responses:
+        "200":
+          description: Independent copies including existing copies on retry
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeneratedBird"
+        "401": { description: Sign in required }
+        "404": { description: Link unavailable }
+        "409": { description: Not enough free library spaces for the selected birds }
   /bird-shares:
     post:
       operationId: createBirdShare
@@ -282,6 +324,17 @@ components:
       scheme: bearer
       description: Random installation credential, never a phone hardware identifier.
   schemas:
+    BirdShareSelection:
+      type: object
+      additionalProperties: false
+      required: [birdIds]
+      properties:
+        birdIds:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9_-]+$' }
     BirdShareInput:
       type: object
       additionalProperties: false
@@ -304,6 +357,10 @@ components:
       type: object
       required: [bird, expiresAt]
       properties:
+        birds:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeneratedBird"
         bird:
           $ref: "#/components/schemas/GeneratedBird"
         expiresAt: { type: string }

@@ -17,6 +17,8 @@ import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 import { CollectionProvider } from '@/context/CollectionContext';
+import { clearCreateRecoveryDrafts } from '@/lib/createRecovery';
+import { noteInputTouch } from '@/lib/inputFocus';
 import colors from '@/constants/colors';
 import { serif } from '@/constants/fonts';
 
@@ -28,6 +30,10 @@ const proxyUrl = process.env.EXPO_PUBLIC_CLERK_PROXY_URL || undefined;
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+
+// Native startup/reload must start in the app, not the alphabetically first
+// authentication group. Auth remains an explicitly opened modal.
+export const unstable_settings = { anchor: '(tabs)' };
 
 function RootLayoutNav() {
   return (
@@ -68,7 +74,10 @@ function AuthBoundary({ children }: { children: React.ReactNode }) {
   const current = isLoaded ? (userId ?? null) : undefined;
   useEffect(() => {
     if (current === undefined) return;
-    if (prevUser.current !== undefined && prevUser.current !== current) qc.clear();
+    if (prevUser.current !== undefined && prevUser.current !== current) {
+      qc.clear();
+      clearCreateRecoveryDrafts();
+    }
     prevUser.current = current;
   }, [current, qc]);
 
@@ -97,7 +106,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache} proxyUrl={proxyUrl}>
             <ClerkLoaded>
-              <GestureHandlerRootView>
+              <GestureHandlerRootView onStartShouldSetResponderCapture={noteInputTouch}>
                 <KeyboardProvider>
                   <AuthBoundary>
                     <RootLayoutNav />

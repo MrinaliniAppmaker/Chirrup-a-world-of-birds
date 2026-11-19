@@ -8,11 +8,23 @@ Do not assume a native text-input focus setting has equivalent behavior in the b
 
 **How to apply:** Keep both native and browser focus semantics covered when changing form controls. Single-line submission should not automatically blur; multiline Enter should still insert a newline. Check intentional focus changes rather than forcing focus back after every blur, which would trap keyboard users.
 
-Desktop focus tests that pass do not disprove intermittent mobile keyboard problems.
+Across every typing field, an unrequested blur is not the user's permission to finish editing or collapse a name editor. Conditional recovery of unsolicited focus loss is intentional; do not replace it with unconditional refocusing.
 
-**Why:** The user continued reporting brief focus loss across naming, extra traits and other typed fields after earlier desktop checks could not reproduce it.
+**Why:** The user repeatedly reported a roughly half-second loss of selection across naming, typed traits, extra traits and sharing, with lost work, and explicitly required selection to continue until they click elsewhere. Programmatic screen or dialog focus changes are not equivalent to such a click.
+
+**How to apply:** Preserve value and caret during unsolicited blur recovery. Accept real outside taps, moving to another field, keyboard navigation, unmounts and application backgrounding. Bound immediate recovery loops without permanently exhausting recovery for the rest of a long edit. Do not finalize a name merely because focus was lost unexpectedly. When a wrapper substitutes DOM inputs for native controls, preserve ref-based focus and submit behavior as well as appearance.
+
+One passing focus test does not disprove intermittent browser or mobile keyboard problems.
+
+**Why:** The user continued reporting brief focus loss across naming, extra traits and other typed fields after earlier desktop checks could not reproduce it, and confirmed the affected environment was the browser preview.
 
 **How to apply:** Cover touch input, idle pauses, viewport changes, input zoom, cursor edits and deliberate dismissal. Report browser emulation and native bundle checks separately from physical-device verification; never promise every phone has been tested.
+
+Focus retention and caret stability are separate requirements.
+
+**Why:** Testing once caught text being inserted at the beginning after a pause even though the same field remained focused and emitted no blur/focus event. Immediate replays did not reproduce it, so focus-only checks are insufficient and the original cause was not conclusively established.
+
+**How to apply:** Check exact resulting text and selection position across pauses and parent rerenders, not just the active element. Avoid redundant value writes during an active browser edit while preserving explicit parent resets/prefills. Do not describe an intermittent caret issue as conclusively solved solely because a few replays pass.
 
 Adding a platform-specific input file can require one Metro restart before browser imports resolve to it.
 

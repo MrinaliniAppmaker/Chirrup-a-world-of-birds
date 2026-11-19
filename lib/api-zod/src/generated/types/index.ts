@@ -9,6 +9,7 @@
 export * from './birdShareClaim';
 export * from './birdShareInput';
 export * from './birdShareLink';
+export * from './birdShareSelection';
 export * from './birdShareTokenParameter';
 export * from './birdTraits';
 export * from './encounterBird';

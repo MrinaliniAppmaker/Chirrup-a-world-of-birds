@@ -15,6 +15,7 @@ import { portraitReference } from '@/lib/portraitReference';
 import type { PortraitSource } from '@/lib/portraitReference';
 
 const MIN = 2;
+export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
 const MAX = 6;
 
 type Candidate = { id: string; name: string; sub: string; image: ImageSourcePropType; portrait: PortraitSource; isReference: boolean; payload: Omit<EncounterBird, 'referenceImage'> };
@@ -118,7 +119,7 @@ export default function InteractionsScreen() {
         <View>
           <Text style={[s.body, { color: c.mutedForeground }]}>Choose two to six birds. The Mallard is a real reference species and is never added to your library.</Text>
           <View style={s.countRow}>
-            <View style={[s.pill, { backgroundColor: c.primary }]}><Text testID="selected-count" style={[s.pillText, { color: c.primaryForeground }]}>{valid.length + ' of ' + MAX + ' selected'}</Text></View>
+            <View style={[s.pill, { backgroundColor: c.primary }]}><Text testID="selected-count" style={[s.pillText, { color: c.primaryForeground }]}>{valid.length + ' selected, max six'}</Text></View>
             {valid.length > 0 ? <Pressable testID="clear-selection" accessibilityRole="button" disabled={pending} onPress={() => { tap(); setPicked([]); }}><Text style={[s.link, { color: c.primary }]}>Clear</Text></Pressable> : null}
           </View>
           {!loaded ? (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,12 +8,16 @@ import { ChirrupBrand, ChirrupLogo } from '@/components/ChirrupBrand';
 import { AccountChip } from '@/components/AccountMenu';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
+export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
 import { sans, serif } from '@/constants/fonts';
 
 export default function HomeScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const illustrationSize = Math.min(380, Math.max(0, width - 40));
+  const illustrationGap = Math.round(illustrationSize * 0.09);
   const { birds, loaded } = useCollection();
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 + 84 : insets.bottom + 90;
@@ -37,7 +41,10 @@ export default function HomeScreen() {
         <Text style={[s.intro, { color: c.mutedForeground }]}>Invent a bird from its anatomy, name it yourself, keep it in your library, and imagine who it meets.</Text>
         <Button testID="home-create" label="Create a bird" icon="plus" onPress={() => { tap(); router.navigate('/create'); }} style={{ marginTop: 18 }} />
       </View>
-      <Eyebrow style={{ marginTop: 28, marginBottom: 10 }}>Where to next</Eyebrow>
+      <Image testID="home-waiting-bird" source={require('../../assets/images/waiting-to-be-generated.png')}
+        accessibilityRole="image" accessibilityLabel="A dashed-outline bird holding a phone and thinking: Wondering when i will be generated..."
+        resizeMode="contain" style={[s.waitingBird, { height: illustrationSize, marginTop: illustrationGap }]} />
+      <Eyebrow style={{ marginTop: illustrationGap, marginBottom: 10 }}>Where to next</Eyebrow>
       <View style={{ gap: 10 }}>
         {entries.map((e) => (
           <Pressable key={e.id} testID={'home-entry-' + e.id} accessibilityRole="button" accessibilityLabel={e.title}
@@ -62,6 +69,7 @@ const s = StyleSheet.create({
   mark: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
   h1: { fontFamily: serif, fontSize: 32, lineHeight: 38, marginTop: 6 },
   intro: { fontFamily: sans.regular, fontSize: 15, lineHeight: 22, marginTop: 8 },
+  waitingBird: { width: '100%', maxWidth: 380, alignSelf: 'center' },
   entry: { flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 1, padding: 14 },
   entryIcon: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   entryTitle: { fontFamily: serif, fontSize: 19 },

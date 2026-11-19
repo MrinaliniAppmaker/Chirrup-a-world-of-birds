@@ -18,7 +18,13 @@ Create starts a fresh bird whenever the user returns after leaving that page. Du
 
 **Why:** The user explicitly requested a new creation session on reopening Create, and disliked the Chirrup mark as the pre-image placeholder.
 
-**How to apply:** Discard unsaved draft/result state on page exit, including late-arriving generation results, without deleting already saved birds.
+**How to apply:** Discard unsaved draft/result state on deliberate page exit, including late-arriving generation results, without deleting already saved birds. Error recovery is not a deliberate exit: retain the current route, selections, generated portrait and unfinished bird name when retrying a failed screen, and keep the signed-in session.
+
+Recovering from a screen error must not send an already signed-in user back to sign-in or discard the bird they were working on.
+
+**Why:** The user reported recovery repeatedly returning to sign-in while they were creating a bird and explicitly asked for error prevention or return to their prior work.
+
+**How to apply:** Prefer retrying the failed screen beneath the existing authentication providers instead of restarting the entire application. Preserve a session-scoped creation draft for recovery only; this must not change the intentional fresh-Create-on-navigation behavior or leak drafts between accounts. A previously generated portrait remains valid after retry even though the new request hook is idle; do not require another paid generation just to display it.
 
 The library is intended to hold up to 100 saved birds.
 
@@ -38,11 +44,23 @@ Your Profile should show the saved-library count as “x birds in library”; ta
 
 **How to apply:** Count saved birds, not discarded generations. Preserve the compact photo/name presentation and access to the existing journal entries.
 
-Sharing between Chirrup accounts should use an emailed link that the recipient can click or copy to add a bird to their own library.
+The requested account direction is email one-time-code authentication, including delivery to Gmail addresses, rather than asking users for a password.
 
-**Why:** The user clarified “Send to another Chirrup account via gmail” and then specified an email button or copyable download link, rather than simply emailing a photograph.
+**Why:** After asking for a shorter password minimum, the user explicitly superseded that request with “remove the password and replace by OTP to the gmail account given.”
 
-**How to apply:** Preserve the bird’s original portrait and traits in an independent recipient copy. Email composition is user-reviewed; never send email automatically on the user’s behalf or move/delete the sender’s bird as part of sharing.
+**How to apply:** Preserve existing account identities and journals when changing login methods. Check sign-in and new-account registration requirements separately: an enabled email-code first factor does not mean password-free registration is enabled. Keeping a required registration password is a temporary provider-policy limitation, not the user's approved final design. Never simulate passwordless registration by secretly assigning users random passwords to bypass the configured policy.
+
+Sharing between Chirrup accounts should use an emailed link that the recipient can click or copy to add the selected birds to their own library. Allow multiple birds to be selected for the same email/link.
+
+**Why:** The user clarified “Send to another Chirrup account via gmail,” specified an email button or copyable download link rather than simply emailing a photograph, and subsequently requested multi-bird selection.
+
+**How to apply:** Preserve each bird’s original portrait and traits in an independent recipient copy. Email composition is user-reviewed; never send email automatically on the user’s behalf or move/delete the sender’s birds as part of sharing.
+
+Pasting a bird-sharing link and pressing “Open shared bird” should add its bird or selection directly to the signed-in recipient's library, not require another preview-and-add step.
+
+**Why:** The user tested sharing, reported failure and clarified that the bottom link field and button should directly put the shared bird into the library.
+
+**How to apply:** Keep source birds intact, support both single and multi-bird links, retain the pasted text on an error, and require the recipient's account before storing private library copies.
 
 Only users name their birds. The name field starts blank; generation must not invent or prefill names. The editor belongs below the generated photograph and becomes a single displayed name on deliberate blur, without a duplicate live heading.
 

@@ -9,6 +9,7 @@ import { Button, Eyebrow } from '@/components/ui';
 import { LibraryShelf } from '@/components/LibraryShelf';
 import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
+export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
 
 export default function ProfileScreen() {
   const c = useColors();

@@ -8,6 +8,7 @@
 import type { GeneratedBird } from './generatedBird';
 
 export interface SharedBirdPreview {
+  birds?: GeneratedBird[];
   bird: GeneratedBird;
   expiresAt: string;
 }

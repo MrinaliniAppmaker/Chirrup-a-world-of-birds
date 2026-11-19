@@ -9,6 +9,77 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Create one seven-day link for selected saved birds
+ */
+export const createBirdShareBatchBodyBirdIdsItemMax = 128;
+
+
+export const createBirdShareBatchBodyBirdIdsItemRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+export const createBirdShareBatchBodyBirdIdsMax = 100;
+
+
+
+export const CreateBirdShareBatchBody = zod.object({
+  "birdIds": zod.array(zod.string().min(1).max(createBirdShareBatchBodyBirdIdsItemMax).regex(createBirdShareBatchBodyBirdIdsItemRegExp)).min(1).max(createBirdShareBatchBodyBirdIdsMax)
+})
+
+export const CreateBirdShareBatchResponse = zod.object({
+  "token": zod.string(),
+  "expiresAt": zod.string()
+})
+
+
+/**
+ * @summary Import all shared birds atomically or import none if capacity is insufficient
+ */
+export const importBirdShareBatchBodyTokenRegExp = new RegExp('^[A-Za-z0-9_-]{43}$');
+
+
+export const ImportBirdShareBatchBody = zod.object({
+  "token": zod.string().regex(importBirdShareBatchBodyTokenRegExp)
+})
+
+export const importBirdShareBatchResponseTraitsBodyMax = 120;
+
+export const importBirdShareBatchResponseTraitsBeakMax = 120;
+
+export const importBirdShareBatchResponseTraitsColorsMax = 120;
+
+export const importBirdShareBatchResponseTraitsFeathersMax = 120;
+
+export const importBirdShareBatchResponseTraitsLegsMax = 120;
+
+export const importBirdShareBatchResponseTraitsFeetMax = 120;
+
+export const importBirdShareBatchResponseTraitsExtraMax = 500;
+
+
+
+export const ImportBirdShareBatchResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "scientificName": zod.string(),
+  "tagline": zod.string(),
+  "appearance": zod.string(),
+  "habitat": zod.string(),
+  "diet": zod.string(),
+  "behavior": zod.string(),
+  "imageUri": zod.string(),
+  "createdAt": zod.string(),
+  "traits": zod.object({
+  "body": zod.string().max(importBirdShareBatchResponseTraitsBodyMax),
+  "beak": zod.string().max(importBirdShareBatchResponseTraitsBeakMax),
+  "colors": zod.string().max(importBirdShareBatchResponseTraitsColorsMax),
+  "feathers": zod.string().max(importBirdShareBatchResponseTraitsFeathersMax),
+  "legs": zod.string().max(importBirdShareBatchResponseTraitsLegsMax),
+  "feet": zod.string().max(importBirdShareBatchResponseTraitsFeetMax),
+  "extra": zod.string().max(importBirdShareBatchResponseTraitsExtraMax).optional()
+})
+})
+export const ImportBirdShareBatchResponse = zod.array(ImportBirdShareBatchResponseItem)
+
+
+/**
  * @summary Create a seven-day link to one bird in the signed-in account
  */
 export const createBirdShareBodyBirdIdMax = 128;
@@ -37,6 +108,20 @@ export const PreviewBirdShareQueryParams = zod.object({
   "token": zod.coerce.string().regex(previewBirdShareQueryTokenRegExp)
 })
 
+export const previewBirdShareResponseBirdsItemTraitsBodyMax = 120;
+
+export const previewBirdShareResponseBirdsItemTraitsBeakMax = 120;
+
+export const previewBirdShareResponseBirdsItemTraitsColorsMax = 120;
+
+export const previewBirdShareResponseBirdsItemTraitsFeathersMax = 120;
+
+export const previewBirdShareResponseBirdsItemTraitsLegsMax = 120;
+
+export const previewBirdShareResponseBirdsItemTraitsFeetMax = 120;
+
+export const previewBirdShareResponseBirdsItemTraitsExtraMax = 500;
+
 export const previewBirdShareResponseBirdTraitsBodyMax = 120;
 
 export const previewBirdShareResponseBirdTraitsBeakMax = 120;
@@ -54,6 +139,27 @@ export const previewBirdShareResponseBirdTraitsExtraMax = 500;
 
 
 export const PreviewBirdShareResponse = zod.object({
+  "birds": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "scientificName": zod.string(),
+  "tagline": zod.string(),
+  "appearance": zod.string(),
+  "habitat": zod.string(),
+  "diet": zod.string(),
+  "behavior": zod.string(),
+  "imageUri": zod.string(),
+  "createdAt": zod.string(),
+  "traits": zod.object({
+  "body": zod.string().max(previewBirdShareResponseBirdsItemTraitsBodyMax),
+  "beak": zod.string().max(previewBirdShareResponseBirdsItemTraitsBeakMax),
+  "colors": zod.string().max(previewBirdShareResponseBirdsItemTraitsColorsMax),
+  "feathers": zod.string().max(previewBirdShareResponseBirdsItemTraitsFeathersMax),
+  "legs": zod.string().max(previewBirdShareResponseBirdsItemTraitsLegsMax),
+  "feet": zod.string().max(previewBirdShareResponseBirdsItemTraitsFeetMax),
+  "extra": zod.string().max(previewBirdShareResponseBirdsItemTraitsExtraMax).optional()
+})
+})).optional(),
   "bird": zod.object({
   "id": zod.string(),
   "name": zod.string(),

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -12,6 +12,7 @@ import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
 import { journalErrorMessage } from '@/lib/journalBackend';
 import { parseBirdShareToken, rememberSharedBird } from '@/lib/birdSharing';
+export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
 
 export default function ReceiveBirdScreen() {
   const params = useLocalSearchParams<{ token?: string }>();
@@ -29,7 +30,7 @@ function ReceiveBirdContent({ raw }: { raw: string }) {
   const { importShared } = useCollection();
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
-  const [added, setAdded] = useState<GeneratedBird | null>(null);
+  const [added, setAdded] = useState<GeneratedBird[] | null>(null);
   const [remembering, setRemembering] = useState(false);
   const bottom = (Platform.OS === 'web' ? 34 : insets.bottom) + 32;
 
@@ -59,12 +60,13 @@ function ReceiveBirdContent({ raw }: { raw: string }) {
   };
 
   const preview_ = preview.data;
+  const shared = preview_?.birds ?? (preview_ ? [preview_.bird] : []);
   const expiry = preview_ ? new Date(preview_.expiresAt).toLocaleString(undefined, { month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
 
   return (
     <ScrollView testID="receive-bird-screen" style={{ flex: 1, backgroundColor: c.background }}
       contentContainerStyle={{ padding: 20, paddingBottom: bottom, maxWidth: 520, width: '100%', alignSelf: 'center' }}>
-      <Eyebrow>A bird was shared with you</Eyebrow>
+      <Eyebrow>{shared.length > 1 ? `${shared.length} birds were shared with you` : 'A bird was shared with you'}</Eyebrow>
       {preview.isLoading ? (
         <View testID="receive-loading" style={{ gap: 12, marginTop: 14 }}>
           <View style={{ width: '100%', aspectRatio: 1, backgroundColor: c.muted, borderRadius: c.radius + 4 }} />
@@ -80,25 +82,35 @@ function ReceiveBirdContent({ raw }: { raw: string }) {
         </View>
       ) : (
         <View style={{ marginTop: 12 }}>
-          <BirdProfile bird={preview_.bird} />
+          {shared.length === 1 ? <BirdProfile bird={shared[0]} /> : (
+            <View style={box}>
+              {shared.map(bird => (
+                <View key={bird.id} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 8 }}>
+                  <Image source={{ uri: bird.imageUri }} style={{ width: 48, height: 48, borderRadius: c.radius, backgroundColor: c.secondary }} />
+                  <Text style={[s.body, { flex: 1, color: c.foreground }]}>{bird.name || 'Unnamed bird'}</Text>
+                </View>
+              ))}
+              <Text style={[s.meta, { color: c.mutedForeground }]}>Each bird keeps its original portrait, traits and field notes. All birds are added together, without duplicates.</Text>
+            </View>
+          )}
           <View testID="receive-actions" style={box}>
-            <Text style={[s.meta, { color: c.mutedForeground }]}>Link expires {expiry}. If the keeper deletes this bird, the link stops working.</Text>
+            <Text style={[s.meta, { color: c.mutedForeground }]}>Link expires {expiry}. If the keeper deletes an included bird, the link stops working.</Text>
             {addError && !added ? <Text accessibilityLiveRegion="polite" style={[s.err, { color: c.destructive }]}>{addError}</Text> : null}
             {added ? (
               <View testID="receive-success" accessibilityLiveRegion="polite" style={{ marginTop: 10 }}>
                 <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
                   <Feather name="check-circle" size={18} color={c.primary} />
-                  <Text style={[s.ok, { color: c.primary }]}>Added to your library.</Text>
+                  <Text style={[s.ok, { color: c.primary }]}>{added.length === 1 ? 'Added to your library.' : `${added.length} birds are in your library.`}</Text>
                 </View>
-                <Button testID="receive-view-bird" label="View bird" icon="arrow-right" onPress={() => router.replace({ pathname: '/bird/[id]', params: { id: added.id } })} style={{ marginTop: 12 }} />
+                <Button testID="receive-view-bird" label={added.length === 1 ? 'View bird' : 'View library'} icon="arrow-right" onPress={() => added.length === 1 ? router.replace({ pathname: '/bird/[id]', params: { id: added[0].id } }) : router.replace('/library')} style={{ marginTop: 12 }} />
               </View>
             ) : isSignedIn ? (
               <>
-                <Button testID="receive-add" label={addError ? 'Try again' : 'Add to my library'} icon="plus" loading={adding} onPress={() => { void add(); }} style={{ marginTop: 12 }} />
+                <Button testID="receive-add" label={addError ? 'Try again' : shared.length > 1 ? `Add ${shared.length} birds to my library` : 'Add to my library'} icon="plus" loading={adding} onPress={() => { void add(); }} style={{ marginTop: 12 }} />
               </>
             ) : (
               <>
-                <Text style={[s.body, { color: c.foreground }]}>Sign in to keep this bird in your own journal.</Text>
+                <Text style={[s.body, { color: c.foreground }]}>Sign in to keep the shared birds in your own journal.</Text>
                 <Button testID="receive-sign-in" label="Sign in to add" icon="log-in" loading={remembering} style={{ marginTop: 12 }}
                   onPress={async () => {
                     setRemembering(true); setAddError(null);

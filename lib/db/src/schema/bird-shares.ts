@@ -1,7 +1,8 @@
-import { foreignKey, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { foreignKey, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import type { z } from "zod/v4";
 import { journalBirds } from "./journal-birds";
+import { journalInstallations } from "./journal-installations";
 
 // Only the digest is retained. A link authorizes a single saved bird, not a journal.
 export const birdShares = pgTable("bird_shares", {
@@ -20,3 +21,15 @@ export const birdShares = pgTable("bird_shares", {
 export const insertBirdShareSchema = createInsertSchema(birdShares).omit({ createdAt: true });
 export type InsertBirdShare = z.infer<typeof insertBirdShareSchema>;
 export type BirdShareRecord = typeof birdShares.$inferSelect;
+
+// Existing single-bird links remain valid. A batch stores only an explicit selection.
+export const birdShareBatches = pgTable("bird_share_batches", {
+  tokenHash: text("token_hash").primaryKey(),
+  installationId: uuid("installation_id").notNull().references(() => journalInstallations.id, { onDelete: "cascade" }),
+  birdIds: jsonb("bird_ids").$type<string[]>().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+export const insertBirdShareBatchSchema = createInsertSchema(birdShareBatches).omit({ createdAt: true });
+export type InsertBirdShareBatch = z.infer<typeof insertBirdShareBatchSchema>;
+export type BirdShareBatchRecord = typeof birdShareBatches.$inferSelect;

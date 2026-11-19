@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
-import { and, count, eq, gt, sql } from "drizzle-orm";
-import { birdShares, db, journalBirds, journalInstallations } from "@workspace/db";
+import { and, count, eq, gt, inArray, sql } from "drizzle-orm";
+import { birdShareBatches, birdShares, db, journalBirds, journalInstallations } from "@workspace/db";
 import { copyJournalPortrait, deletePortrait } from "./journalPortraits";
 import { JournalFullError, MAX_JOURNAL_BIRDS } from "./journalRepository";
 
@@ -64,6 +64,87 @@ export async function importSharedBird(targetId: string, token: string) {
     });
   } catch (error) {
     if (copiedPath) await deletePortrait(copiedPath).catch(() => {});
+    throw error;
+  }
+}
+
+export async function createBirdShareBatchLink(installationId: string, birdIds: string[]) {
+  if (!birdIds.length || birdIds.length > 100 || new Set(birdIds).size !== birdIds.length) throw new BirdShareUnavailable();
+  return db.transaction(async tx => {
+    await tx.select({ id: journalInstallations.id }).from(journalInstallations)
+      .where(eq(journalInstallations.id, installationId)).for("update");
+    const birds = await tx.select().from(journalBirds).where(and(
+      eq(journalBirds.installationId, installationId), inArray(journalBirds.birdId, birdIds),
+    ));
+    if (birds.length !== birdIds.length) throw new BirdShareUnavailable();
+    const token = randomBytes(32).toString("base64url");
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60_000);
+    await tx.insert(birdShareBatches).values({ tokenHash: digest(token), installationId, birdIds, expiresAt });
+    return { token, expiresAt: expiresAt.toISOString() };
+  });
+}
+
+export async function findSharedBirds(token: string) {
+  if (!/^[A-Za-z0-9_-]{43}$/.test(token)) throw new BirdShareUnavailable();
+  const [batch] = await db.select().from(birdShareBatches).where(and(
+    eq(birdShareBatches.tokenHash, digest(token)), gt(birdShareBatches.expiresAt, new Date()),
+  ));
+  if (!batch) {
+    const single = await findBirdShare(token);
+    return { birds: [single.bird], expiresAt: single.share.expiresAt };
+  }
+  const birds = await db.select().from(journalBirds).where(and(
+    eq(journalBirds.installationId, batch.installationId), inArray(journalBirds.birdId, batch.birdIds),
+  ));
+  if (birds.length !== batch.birdIds.length) throw new BirdShareUnavailable();
+  return { birds: batch.birdIds.map(id => birds.find(bird => bird.birdId === id)!), expiresAt: batch.expiresAt };
+}
+
+export async function importSharedBirdBatch(targetId: string, token: string) {
+  const initial = await findSharedBirds(token);
+  const sourceId = initial.birds[0].installationId;
+  const copiedPaths: string[] = [];
+  try {
+    return await db.transaction(async tx => {
+      await tx.select({ id: journalInstallations.id }).from(journalInstallations)
+        .where(sql`${journalInstallations.id} = ${targetId} OR ${journalInstallations.id} = ${sourceId}`)
+        .orderBy(journalInstallations.id).for("update");
+      const [batch] = await tx.select().from(birdShareBatches).where(and(
+        eq(birdShareBatches.tokenHash, digest(token)), gt(birdShareBatches.expiresAt, new Date()),
+      ));
+      const [single] = batch ? [] : await tx.select().from(birdShares).where(and(
+        eq(birdShares.tokenHash, digest(token)), gt(birdShares.expiresAt, new Date()),
+      ));
+      if (!batch && !single) throw new BirdShareUnavailable();
+      const ids = batch ? batch.birdIds : [single!.birdId];
+      const source = await tx.select().from(journalBirds).where(and(
+        eq(journalBirds.installationId, sourceId), inArray(journalBirds.birdId, ids),
+      ));
+      if (source.length !== ids.length) throw new BirdShareUnavailable();
+      const ordered = ids.map(id => source.find(bird => bird.birdId === id)!);
+      if (sourceId === targetId) return ordered;
+      const existing = await tx.select().from(journalBirds).where(eq(journalBirds.installationId, targetId));
+      const copyId = (id: string) => `shared_${digest(`${sourceId}:${id}`)}`;
+      const missing = ordered.filter(bird => !existing.some(other => other.birdId === copyId(bird.birdId)));
+      // Capacity is checked for the whole batch before copying a single portrait.
+      if (existing.length + missing.length > MAX_JOURNAL_BIRDS) throw new JournalFullError();
+      const result = [];
+      for (const bird of ordered) {
+        const id = copyId(bird.birdId);
+        const previous = existing.find(other => other.birdId === id);
+        if (previous) { result.push(previous); continue; }
+        const portraitPath = await copyJournalPortrait(bird.portraitPath, targetId, id);
+        copiedPaths.push(portraitPath);
+        const [saved] = await tx.insert(journalBirds).values({
+          installationId: targetId, birdId: id, portraitPath,
+          metadata: { ...bird.metadata, id, imageUri: "" },
+        }).returning();
+        result.push(saved);
+      }
+      return result;
+    });
+  } catch (error) {
+    await Promise.all(copiedPaths.map(path => deletePortrait(path).catch(() => {})));
     throw error;
   }
 }

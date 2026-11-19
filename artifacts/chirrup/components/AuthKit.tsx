@@ -8,6 +8,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useSSO, useUser } from '@clerk/expo';
 import { useRouter } from 'expo-router';
 import { goAfterSignIn } from '@/lib/birdSharing';
+import { noteInputTouch } from '@/lib/inputFocus';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FieldInput } from '@/components/FieldInput';
 import { ChirrupLogo } from '@/components/ChirrupBrand';
@@ -225,7 +226,7 @@ export function RenameDialog({ visible, initial, onClose, onSave }: { visible: b
   const len = value.trim().length;
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View style={s.scrim}>
+      <View style={s.scrim} onStartShouldSetResponderCapture={noteInputTouch}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Dismiss" testID="rename-scrim" />
         <View style={[s.sheet, { backgroundColor: c.card, borderColor: c.border, borderRadius: c.radius + 4 }]}>
           <Eyebrow>Rename</Eyebrow>
