@@ -32,6 +32,18 @@ Backend collections belong to signed-in accounts and contain saved journal birds
 
 **How to apply:** Keep journals and offline caches isolated between accounts; sign-out must hide, not delete, the account's birds. Preserve original portraits and notes during migration and prevent another account from claiming the same legacy collection. Do not automatically archive discarded or unnamed generations.
 
+Your Profile should show the saved-library count as “x birds in library”; tapping it reveals small square portraits and names. Bird sharing must be reachable from both Your Profile and Library.
+
+**Why:** The user explicitly requested the count, expandable small-photo list (roughly one tenth of the shorter phone edge), and both sharing entry points.
+
+**How to apply:** Count saved birds, not discarded generations. Preserve the compact photo/name presentation and access to the existing journal entries.
+
+Sharing between Chirrup accounts should use an emailed link that the recipient can click or copy to add a bird to their own library.
+
+**Why:** The user clarified “Send to another Chirrup account via gmail” and then specified an email button or copyable download link, rather than simply emailing a photograph.
+
+**How to apply:** Preserve the bird’s original portrait and traits in an independent recipient copy. Email composition is user-reviewed; never send email automatically on the user’s behalf or move/delete the sender’s bird as part of sharing.
+
 Only users name their birds. The name field starts blank; generation must not invent or prefill names. The editor belongs below the generated photograph and becomes a single displayed name on deliberate blur, without a duplicate live heading.
 
 **Why:** The user explicitly said users name their birds, moved the editor below the photo, and rejected showing the typed name twice.

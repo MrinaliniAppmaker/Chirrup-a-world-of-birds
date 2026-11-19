@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { GeneratedBird } from '@workspace/api-client-react';
+import { importBirdShare, type GeneratedBird } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@clerk/expo';
 import { hasLocalPortrait, loadCollection, saveCollectionBird, removeCollectionBird, replaceCollection, MAX_BIRDS } from '@/lib/collectionStorage';
@@ -17,6 +17,7 @@ interface CollectionValue {
   retrySync: () => Promise<void>;
   isSaved: (id: string) => boolean;
   save: (bird: GeneratedBird) => Promise<void>;
+  importShared: (token: string) => Promise<GeneratedBird>;
   remove: (id: string) => Promise<void>;
   get: (id: string) => GeneratedBird | undefined;
 }
@@ -166,6 +167,36 @@ export function CollectionProvider({ children }: { children: React.ReactNode }) 
     }
   }), [enqueue, loaded, synchronize, userId, owner, getSession, ensureOwner]);
 
+  const importShared = useCallback((token: string) => enqueue(async () => {
+    ensureOwner();
+    if (!userId) throw new Error('Sign in to add this shared bird.');
+    const session = await getSession();
+    const accessToken = await session.getToken!();
+    if (!accessToken) throw new Error('Sign in again to add this shared bird.');
+    const remote = await importBirdShare({ token }, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    ensureOwner();
+    // The server already saved the copy. An offline-cache failure must not tell
+    // the user to re-import or suggest that their committed bird was lost.
+    try {
+      if (!storageReady.current) throw new Error('Offline storage not ready.');
+      const existing = current.current.find(bird => bird.id === remote.id);
+      const stored = existing ?? await saveCollectionBird(remote, current.current, owner);
+      current.current = existing ? current.current : [stored, ...current.current];
+      setBirds(current.current);
+      setError(null);
+      setSyncError(migrationWarning.current);
+      return stored;
+    } catch {
+      current.current = current.current.some(bird => bird.id === remote.id)
+        ? current.current : [remote, ...current.current];
+      setBirds(current.current);
+      setSyncError('The shared bird is saved to your account. Retry sync to keep an offline copy.');
+      return remote;
+    }
+  }), [enqueue, ensureOwner, userId, getSession, owner]);
+
   const remove = useCallback((id: string) => enqueue(async () => {
     ensureOwner();
     if (!userId) throw new Error('Sign in from Home before changing this journal.');
@@ -193,10 +224,10 @@ export function CollectionProvider({ children }: { children: React.ReactNode }) 
   }), [enqueue, loaded, synchronize, userId, owner, getSession, ensureOwner]);
 
   const value = useMemo<CollectionValue>(() => ({
-    birds, loaded, error, syncing, syncError, retrySync, save, remove,
+    birds, loaded, error, syncing, syncError, retrySync, save, remove, importShared,
     isSaved: (id) => birds.some((b) => b.id === id),
     get: (id) => birds.find((b) => b.id === id),
-  }), [birds, loaded, error, syncing, syncError, retrySync, save, remove]);
+  }), [birds, loaded, error, syncing, syncError, retrySync, save, remove, importShared]);
 
   return <CollectionContext.Provider value={value}>{children}</CollectionContext.Provider>;
 }

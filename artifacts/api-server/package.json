@@ -9,7 +9,8 @@
     "start": "node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:journal": "node tests/run-journal.mjs",
-    "test:accounts": "node tests/run-account-journal.mjs"
+    "test:accounts": "node tests/run-account-journal.mjs",
+    "test:sharing": "node tests/run-bird-sharing.mjs"
   },
   "dependencies": {
     "@clerk/express": "^2.1.91",

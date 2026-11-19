@@ -34,7 +34,10 @@ export default function LibraryScreen() {
         <ChirrupBrand size={24} />
         <Eyebrow style={{ marginTop: 18 }}>Your library</Eyebrow>
         <Text accessibilityRole="header" style={[s.h1, { color: c.foreground }]}>Field journal</Text>
-        <Button testID="library-interactions" label="Interactions" icon="users" variant="outline" onPress={() => router.push('/interactions')} style={{ marginTop: 12 }} />
+        <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+          <Button testID="library-interactions" label="Interactions" icon="users" variant="outline" onPress={() => router.push('/interactions')} style={{ flex: 1, paddingHorizontal: 10 }} />
+          <Button testID="library-share-birds" label="Share birds" icon="share-2" variant="outline" onPress={() => router.push('/share-birds')} style={{ flex: 1, paddingHorizontal: 10 }} />
+        </View>
         <View style={s.filterRow}>
           <View style={[s.countPill, { backgroundColor: c.primary }]}>
             <Text testID="library-count" style={{ fontFamily: sans.medium, fontSize: 12, color: c.primaryForeground }}>{'All birds \u00b7 ' + birds.length}</Text>

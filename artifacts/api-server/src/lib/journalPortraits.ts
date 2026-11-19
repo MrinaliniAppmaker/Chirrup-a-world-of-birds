@@ -77,3 +77,25 @@ export async function validatePortrait(path: string): Promise<void> {
 export async function deletePortrait(path: string) {
   await location(path).file.delete({ ignoreNotFound: true });
 }
+
+/** Independent private copy: deleting either journal's bird cannot break the other. */
+export async function copyJournalPortrait(source: string, installationId: string, birdId: string) {
+  const destination = `journal-portraits/${installationId}/${birdId}/${randomUUID()}`;
+  const { file } = location(source);
+  const [metadata] = await file.getMetadata();
+  const size = Number(metadata.size);
+  if (!Number.isFinite(size) || size < 1 || size > MAX_PORTRAIT_BYTES) throw new Error("Invalid saved portrait.");
+  // Source paths are exclusively from trusted saved rows, never from a request URL.
+  const [bytes] = await file.download();
+  if (bytes.length !== size) throw new Error("Portrait copy was incomplete.");
+  try {
+    await location(destination).file.save(bytes, {
+      resumable: false,
+      metadata: { contentType: metadata.contentType },
+    });
+    return destination;
+  } catch (error) {
+    await deletePortrait(destination).catch(() => {});
+    throw error;
+  }
+}

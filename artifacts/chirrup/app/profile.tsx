@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { Avatar, Notice, RenameDialog, displayNameOf, useProfileActions } from '@/components/AuthKit';
 import { signOutToHome } from '@/components/AccountMenu';
 import { Button, Eyebrow } from '@/components/ui';
+import { LibraryShelf } from '@/components/LibraryShelf';
 import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
 
@@ -47,6 +48,8 @@ export default function ProfileScreen() {
         <Text style={[s.body, { color: c.mutedForeground }]} testID="profile-email">{user.primaryEmailAddress?.emailAddress}</Text>
         {joined ? <Text style={[s.meta, { color: c.mutedForeground }]}>Keeping a journal since {joined}</Text> : null}
       </View>
+      <LibraryShelf />
+      <Button testID="profile-share-birds" label="Share birds" icon="share-2" variant="outline" onPress={() => router.push('/share-birds')} style={{ marginBottom: 8 }} />
       <Notice text={photoError} />
       <Notice text={logoutError} />
       <View style={{ gap: 10, marginTop: 6 }}>

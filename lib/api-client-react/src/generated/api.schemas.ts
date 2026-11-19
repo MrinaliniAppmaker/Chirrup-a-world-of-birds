@@ -5,6 +5,61 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface BirdShareInput {
+  /**
+     * @minLength 1
+     * @maxLength 128
+     * @pattern ^[A-Za-z0-9_-]+$
+     */
+  birdId: string;
+}
+
+export interface BirdShareClaim {
+  /** @pattern ^[A-Za-z0-9_-]{43}$ */
+  token: string;
+}
+
+export interface BirdShareLink {
+  token: string;
+  expiresAt: string;
+}
+
+export interface BirdTraits {
+  /** @maxLength 120 */
+  body: string;
+  /** @maxLength 120 */
+  beak: string;
+  /** @maxLength 120 */
+  colors: string;
+  /** @maxLength 120 */
+  feathers: string;
+  /** @maxLength 120 */
+  legs: string;
+  /** @maxLength 120 */
+  feet: string;
+  /** @maxLength 500 */
+  extra?: string;
+}
+
+export interface GeneratedBird {
+  id: string;
+  name: string;
+  scientificName: string;
+  tagline: string;
+  appearance: string;
+  habitat: string;
+  diet: string;
+  behavior: string;
+  imageUri: string;
+  createdAt: string;
+  traits: BirdTraits;
+}
+
+export interface SharedBirdPreview {
+  bird: GeneratedBird;
+  expiresAt: string;
+}
+
 export interface ProfileName {
   /**
      * @minLength 1
@@ -58,37 +113,6 @@ export interface JournalPortraitUpload {
   uploadUrl: string;
   /** @maxLength 350 */
   portraitPath: string;
-}
-
-export interface BirdTraits {
-  /** @maxLength 120 */
-  body: string;
-  /** @maxLength 120 */
-  beak: string;
-  /** @maxLength 120 */
-  colors: string;
-  /** @maxLength 120 */
-  feathers: string;
-  /** @maxLength 120 */
-  legs: string;
-  /** @maxLength 120 */
-  feet: string;
-  /** @maxLength 500 */
-  extra?: string;
-}
-
-export interface GeneratedBird {
-  id: string;
-  name: string;
-  scientificName: string;
-  tagline: string;
-  appearance: string;
-  habitat: string;
-  diet: string;
-  behavior: string;
-  imageUri: string;
-  createdAt: string;
-  traits: BirdTraits;
 }
 
 export interface JournalBirdInput {
@@ -158,4 +182,20 @@ export interface GeneratedEncounter {
 export interface HealthStatus {
   status: string;
 }
+
+export type BirdShareTokenParameter = string;
+
+export type PreviewBirdShareParams = {
+/**
+ * @pattern ^[A-Za-z0-9_-]{43}$
+ */
+token: BirdShareTokenParameter;
+};
+
+export type OpenBirdShareParams = {
+/**
+ * @pattern ^[A-Za-z0-9_-]{43}$
+ */
+token: BirdShareTokenParameter;
+};
 

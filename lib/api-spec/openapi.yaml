@@ -11,6 +11,73 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /bird-shares:
+    post:
+      operationId: createBirdShare
+      summary: Create a seven-day link to one bird in the signed-in account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirdShareInput"
+      responses:
+        "201":
+          description: Anyone holding the link may preview and import this bird
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirdShareLink"
+        "400": { description: Invalid bird identifier }
+        "401": { description: Sign in required }
+        "404": { description: Bird not found in your journal }
+  /bird-shares/preview:
+    get:
+      operationId: previewBirdShare
+      summary: Preview only the bird authorized by a sharing token
+      parameters:
+        - $ref: "#/components/parameters/BirdShareToken"
+      responses:
+        "200":
+          description: Shared bird and link expiration
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedBirdPreview"
+        "404": { description: "Link invalid, expired, or source bird removed" }
+  /bird-shares/import:
+    post:
+      operationId: importBirdShare
+      summary: Add an independent exact copy to the signed-in account without replacing any bird
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirdShareClaim"
+      responses:
+        "200":
+          description: Imported bird or the previously imported copy on retry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedBird"
+        "401": { description: Sign in required }
+        "404": { description: "Link invalid, expired, or source bird removed" }
+        "409": { description: Library holds 100 birds already }
+  /bird-shares/open:
+    get:
+      operationId: openBirdShare
+      summary: Email landing page with an app button and a copyable link
+      parameters:
+        - $ref: "#/components/parameters/BirdShareToken"
+      responses:
+        "200":
+          description: Sharing instructions
+          content:
+            text/html:
+              schema: { type: string }
+        "404": { description: Link invalid or expired }
   /journal/profile:
     patch:
       operationId: renameAccountProfile
@@ -201,12 +268,45 @@ paths:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
 components:
+  parameters:
+    BirdShareToken:
+      in: query
+      name: token
+      required: true
+      schema:
+        type: string
+        pattern: '^[A-Za-z0-9_-]{43}$'
   securitySchemes:
     journalDevice:
       type: http
       scheme: bearer
       description: Random installation credential, never a phone hardware identifier.
   schemas:
+    BirdShareInput:
+      type: object
+      additionalProperties: false
+      required: [birdId]
+      properties:
+        birdId: { type: string, minLength: 1, maxLength: 128, pattern: '^[A-Za-z0-9_-]+$' }
+    BirdShareClaim:
+      type: object
+      additionalProperties: false
+      required: [token]
+      properties:
+        token: { type: string, pattern: '^[A-Za-z0-9_-]{43}$' }
+    BirdShareLink:
+      type: object
+      required: [token, expiresAt]
+      properties:
+        token: { type: string }
+        expiresAt: { type: string }
+    SharedBirdPreview:
+      type: object
+      required: [bird, expiresAt]
+      properties:
+        bird:
+          $ref: "#/components/schemas/GeneratedBird"
+        expiresAt: { type: string }
     ProfileName:
       type: object
       additionalProperties: false

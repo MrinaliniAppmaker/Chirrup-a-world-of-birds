@@ -6,6 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './birdShareClaim';
+export * from './birdShareInput';
+export * from './birdShareLink';
+export * from './birdShareTokenParameter';
 export * from './birdTraits';
 export * from './encounterBird';
 export * from './encounterRequest';
@@ -20,4 +24,7 @@ export * from './journalInstallation';
 export * from './journalPortraitInput';
 export * from './journalPortraitInputContentType';
 export * from './journalPortraitUpload';
+export * from './openBirdShareParams';
+export * from './previewBirdShareParams';
 export * from './profileName';
+export * from './sharedBirdPreview';

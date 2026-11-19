@@ -7,6 +7,7 @@ import * as AuthSession from 'expo-auth-session';
 import * as ImagePicker from 'expo-image-picker';
 import { useSSO, useUser } from '@clerk/expo';
 import { useRouter } from 'expo-router';
+import { goAfterSignIn } from '@/lib/birdSharing';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FieldInput } from '@/components/FieldInput';
 import { ChirrupLogo } from '@/components/ChirrupBrand';
@@ -133,7 +134,7 @@ export function GoogleButton({ onError, testID }: { onError: (msg: string | null
           session: createdSessionId,
           navigate: async ({ session }) => {
             if (session?.currentTask) { onError(taskMessage(session.currentTask)); return; }
-            router.replace('/');
+            void goAfterSignIn(router);
           },
         });
       } else {

@@ -4,6 +4,7 @@ import { useSignIn } from '@clerk/expo';
 import { useRouter } from 'expo-router';
 import { AuthField, AuthShell, Divider, GoogleButton, LinkText, Notice, readableError, taskMessage } from '@/components/AuthKit';
 import { Button } from '@/components/ui';
+import { goAfterSignIn } from '@/lib/birdSharing';
 
 export default function SignInScreen() {
   const { signIn, errors, fetchStatus } = useSignIn();
@@ -20,7 +21,7 @@ export default function SignInScreen() {
     await signIn.finalize({
       navigate: ({ session }) => {
         if (session?.currentTask) { setMessage(taskMessage(session.currentTask)); return; }
-        router.replace('/');
+        void goAfterSignIn(router);
       },
     });
   };

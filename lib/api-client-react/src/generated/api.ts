@@ -20,6 +20,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BirdShareClaim,
+  BirdShareInput,
+  BirdShareLink,
   BirdTraits,
   EncounterRequest,
   GeneratedBird,
@@ -31,7 +34,10 @@ import type {
   JournalInstallation,
   JournalPortraitInput,
   JournalPortraitUpload,
-  ProfileName
+  OpenBirdShareParams,
+  PreviewBirdShareParams,
+  ProfileName,
+  SharedBirdPreview
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -60,6 +66,350 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getCreateBirdShareUrl = () => {
+
+
+
+
+  return `/api/bird-shares`
+}
+
+/**
+ * @summary Create a seven-day link to one bird in the signed-in account
+ */
+export const createBirdShare = async (birdShareInput: BirdShareInput, options?: Parameters<typeof customFetch>[1]): Promise<BirdShareLink> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<BirdShareLink>(getCreateBirdShareUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(birdShareInput)
+  }
+);}
+
+
+
+
+
+export const getCreateBirdShareMutationKey = () => ['createBirdShare'] as const;
+
+export const getCreateBirdShareMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBirdShare>>, TError,CreateBirdShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createBirdShare>>, TError,CreateBirdShareMutationVariables, TContext> => {
+
+const mutationKey = getCreateBirdShareMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createBirdShare>>, CreateBirdShareMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createBirdShare(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateBirdShareMutationResult = NonNullable<Awaited<ReturnType<typeof createBirdShare>>>
+    export type CreateBirdShareMutationBody = BodyType<BirdShareInput>
+    export type CreateBirdShareMutationError = ErrorType<void>
+    export type CreateBirdShareMutationVariables = {data: BodyType<BirdShareInput>}
+
+    /**
+ * @summary Create a seven-day link to one bird in the signed-in account
+ */
+export const useCreateBirdShare = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBirdShare>>, TError,CreateBirdShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createBirdShare>>,
+        TError,
+        CreateBirdShareMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateBirdShareMutationOptions(options));
+    }
+
+export const getPreviewBirdShareUrl = (params: PreviewBirdShareParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/bird-shares/preview?${stringifiedParams}` : `/api/bird-shares/preview`
+}
+
+/**
+ * @summary Preview only the bird authorized by a sharing token
+ */
+export const previewBirdShare = async (params: PreviewBirdShareParams, options?: Parameters<typeof customFetch>[1]): Promise<SharedBirdPreview> => {
+
+  return customFetch<SharedBirdPreview>(getPreviewBirdShareUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPreviewBirdShareQueryKey = (params?: PreviewBirdShareParams,) => {
+    return [
+    `/api/bird-shares/preview`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getPreviewBirdShareQueryOptions = <TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(params: PreviewBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPreviewBirdShareQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof previewBirdShare>>> = ({ signal }) => previewBirdShare(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PreviewBirdShareQueryResult = NonNullable<Awaited<ReturnType<typeof previewBirdShare>>>
+export type PreviewBirdShareQueryError = ErrorType<void>
+
+
+/**
+ * @summary Preview only the bird authorized by a sharing token
+ */
+
+export function usePreviewBirdShare<TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(
+ params: PreviewBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPreviewBirdShareQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getImportBirdShareUrl = () => {
+
+
+
+
+  return `/api/bird-shares/import`
+}
+
+/**
+ * @summary Add an independent exact copy to the signed-in account without replacing any bird
+ */
+export const importBirdShare = async (birdShareClaim: BirdShareClaim, options?: Parameters<typeof customFetch>[1]): Promise<GeneratedBird> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<GeneratedBird>(getImportBirdShareUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(birdShareClaim)
+  }
+);}
+
+
+
+
+
+export const getImportBirdShareMutationKey = () => ['importBirdShare'] as const;
+
+export const getImportBirdShareMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importBirdShare>>, TError,ImportBirdShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof importBirdShare>>, TError,ImportBirdShareMutationVariables, TContext> => {
+
+const mutationKey = getImportBirdShareMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importBirdShare>>, ImportBirdShareMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  importBirdShare(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportBirdShareMutationResult = NonNullable<Awaited<ReturnType<typeof importBirdShare>>>
+    export type ImportBirdShareMutationBody = BodyType<BirdShareClaim>
+    export type ImportBirdShareMutationError = ErrorType<void>
+    export type ImportBirdShareMutationVariables = {data: BodyType<BirdShareClaim>}
+
+    /**
+ * @summary Add an independent exact copy to the signed-in account without replacing any bird
+ */
+export const useImportBirdShare = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importBirdShare>>, TError,ImportBirdShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof importBirdShare>>,
+        TError,
+        ImportBirdShareMutationVariables,
+        TContext
+      > => {
+      return useMutation(getImportBirdShareMutationOptions(options));
+    }
+
+export const getOpenBirdShareUrl = (params: OpenBirdShareParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/bird-shares/open?${stringifiedParams}` : `/api/bird-shares/open`
+}
+
+/**
+ * @summary Email landing page with an app button and a copyable link
+ */
+export const openBirdShare = async (params: OpenBirdShareParams, options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getOpenBirdShareUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getOpenBirdShareQueryKey = (params?: OpenBirdShareParams,) => {
+    return [
+    `/api/bird-shares/open`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getOpenBirdShareQueryOptions = <TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(params: OpenBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getOpenBirdShareQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof openBirdShare>>> = ({ signal }) => openBirdShare(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type OpenBirdShareQueryResult = NonNullable<Awaited<ReturnType<typeof openBirdShare>>>
+export type OpenBirdShareQueryError = ErrorType<void>
+
+
+/**
+ * @summary Email landing page with an app button and a copyable link
+ */
+
+export function useOpenBirdShare<TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(
+ params: OpenBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getOpenBirdShareQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getRenameAccountProfileUrl = () => {
 

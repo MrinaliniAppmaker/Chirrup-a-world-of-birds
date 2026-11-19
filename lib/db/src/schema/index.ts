@@ -19,3 +19,4 @@
 
 export * from "./journal-installations";
 export * from "./journal-birds";
+export * from "./bird-shares";

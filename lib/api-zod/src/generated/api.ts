@@ -9,6 +9,139 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Create a seven-day link to one bird in the signed-in account
+ */
+export const createBirdShareBodyBirdIdMax = 128;
+
+
+export const createBirdShareBodyBirdIdRegExp = new RegExp('^[A-Za-z0-9_-]+$');
+
+
+export const CreateBirdShareBody = zod.object({
+  "birdId": zod.string().min(1).max(createBirdShareBodyBirdIdMax).regex(createBirdShareBodyBirdIdRegExp)
+})
+
+export const CreateBirdShareResponse = zod.object({
+  "token": zod.string(),
+  "expiresAt": zod.string()
+})
+
+
+/**
+ * @summary Preview only the bird authorized by a sharing token
+ */
+export const previewBirdShareQueryTokenRegExp = new RegExp('^[A-Za-z0-9_-]{43}$');
+
+
+export const PreviewBirdShareQueryParams = zod.object({
+  "token": zod.coerce.string().regex(previewBirdShareQueryTokenRegExp)
+})
+
+export const previewBirdShareResponseBirdTraitsBodyMax = 120;
+
+export const previewBirdShareResponseBirdTraitsBeakMax = 120;
+
+export const previewBirdShareResponseBirdTraitsColorsMax = 120;
+
+export const previewBirdShareResponseBirdTraitsFeathersMax = 120;
+
+export const previewBirdShareResponseBirdTraitsLegsMax = 120;
+
+export const previewBirdShareResponseBirdTraitsFeetMax = 120;
+
+export const previewBirdShareResponseBirdTraitsExtraMax = 500;
+
+
+
+export const PreviewBirdShareResponse = zod.object({
+  "bird": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "scientificName": zod.string(),
+  "tagline": zod.string(),
+  "appearance": zod.string(),
+  "habitat": zod.string(),
+  "diet": zod.string(),
+  "behavior": zod.string(),
+  "imageUri": zod.string(),
+  "createdAt": zod.string(),
+  "traits": zod.object({
+  "body": zod.string().max(previewBirdShareResponseBirdTraitsBodyMax),
+  "beak": zod.string().max(previewBirdShareResponseBirdTraitsBeakMax),
+  "colors": zod.string().max(previewBirdShareResponseBirdTraitsColorsMax),
+  "feathers": zod.string().max(previewBirdShareResponseBirdTraitsFeathersMax),
+  "legs": zod.string().max(previewBirdShareResponseBirdTraitsLegsMax),
+  "feet": zod.string().max(previewBirdShareResponseBirdTraitsFeetMax),
+  "extra": zod.string().max(previewBirdShareResponseBirdTraitsExtraMax).optional()
+})
+}),
+  "expiresAt": zod.string()
+})
+
+
+/**
+ * @summary Add an independent exact copy to the signed-in account without replacing any bird
+ */
+export const importBirdShareBodyTokenRegExp = new RegExp('^[A-Za-z0-9_-]{43}$');
+
+
+export const ImportBirdShareBody = zod.object({
+  "token": zod.string().regex(importBirdShareBodyTokenRegExp)
+})
+
+export const importBirdShareResponseTraitsBodyMax = 120;
+
+export const importBirdShareResponseTraitsBeakMax = 120;
+
+export const importBirdShareResponseTraitsColorsMax = 120;
+
+export const importBirdShareResponseTraitsFeathersMax = 120;
+
+export const importBirdShareResponseTraitsLegsMax = 120;
+
+export const importBirdShareResponseTraitsFeetMax = 120;
+
+export const importBirdShareResponseTraitsExtraMax = 500;
+
+
+
+export const ImportBirdShareResponse = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "scientificName": zod.string(),
+  "tagline": zod.string(),
+  "appearance": zod.string(),
+  "habitat": zod.string(),
+  "diet": zod.string(),
+  "behavior": zod.string(),
+  "imageUri": zod.string(),
+  "createdAt": zod.string(),
+  "traits": zod.object({
+  "body": zod.string().max(importBirdShareResponseTraitsBodyMax),
+  "beak": zod.string().max(importBirdShareResponseTraitsBeakMax),
+  "colors": zod.string().max(importBirdShareResponseTraitsColorsMax),
+  "feathers": zod.string().max(importBirdShareResponseTraitsFeathersMax),
+  "legs": zod.string().max(importBirdShareResponseTraitsLegsMax),
+  "feet": zod.string().max(importBirdShareResponseTraitsFeetMax),
+  "extra": zod.string().max(importBirdShareResponseTraitsExtraMax).optional()
+})
+})
+
+
+/**
+ * @summary Email landing page with an app button and a copyable link
+ */
+export const openBirdShareQueryTokenRegExp = new RegExp('^[A-Za-z0-9_-]{43}$');
+
+
+export const OpenBirdShareQueryParams = zod.object({
+  "token": zod.coerce.string().regex(openBirdShareQueryTokenRegExp)
+})
+
+export const OpenBirdShareResponse = zod.unknown()
+
+
+/**
  * @summary Rename only the signed-in user's profile
  */
 export const renameAccountProfileBodyDisplayNameMax = 60;
