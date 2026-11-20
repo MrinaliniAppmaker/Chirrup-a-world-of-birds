@@ -7,3 +7,5 @@
 - [App Storage compatibility](storage-sidecar-compatibility.md) — SDK major updates must support Replit's bucket-scoped sidecar; signed uploads alone do not prove reads work.
 - [Account profile compatibility](account-profile-compatibility.md) — typed Clerk name fields can be disabled in frontend requests; keep verified, narrowly scoped profile updates.
 - [Expo verification resources](expo-export-resources.md) — serialize heavy checks and use one export worker; parallel verification has coincided with workspace disconnections.
+- [Live API generation safety](live-api-generation.md) — keep imported API helpers available during regeneration; a clean-output gap caused a real Home preview failure.
+- [Browser OAuth cancellation](browser-oauth-cancellation.md) — a closed Google popup can leave shared SDK loading stuck; email forms need their own request state.

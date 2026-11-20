@@ -26,6 +26,14 @@ Focus retention and caret stability are separate requirements.
 
 **How to apply:** Check exact resulting text and selection position across pauses and parent rerenders, not just the active element. Avoid redundant value writes during an active browser edit while preserving explicit parent resets/prefills. Do not describe an intermittent caret issue as conclusively solved solely because a few replays pass.
 
+A focused-looking border is not proof that an input accepts keyboard editing.
+
+**Why:** After earlier focus repairs, the user explicitly reported that fields appeared selected but could not be typed into, and requested a complete fix rather than stronger apparent selection.
+
+**How to apply:** Verify actual keyboard characters, deletion, paste and the value used by the form, not just styling, focus APIs or scripted filling. Reflect real blur in styling and do not let focus recovery compete with another editable control. Keep error highlights separate from the editable control so feedback cannot intercept typing.
+
+Inspect actual read-only/disabled state before adding focus recovery. [A cancelled Google popup](browser-oauth-cancellation.md) left shared provider loading stuck and disabled otherwise correctly focused email fields.
+
 Do not diagnose missing characters solely from an immediate React fiber snapshot.
 
 **Why:** An input's inspected prop once appeared one character behind its DOM value immediately after typing. A settled read through the committed root matched the complete text. The original snapshot did not establish actual data loss; it could have observed an alternate fiber or an unfinished commit.

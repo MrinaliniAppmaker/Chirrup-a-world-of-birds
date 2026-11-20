@@ -13,8 +13,8 @@
     "test:sharing": "node tests/run-bird-sharing.mjs"
   },
   "dependencies": {
-    "@clerk/express": "^2.1.91",
-    "@clerk/shared": "^4.46.0",
+    "@clerk/express": "^2.1.93",
+    "@clerk/shared": "^4.48.0",
     "@google-cloud/storage": "^7.22.0",
     "@google/genai": "^1.52.0",
     "@resvg/resvg-js": "^2.6.2",

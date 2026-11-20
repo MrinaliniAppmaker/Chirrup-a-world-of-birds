@@ -161,6 +161,12 @@ export const FieldInput = forwardRef<TextInputInstance, TextInputProps & { onEdi
     onBlur: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const node = event.currentTarget;
       const next = event.relatedTarget;
+      // Styling must reflect actual focus, including failed/cancelled recovery.
+      // A green border alone is never evidence that keyboard events reach us.
+      setFocused(false);
+      const nextIsEditor = next instanceof HTMLElement
+        && (next.matches('input, textarea, select') || next.isContentEditable);
+      if (nextIsEditor) deliberateBlur.current = true;
       const finish = () => {
         if (!mounted.current) return;
         setFocused(false);
@@ -197,7 +203,10 @@ export const FieldInput = forwardRef<TextInputInstance, TextInputProps & { onEdi
         }
       }
     },
-    onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    // This control is browser-owned, not a React-controlled value. Native input
+    // events must reach form state even when autofill/IME or another browser
+    // integration updated React's value tracker before dispatching the event.
+    onInput: (event: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       deliberateBlur.current = false;
       restorations.current = 0;
       valueState.current.reported = event.currentTarget.value;

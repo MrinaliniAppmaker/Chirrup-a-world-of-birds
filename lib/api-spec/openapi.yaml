@@ -272,6 +272,30 @@ paths:
           description: Studio is busy
         "502":
           description: Encounter generation failed
+  /birds/validate-traits:
+    post:
+      operationId: checkBirdTraits
+      tags: [birds]
+      summary: Check bird features before opening the review screen
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BirdTraits"
+      responses:
+        "200":
+          description: Validation result with exact offending text ranges
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BirdTraitCheck"
+        "400":
+          description: Missing or unreadable traits
+        "429":
+          description: Too many checks
+        "502":
+          description: Trait validation is temporarily unavailable
   /birds/generate:
     post:
       operationId: generateBird
@@ -471,6 +495,26 @@ components:
         legs: { type: string, maxLength: 120 }
         feet: { type: string, maxLength: 120 }
         extra: { type: string, maxLength: 500 }
+    BirdTraitIssue:
+      type: object
+      required: [field, feature, start, end]
+      properties:
+        field:
+          type: string
+          enum: [body, beak, colors, feathers, legs, feet, extra]
+        feature: { type: string }
+        start: { type: integer, minimum: 0 }
+        end: { type: integer, minimum: 1 }
+    BirdTraitCheck:
+      type: object
+      required: [valid, message, issues]
+      properties:
+        valid: { type: boolean }
+        message: { type: string }
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/BirdTraitIssue"
     GeneratedBird:
       type: object
       required: [id, name, scientificName, tagline, appearance, habitat, diet, behavior, imageUri, createdAt, traits]

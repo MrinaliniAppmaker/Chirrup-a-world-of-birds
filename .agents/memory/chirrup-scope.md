@@ -126,7 +126,13 @@ Extra features must remain genuine bird features, even though combinations may b
 
 **Why:** The user reported that “elephant trunk, catlike ears, and butterfly wings” was accepted and identified this as a major generation error.
 
-**How to apply:** Reject non-bird anatomy before image generation without silently removing it. Preserve rare avian anatomy, unusual feather colors, feathered ear tufts, and contradictory combinations of valid bird traits.
+**How to apply:** Check both “Type your traits” and “More traits” before opening Review, not only after asking to generate. The user explicitly requested earlier errors and highlighting the offending typed features so they can edit them. Identify the field and exact offending words, preserve all entered text, and never silently remove features. Preserve rare avian anatomy, unusual feather colors, feathered ear tufts, and contradictory combinations of valid bird traits.
+
+Do not display the “6 of 6 traits” counter on Create.
+
+**Why:** The user explicitly requested its removal because it took up space without a purpose.
+
+**How to apply:** Keep the completeness requirement for continuing, but do not reintroduce the numeric trait-count badge.
 
 Legs and Feet choices should scroll with their underside scrollbars, without large side arrows.
 

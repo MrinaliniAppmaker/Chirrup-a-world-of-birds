@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { randomUUID } from "node:crypto";
 import { rateLimit } from "express-rate-limit";
 import { z } from "zod";
-import { GenerateBirdBody, GenerateBirdResponse, SimulateEncounterBody, SimulateEncounterResponse } from "@workspace/api-zod";
+import { CheckBirdTraitsBody, CheckBirdTraitsResponse, GenerateBirdBody, GenerateBirdResponse, SimulateEncounterBody, SimulateEncounterResponse } from "@workspace/api-zod";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { batchProcess } from "@workspace/integrations-openai-ai-server/batch";
 import { designPolicy } from "../lib/birdDesign";
@@ -11,7 +11,7 @@ import { generateEncounterPortrait } from "../lib/encounterPortrait";
 import { encounterNarratorPrompt } from "../lib/encounterNarrative";
 import { anatomyGuidance } from "../lib/anatomyGuidance";
 import { anonymousParticipants, restoreBirdNames, referencePart, InvalidReferenceError } from "../lib/encounterReference";
-import { validateBirdTraits } from "../lib/birdTraitValidation";
+import { inspectBirdTraits, validateBirdTraits } from "../lib/birdTraitValidation";
 import { classifyBirdTraits } from "../lib/birdTraitClassifier";
 import { encounterMortalityPolicy } from "../lib/encounterPolicy";
 
@@ -136,6 +136,27 @@ router.post(
       res.status(502).json({ error: "We couldn't imagine this encounter. Your selections are kept; please try again." });
     } finally {
       activeGenerations -= 1;
+    }
+  },
+);
+
+router.post(
+  "/birds/validate-traits",
+  rateLimit({
+    windowMs: 15 * 60 * 1000, limit: 40, standardHeaders: "draft-8", legacyHeaders: false,
+    message: { error: "Too many feature checks. Please wait a little and try again; your text is kept." },
+  }),
+  async (req, res) => {
+    const parsed = CheckBirdTraitsBody.safeParse(req.body);
+    if (!parsed.success || ["body", "beak", "colors", "feathers", "legs", "feet"].some((key) => !parsed.data[key as keyof typeof parsed.data]?.trim())) {
+      res.status(400).json({ error: "Please fill all six bird features before reviewing." });
+      return;
+    }
+    try {
+      res.json(CheckBirdTraitsResponse.parse(await inspectBirdTraits(parsed.data, classifyBirdTraits)));
+    } catch (err) {
+      req.log.error({ err }, "Pre-review trait check failed");
+      res.status(502).json({ error: "We couldn't check these features right now. Your text is kept; please try again." });
     }
   },
 );

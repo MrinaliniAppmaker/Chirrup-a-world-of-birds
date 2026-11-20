@@ -10,9 +10,14 @@ import {
   useQuery
 } from '@tanstack/react-query';
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
+  QueryClient,
   QueryFunction,
   QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
   UseQueryOptions,
@@ -24,6 +29,7 @@ import type {
   BirdShareInput,
   BirdShareLink,
   BirdShareSelection,
+  BirdTraitCheck,
   BirdTraits,
   EncounterRequest,
   GeneratedBird,
@@ -147,13 +153,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useCreateBirdShareBatch = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBirdShareBatch>>, TError,CreateBirdShareBatchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createBirdShareBatch>>,
         TError,
         CreateBirdShareBatchMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateBirdShareBatchMutationOptions(options));
+      return useMutation(getCreateBirdShareBatchMutationOptions(options), queryClient);
     }
 
 export const getImportBirdShareBatchUrl = () => {
@@ -235,13 +241,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useImportBirdShareBatch = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importBirdShareBatch>>, TError,ImportBirdShareBatchMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof importBirdShareBatch>>,
         TError,
         ImportBirdShareBatchMutationVariables,
         TContext
       > => {
-      return useMutation(getImportBirdShareBatchMutationOptions(options));
+      return useMutation(getImportBirdShareBatchMutationOptions(options), queryClient);
     }
 
 export const getCreateBirdShareUrl = () => {
@@ -323,13 +329,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useCreateBirdShare = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createBirdShare>>, TError,CreateBirdShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createBirdShare>>,
         TError,
         CreateBirdShareMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateBirdShareMutationOptions(options));
+      return useMutation(getCreateBirdShareMutationOptions(options), queryClient);
     }
 
 export const getPreviewBirdShareUrl = (params: PreviewBirdShareParams,) => {
@@ -372,7 +378,7 @@ export const getPreviewBirdShareQueryKey = (params?: PreviewBirdShareParams,) =>
     }
 
 
-export const getPreviewBirdShareQueryOptions = <TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(params: PreviewBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getPreviewBirdShareQueryOptions = <TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(params: PreviewBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -387,25 +393,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type PreviewBirdShareQueryResult = NonNullable<Awaited<ReturnType<typeof previewBirdShare>>>
 export type PreviewBirdShareQueryError = ErrorType<void>
 
 
+export function usePreviewBirdShare<TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(
+ params: PreviewBirdShareParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof previewBirdShare>>,
+          TError,
+          Awaited<ReturnType<typeof previewBirdShare>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewBirdShare<TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(
+ params: PreviewBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof previewBirdShare>>,
+          TError,
+          Awaited<ReturnType<typeof previewBirdShare>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function usePreviewBirdShare<TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(
+ params: PreviewBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Preview only the bird authorized by a sharing token
  */
 
 export function usePreviewBirdShare<TData = Awaited<ReturnType<typeof previewBirdShare>>, TError = ErrorType<void>>(
- params: PreviewBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ params: PreviewBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof previewBirdShare>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getPreviewBirdShareQueryOptions(params,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
@@ -495,13 +525,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useImportBirdShare = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importBirdShare>>, TError,ImportBirdShareMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof importBirdShare>>,
         TError,
         ImportBirdShareMutationVariables,
         TContext
       > => {
-      return useMutation(getImportBirdShareMutationOptions(options));
+      return useMutation(getImportBirdShareMutationOptions(options), queryClient);
     }
 
 export const getOpenBirdShareUrl = (params: OpenBirdShareParams,) => {
@@ -544,7 +574,7 @@ export const getOpenBirdShareQueryKey = (params?: OpenBirdShareParams,) => {
     }
 
 
-export const getOpenBirdShareQueryOptions = <TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(params: OpenBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getOpenBirdShareQueryOptions = <TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(params: OpenBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -559,25 +589,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type OpenBirdShareQueryResult = NonNullable<Awaited<ReturnType<typeof openBirdShare>>>
 export type OpenBirdShareQueryError = ErrorType<void>
 
 
+export function useOpenBirdShare<TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(
+ params: OpenBirdShareParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof openBirdShare>>,
+          TError,
+          Awaited<ReturnType<typeof openBirdShare>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOpenBirdShare<TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(
+ params: OpenBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof openBirdShare>>,
+          TError,
+          Awaited<ReturnType<typeof openBirdShare>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useOpenBirdShare<TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(
+ params: OpenBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Email landing page with an app button and a copyable link
  */
 
 export function useOpenBirdShare<TData = Awaited<ReturnType<typeof openBirdShare>>, TError = ErrorType<void>>(
- params: OpenBirdShareParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+ params: OpenBirdShareParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof openBirdShare>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getOpenBirdShareQueryOptions(params,options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
@@ -667,13 +721,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useRenameAccountProfile = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof renameAccountProfile>>, TError,RenameAccountProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof renameAccountProfile>>,
         TError,
         RenameAccountProfileMutationVariables,
         TContext
       > => {
-      return useMutation(getRenameAccountProfileMutationOptions(options));
+      return useMutation(getRenameAccountProfileMutationOptions(options), queryClient);
     }
 
 export const getGetAccountJournalUrl = () => {
@@ -709,7 +763,7 @@ export const getGetAccountJournalQueryKey = () => {
     }
 
 
-export const getGetAccountJournalQueryOptions = <TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getGetAccountJournalQueryOptions = <TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -724,25 +778,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type GetAccountJournalQueryResult = NonNullable<Awaited<ReturnType<typeof getAccountJournal>>>
 export type GetAccountJournalQueryError = ErrorType<void>
 
 
+export function useGetAccountJournal<TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAccountJournal>>,
+          TError,
+          Awaited<ReturnType<typeof getAccountJournal>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAccountJournal<TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getAccountJournal>>,
+          TError,
+          Awaited<ReturnType<typeof getAccountJournal>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetAccountJournal<TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Open the signed-in account journal
  */
 
 export function useGetAccountJournal<TData = Awaited<ReturnType<typeof getAccountJournal>>, TError = ErrorType<void>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getAccountJournal>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetAccountJournalQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
@@ -832,13 +910,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useClaimJournal = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof claimJournal>>, TError,ClaimJournalMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof claimJournal>>,
         TError,
         ClaimJournalMutationVariables,
         TContext
       > => {
-      return useMutation(getClaimJournalMutationOptions(options));
+      return useMutation(getClaimJournalMutationOptions(options), queryClient);
     }
 
 export const getRegisterJournalInstallationUrl = () => {
@@ -906,13 +984,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useRegisterJournalInstallation = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerJournalInstallation>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof registerJournalInstallation>>,
         TError,
         void,
         TContext
       > => {
-      return useMutation(getRegisterJournalInstallationMutationOptions(options));
+      return useMutation(getRegisterJournalInstallationMutationOptions(options), queryClient);
     }
 
 export const getListJournalBirdsUrl = () => {
@@ -948,7 +1026,7 @@ export const getListJournalBirdsQueryKey = () => {
     }
 
 
-export const getListJournalBirdsQueryOptions = <TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getListJournalBirdsQueryOptions = <TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -963,25 +1041,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type ListJournalBirdsQueryResult = NonNullable<Awaited<ReturnType<typeof listJournalBirds>>>
 export type ListJournalBirdsQueryError = ErrorType<unknown>
 
 
+export function useListJournalBirds<TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listJournalBirds>>,
+          TError,
+          Awaited<ReturnType<typeof listJournalBirds>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListJournalBirds<TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listJournalBirds>>,
+          TError,
+          Awaited<ReturnType<typeof listJournalBirds>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListJournalBirds<TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary List this installation's saved birds
  */
 
 export function useListJournalBirds<TData = Awaited<ReturnType<typeof listJournalBirds>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listJournalBirds>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListJournalBirdsQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }
@@ -1071,13 +1173,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useSaveJournalBird = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveJournalBird>>, TError,SaveJournalBirdMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof saveJournalBird>>,
         TError,
         SaveJournalBirdMutationVariables,
         TContext
       > => {
-      return useMutation(getSaveJournalBirdMutationOptions(options));
+      return useMutation(getSaveJournalBirdMutationOptions(options), queryClient);
     }
 
 export const getRequestJournalPortraitUrl = () => {
@@ -1159,13 +1261,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useRequestJournalPortrait = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestJournalPortrait>>, TError,RequestJournalPortraitMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof requestJournalPortrait>>,
         TError,
         RequestJournalPortraitMutationVariables,
         TContext
       > => {
-      return useMutation(getRequestJournalPortraitMutationOptions(options));
+      return useMutation(getRequestJournalPortraitMutationOptions(options), queryClient);
     }
 
 export const getDeleteJournalBirdUrl = (birdId: string,) => {
@@ -1233,13 +1335,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useDeleteJournalBird = <TError = ErrorType<unknown>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteJournalBird>>, TError,DeleteJournalBirdMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteJournalBird>>,
         TError,
         DeleteJournalBirdMutationVariables,
         TContext
       > => {
-      return useMutation(getDeleteJournalBirdMutationOptions(options));
+      return useMutation(getDeleteJournalBirdMutationOptions(options), queryClient);
     }
 
 export const getSimulateEncounterUrl = () => {
@@ -1321,13 +1423,101 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useSimulateEncounter = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof simulateEncounter>>, TError,SimulateEncounterMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof simulateEncounter>>,
         TError,
         SimulateEncounterMutationVariables,
         TContext
       > => {
-      return useMutation(getSimulateEncounterMutationOptions(options));
+      return useMutation(getSimulateEncounterMutationOptions(options), queryClient);
+    }
+
+export const getCheckBirdTraitsUrl = () => {
+
+
+
+
+  return `/api/birds/validate-traits`
+}
+
+/**
+ * @summary Check bird features before opening the review screen
+ */
+export const checkBirdTraits = async (birdTraits: BirdTraits, options?: Parameters<typeof customFetch>[1]): Promise<BirdTraitCheck> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<BirdTraitCheck>(getCheckBirdTraitsUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(birdTraits)
+  }
+);}
+
+
+
+
+
+export const getCheckBirdTraitsMutationKey = () => ['checkBirdTraits'] as const;
+
+export const getCheckBirdTraitsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkBirdTraits>>, TError,CheckBirdTraitsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof checkBirdTraits>>, TError,CheckBirdTraitsMutationVariables, TContext> => {
+
+const mutationKey = getCheckBirdTraitsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof checkBirdTraits>>, CheckBirdTraitsMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  checkBirdTraits(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CheckBirdTraitsMutationResult = NonNullable<Awaited<ReturnType<typeof checkBirdTraits>>>
+    export type CheckBirdTraitsMutationBody = BodyType<BirdTraits>
+    export type CheckBirdTraitsMutationError = ErrorType<void>
+    export type CheckBirdTraitsMutationVariables = {data: BodyType<BirdTraits>}
+
+    /**
+ * @summary Check bird features before opening the review screen
+ */
+export const useCheckBirdTraits = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof checkBirdTraits>>, TError,CheckBirdTraitsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof checkBirdTraits>>,
+        TError,
+        CheckBirdTraitsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCheckBirdTraitsMutationOptions(options), queryClient);
     }
 
 export const getGenerateBirdUrl = () => {
@@ -1409,13 +1599,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const useGenerateBird = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateBird>>, TError,GenerateBirdMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
- ): UseMutationResult<
+ , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof generateBird>>,
         TError,
         GenerateBirdMutationVariables,
         TContext
       > => {
-      return useMutation(getGenerateBirdMutationOptions(options));
+      return useMutation(getGenerateBirdMutationOptions(options), queryClient);
     }
 
 export const getHealthCheckUrl = () => {
@@ -1452,7 +1642,7 @@ export const getHealthCheckQueryKey = () => {
     }
 
 
-export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+export const getHealthCheckQueryOptions = <TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1467,25 +1657,49 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type HealthCheckQueryResult = NonNullable<Awaited<ReturnType<typeof healthCheck>>>
 export type HealthCheckQueryError = ErrorType<unknown>
 
 
+export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof healthCheck>>,
+          TError,
+          Awaited<ReturnType<typeof healthCheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof healthCheck>>,
+          TError,
+          Awaited<ReturnType<typeof healthCheck>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Health check
  */
 
 export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, TError = ErrorType<unknown>>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
-
- ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getHealthCheckQueryOptions(options)
 
-  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return withQueryKey(query, queryOptions.queryKey);
 }

@@ -94,3 +94,13 @@ assert.equal(externalBrowserInputValue(inputState, 'soft down', 'soft down'), un
 assert.equal(externalBrowserInputValue(inputState, '', 'soft down'), '', 'an intentional parent reset still clears the field');
 assert.equal(externalBrowserInputValue(inputState, 'restored draft', ''), 'restored draft', 'external prefilling still works');
 console.log('PASS: stale prop replays, keystroke echoes, explicit resets and restored drafts');
+
+const { traitHighlightParts } = load('lib/traitHighlights.ts');
+const highlighted = traitHighlightParts('white feathers, catlike ears', [{ start: 16, end: 28 }]);
+assert.equal(highlighted.map(part => part.text).join(''), 'white feathers, catlike ears');
+assert.equal(highlighted.filter(part => part.invalid).map(part => part.text).join(''), 'catlike ears');
+const overlap = traitHighlightParts('abcdef', [{ start: 1, end: 4 }, { start: 2, end: 5 }]);
+assert.equal(overlap.map(part => part.text).join(''), 'abcdef', 'overlapping spans never duplicate text');
+assert.equal(overlap.filter(part => part.invalid)[0].text, 'bcde');
+assert.equal(traitHighlightParts('abc', [{ start: 30, end: 40 }]).map(part => part.text).join(''), 'abc');
+console.log('PASS: exact invalid-word highlighting, overlapping and out-of-range spans');

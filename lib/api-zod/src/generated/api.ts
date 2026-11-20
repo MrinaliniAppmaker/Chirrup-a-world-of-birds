@@ -552,6 +552,52 @@ export const SimulateEncounterResponse = zod.object({
 
 
 /**
+ * @summary Check bird features before opening the review screen
+ */
+export const checkBirdTraitsBodyBodyMax = 120;
+
+export const checkBirdTraitsBodyBeakMax = 120;
+
+export const checkBirdTraitsBodyColorsMax = 120;
+
+export const checkBirdTraitsBodyFeathersMax = 120;
+
+export const checkBirdTraitsBodyLegsMax = 120;
+
+export const checkBirdTraitsBodyFeetMax = 120;
+
+export const checkBirdTraitsBodyExtraMax = 500;
+
+
+
+export const CheckBirdTraitsBody = zod.object({
+  "body": zod.string().max(checkBirdTraitsBodyBodyMax),
+  "beak": zod.string().max(checkBirdTraitsBodyBeakMax),
+  "colors": zod.string().max(checkBirdTraitsBodyColorsMax),
+  "feathers": zod.string().max(checkBirdTraitsBodyFeathersMax),
+  "legs": zod.string().max(checkBirdTraitsBodyLegsMax),
+  "feet": zod.string().max(checkBirdTraitsBodyFeetMax),
+  "extra": zod.string().max(checkBirdTraitsBodyExtraMax).optional()
+})
+
+export const checkBirdTraitsResponseIssuesItemStartMin = 0;
+
+
+
+
+export const CheckBirdTraitsResponse = zod.object({
+  "valid": zod.boolean(),
+  "message": zod.string(),
+  "issues": zod.array(zod.object({
+  "field": zod.enum(['body', 'beak', 'colors', 'feathers', 'legs', 'feet', 'extra']),
+  "feature": zod.string(),
+  "start": zod.number().int().min(checkBirdTraitsResponseIssuesItemStartMin),
+  "end": zod.number().int().min(1)
+}))
+})
+
+
+/**
  * @summary Generate an imagined bird from selected traits
  */
 export const generateBirdBodyBodyMax = 120;

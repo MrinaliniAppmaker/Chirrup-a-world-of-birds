@@ -7,7 +7,7 @@ import { Button } from '@/components/ui';
 import { goAfterSignIn } from '@/lib/birdSharing';
 
 export default function SignInScreen() {
-  const { signIn, errors, fetchStatus } = useSignIn();
+  const { signIn, errors } = useSignIn();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [sentEmail, setSentEmail] = useState('');
@@ -16,10 +16,13 @@ export default function SignInScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+  const [googleWorking, setGoogleWorking] = useState(false);
   const [resendWait, setResendWait] = useState(false);
   const [needsRecovery, setNeedsRecovery] = useState(false);
   const requestLock = useRef(false);
-  const busy = working || fetchStatus === 'fetching';
+  // A cancelled SDK SSO promise can remain fetching. Only requests owned by
+  // this form may lock its keyboard or show the email-request spinner.
+  const busy = working;
   const secondFactor = signIn.status === 'needs_client_trust' || signIn.status === 'needs_second_factor';
 
   useEffect(() => {
@@ -67,6 +70,10 @@ export default function SignInScreen() {
   };
 
   const submit = () => run(async () => {
+    if (googleWorking) {
+      setMessage('Finish or close the Google sign-in window first, then request your email code.');
+      return;
+    }
     const address = email.trim();
     if (!address) { setMessage('Enter your email address first.'); return; }
     const { error } = await signIn.emailCode.sendCode({ emailAddress: address });
@@ -118,12 +125,12 @@ export default function SignInScreen() {
   return (
     <AuthShell testID="sign-in-screen" eyebrow="Return to the field studio" title="Welcome back" subtitle="Enter your email and we will send a one-time sign-in code. Your journal stays with the same account.">
       <Notice text={message} testID="sign-in-error" />
-      <GoogleButton testID="sign-in-google" onError={setMessage} />
+      <GoogleButton testID="sign-in-google" onError={setMessage} onBusyChange={setGoogleWorking} disabled={busy} />
       <Divider />
       <AuthField testID="sign-in-email" label="Email" value={email} onChangeText={setEmail} autoCapitalize="none" autoCorrect={false}
         keyboardType="email-address" autoComplete="email" textContentType="emailAddress" returnKeyType="go" editable={!busy}
         onSubmitEditing={submit} error={errors.fields.identifier?.message} />
-      <Button testID="sign-in-submit" label="Email me a sign-in code" icon="mail" onPress={submit} loading={busy} disabled={!email.trim()} />
+      <Button testID="sign-in-submit" label="Email me a sign-in code" icon="mail" onPress={submit} loading={busy} disabled={googleWorking || !email.trim()} />
       <View style={{ height: 4 }} />
       <LinkText testID="sign-in-to-sign-up" label="New here? Create an account" onPress={() => router.replace('/(auth)/sign-up')} />
     </AuthShell>

@@ -1,11 +1,12 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Modal, Platform, Pressable, StyleSheet, Text, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import * as AuthSession from 'expo-auth-session';
 import * as ImagePicker from 'expo-image-picker';
-import { useSSO, useUser } from '@clerk/expo';
+import { useClerk, useSignIn, useSignUp, useSSO, useUser } from '@clerk/expo';
+import { waitForGooglePopup } from '@/lib/googlePopup';
 import { useRouter } from 'expo-router';
 import { goAfterSignIn } from '@/lib/birdSharing';
 import { noteInputTouch } from '@/lib/inputFocus';
@@ -120,16 +121,61 @@ function useWarmUpBrowser() {
   }, []);
 }
 
-export function GoogleButton({ onError, testID }: { onError: (msg: string | null) => void; testID: string }) {
+export function GoogleButton({ onError, onBusyChange, disabled, testID }: { onError: (msg: string | null) => void; onBusyChange?: (busy: boolean) => void; disabled?: boolean; testID: string }) {
   useWarmUpBrowser();
   const c = useColors();
   const router = useRouter();
   const { startSSOFlow } = useSSO();
+  const { signIn } = useSignIn();
+  const { signUp } = useSignUp();
+  const clerk = useClerk();
   const [busy, setBusy] = useState(false);
+  const requestLock = useRef(false);
+  const cancelPopup = useRef<(() => void) | null>(null);
+  useEffect(() => () => cancelPopup.current?.(), []);
   const onPress = async () => {
-    tap(); onError(null); setBusy(true);
+    if (requestLock.current || disabled) return;
+    requestLock.current = true;
+    tap(); onError(null); setBusy(true); onBusyChange?.(true);
+    let popup: Window | null = null;
     try {
-      const { createdSessionId, setActive } = await startSSOFlow({ strategy: 'oauth_google', redirectUrl: AuthSession.makeRedirectUri() });
+      if (Platform.OS === 'web') {
+        // Open synchronously in the click gesture. The native useSSO flow waits
+        // for a network request before opening its browser; Chrome can block
+        // that popup in an embedded preview. Use Clerk's web popup API instead.
+        popup = window.open('about:blank', 'chirrup-google-sign-in', 'popup=yes,width=520,height=720');
+        if (!popup) {
+          onError('Chrome blocked the Google sign-in window. Allow pop-ups for this preview, then try again. Email-code sign-in is also available.');
+          return;
+        }
+        const callback = `${window.location.origin}/sso-callback`;
+        const controller = new AbortController();
+        cancelPopup.current = () => { popup?.close(); controller.abort(); };
+        const completion = await waitForGooglePopup(signIn.sso({
+          strategy: 'oauth_google', popup, redirectUrl: callback, redirectCallbackUrl: callback,
+        }), () => !!popup?.closed, controller.signal);
+        if (completion.kind === 'completed' && completion.value.error) throw completion.value.error;
+        if (completion.kind !== 'completed' && !clerk.session && signIn.status !== 'complete' && signUp.status !== 'complete') {
+          popup.close();
+          // Clear SDK-local fetching state as well as this button's spinner.
+          // Otherwise the email fields also remain read-only after cancellation.
+          const reset = await signIn.reset();
+          if (reset.error) throw reset.error;
+          await signUp.reset();
+          if (completion.kind === 'timeout') onError('Google sign-in timed out. Please try again, or use an emailed sign-in code.');
+          return;
+        }
+        if (clerk.session) { await goAfterSignIn(router); return; }
+        const flow = signIn.status === 'complete' ? signIn : signUp.status === 'complete' ? signUp : null;
+        if (flow) {
+          await flow.finalize({ navigate: async ({ session }) => {
+            if (session?.currentTask) { onError(taskMessage(session.currentTask)); return; }
+            await goAfterSignIn(router);
+          } });
+        }
+        return;
+      }
+      const { createdSessionId, setActive, authSessionResult } = await startSSOFlow({ strategy: 'oauth_google', redirectUrl: AuthSession.makeRedirectUri() });
       if (createdSessionId && setActive) {
         await setActive({
           session: createdSessionId,
@@ -138,15 +184,16 @@ export function GoogleButton({ onError, testID }: { onError: (msg: string | null
             void goAfterSignIn(router);
           },
         });
-      } else {
-        onError('Google sign-in needs another step this app cannot complete yet. Try email and password instead.');
+      } else if (authSessionResult?.type !== 'cancel' && authSessionResult?.type !== 'dismiss') {
+        onError('Google sign-in needs another verification step. You can use an emailed sign-in code instead.');
       }
     } catch (err) {
+      popup?.close();
       onError(readableError(err, 'Google sign-in did not finish. Please try again.'));
-    } finally { setBusy(false); }
+    } finally { cancelPopup.current = null; requestLock.current = false; setBusy(false); onBusyChange?.(false); }
   };
   return (
-    <Pressable testID={testID} accessibilityRole="button" accessibilityLabel="Continue with Google" disabled={busy} onPress={onPress}
+    <Pressable testID={testID} accessibilityRole="button" accessibilityLabel="Continue with Google" disabled={busy || disabled} onPress={onPress}
       style={({ pressed }) => [s.google, { borderColor: c.input, backgroundColor: c.background, borderRadius: c.radius, opacity: pressed ? 0.8 : 1 }]}>
       {busy ? <ActivityIndicator color={c.primary} /> : (
         <>

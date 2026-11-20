@@ -8,9 +8,10 @@ import { useNavigation, useRouter } from 'expo-router';
 import { useAuth } from '@clerk/expo';
 import { discardCreateRecoveryDraft, getCreateRecoveryDraft, keepCreateRecoveryDraft } from '@/lib/createRecovery';
 import { SymbolView } from 'expo-symbols';
-import { useGenerateBird, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
+import { useCheckBirdTraits, useGenerateBird, type BirdTraitCheck, type BirdTraitIssue, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FieldInput } from '@/components/FieldInput';
+import { TraitValidationFeedback } from '@/components/TraitValidationFeedback';
 import { BirdNameDialog } from '@/components/BirdNameDialog';
 import { BirdProfile, Button, Eyebrow, tap } from '@/components/ui';
 import { TraitChoiceGrid } from '@/components/TraitChoiceGrid';
@@ -54,6 +55,7 @@ export default function CreateScreen() {
   const recovered = useRef(getCreateRecoveryDraft(owner)).current;
   const { save, isSaved } = useCollection();
   const generate = useGenerateBird();
+  const checkTraits = useCheckBirdTraits();
   const { invalid: invalidTraits, message: generationErrorMessage } = generationFailure(generate.error);
 
   const [step, setStep] = useState<Step>(recovered?.step ?? 'build');
@@ -71,6 +73,11 @@ export default function CreateScreen() {
   const [popupName, setPopupName] = useState<string>(recovered?.popupName ?? '');
   const [saving, setSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [traitCheck, setTraitCheck] = useState<{ input: BirdTraits; result: BirdTraitCheck } | null>(null);
+  const [checkError, setCheckError] = useState<string | null>(null);
+  const [checkingTraits, setCheckingTraits] = useState(false);
+  const checkingLock = useRef<number | null>(null);
+  const checkVersion = useRef(0);
   const generationId = useRef(0);
   useLayoutEffect(() => {
     keepCreateRecoveryDraft(owner, {
@@ -87,10 +94,39 @@ export default function CreateScreen() {
     KEYS.map((k) => [k, mode === 'typed' ? typed[k].trim() : optionFor(k, sel[k])?.value ?? '']),
   ) as unknown as BirdTraits;
   if (extra.trim()) traits.extra = extra.trim();
-  const filled = KEYS.filter((k) => (traits[k] as string).length > 0).length;
-  const ready = filled === 6;
+  const ready = KEYS.every((k) => (traits[k] as string).length > 0);
+  const currentIssues = (traitCheck?.result.issues ?? []).filter(
+    (issue) => traitCheck?.input[issue.field] === traits[issue.field],
+  );
+  const issuesFor = (field: BirdTraitIssue['field']) => currentIssues.filter((issue) => issue.field === field);
+  const editedTraits = () => { checkVersion.current += 1; setCheckError(null); };
 
   const goTo = (s: Step) => { setStep(s);  };
+
+  const reviewTraits = async () => {
+    if (!ready || checkingLock.current !== null) return;
+    setCheckingTraits(true); setCheckError(null);
+    const version = ++checkVersion.current;
+    checkingLock.current = version;
+    const input = { ...traits };
+    try {
+      const result = await checkTraits.mutateAsync({ data: input });
+      if (version !== checkVersion.current) return;
+      setTraitCheck({ input, result });
+      if (result.valid) goTo('review');
+      else if (result.issues.some((issue) => issue.field === 'extra')) setShowExtra(true);
+    } catch (error) {
+      if (version !== checkVersion.current) return;
+      const data = error && typeof error === 'object' && 'data' in error ? error.data : null;
+      setCheckError(data && typeof data === 'object' && 'error' in data && typeof data.error === 'string'
+        ? data.error : "We couldn't check these features. Your text is kept; please try again.");
+    } finally {
+      if (checkingLock.current === version) {
+        checkingLock.current = null;
+        setCheckingTraits(false);
+      }
+    }
+  };
 
   const runGenerate = async () => {
     const requestId = ++generationId.current;
@@ -112,6 +148,9 @@ export default function CreateScreen() {
   const resetMutation = generate.reset;
   const reset = useCallback(() => {
     generationId.current += 1;
+    checkVersion.current += 1;
+    checkingLock.current = null; setCheckingTraits(false);
+    setTraitCheck(null); setCheckError(null);
     setSel(DEFAULT_SEL); setTyped(EMPTY_TYPED); setExtra(''); setShowExtra(false);
     setMode('visual'); setExpanded({}); setSaveError(null); setSaving(false);
     setBird(null); setBirdName(''); setNameDraft(''); setEditingName(true);
@@ -125,7 +164,7 @@ export default function CreateScreen() {
     discardCreateRecoveryDraft(owner);
     resetOnExit.current();
   }), [navigation, owner]);
-  useEffect(() => () => { generationId.current += 1; }, []);
+  useEffect(() => () => { generationId.current += 1; checkVersion.current += 1; checkingLock.current = null; }, []);
 
   const commitName = () => {
     const name = nameDraft.trim();
@@ -197,16 +236,13 @@ export default function CreateScreen() {
             </View>
             <View style={st.refCaption}>
               <Text style={[st.refTitle, { color: c.foreground }]}>A woodland bird, for scale.</Text>
-              <View style={[st.pill, { backgroundColor: c.secondary }]}>
-                <Text style={{ fontFamily: sans.medium, fontSize: 12, color: c.secondaryForeground }}>{filled} of 6 traits</Text>
-              </View>
             </View>
             <Text style={[st.small, { color: c.mutedForeground }]}>A real photograph to think with. Your bird is drawn only after you generate.</Text>
 
             <View style={[st.segment, { backgroundColor: c.muted, borderRadius: c.radius + 2 }]}>
               {(['visual', 'typed'] as Mode[]).map((m) => (
                 <Pressable key={m} testID={`mode-${m}`} accessibilityRole="tab" accessibilityState={{ selected: mode === m }}
-                  onPress={() => { tap(); setMode(m); }}
+                  onPress={() => { tap(); editedTraits(); setMode(m); }}
                   style={[st.segBtn, { borderRadius: c.radius, backgroundColor: mode === m ? c.card : 'transparent' }]}>
                   <Text style={{ fontFamily: mode === m ? sans.semibold : sans.regular, fontSize: 14, color: mode === m ? c.foreground : c.mutedForeground }}>
                     {m === 'visual' ? 'Choose visually' : 'Type your traits'}
@@ -234,7 +270,7 @@ export default function CreateScreen() {
                       </View>
                       <TraitChoiceGrid trait={g.key} options={opts} selected={sel[g.key]}
                         detailed={open && (g.key === 'body' || g.key === 'beak')}
-                        onSelect={(id) => setSel((current) => ({ ...current, [g.key]: id }))}
+                        onSelect={(id) => { editedTraits(); setSel((current) => ({ ...current, [g.key]: id })); }}
                         onMore={g.key === 'beak' && open ? () => setExpanded((current) => ({ ...current, 'waterbird-beaks': !current['waterbird-beaks'] })) : undefined}
                         moreOpen={waterbirdsOpen} />
                       {g.key === 'beak' && WATERBIRD_BEAK_OPTIONS.some((o) => o.id === sel.beak) ? (
@@ -244,7 +280,7 @@ export default function CreateScreen() {
                         <View testID="waterbird-beak-options" style={{ marginTop: 16, gap: 10 }}>
                           <Eyebrow>Waterbird beaks</Eyebrow>
                           <TraitChoiceGrid trait="beak" options={WATERBIRD_BEAK_OPTIONS} selected={sel.beak} detailed
-                            onSelect={(id) => setSel((current) => ({ ...current, beak: id }))} />
+                            onSelect={(id) => { editedTraits(); setSel((current) => ({ ...current, beak: id })); }} />
                         </View>
                       ) : null}
                     </View>
@@ -256,7 +292,7 @@ export default function CreateScreen() {
                       <Text style={{ color: c.mutedForeground }}>{`0${i + 5}  `}</Text>{title}
                     </Text>
                     <TraitOptionStrip trait={key} options={opts} selected={sel[key]}
-                      onSelect={(id) => setSel((current) => ({ ...current, [key]: id }))} />
+                      onSelect={(id) => { editedTraits(); setSel((current) => ({ ...current, [key]: id })); }} />
                   </View>
                 ))}
               </View>
@@ -268,13 +304,14 @@ export default function CreateScreen() {
                     <FieldInput
                       testID={`input-${k}`}
                       value={typed[k]}
-                      onChangeText={(t) => setTyped((current) => ({ ...current, [k]: t }))}
+                      onChangeText={(t) => { editedTraits(); setTyped((current) => ({ ...current, [k]: t })); }}
                       placeholder={optionFor(k, DEFAULT_SEL[k])?.value}
                       placeholderTextColor={c.mutedForeground}
                       maxLength={120}
                       returnKeyType="next"
-                      style={[st.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius }]}
+                      style={[st.input, { borderColor: issuesFor(k).length ? c.destructive : c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius }]}
                     />
+                    <TraitValidationFeedback field={k} value={traits[k]} issues={issuesFor(k)} />
                   </View>
                 ))}
               </View>
@@ -284,7 +321,7 @@ export default function CreateScreen() {
               <Pressable testID="toggle-extra" hitSlop={10} onPress={() => { tap(); setShowExtra(!showExtra); }}>
                 <Text style={[st.more, { color: c.primary }]}>{showExtra ? '− Hide extra traits' : '+ More traits: tail, wings & markings'}</Text>
               </Pressable>
-              <Pressable testID="reset" hitSlop={10} onPress={() => { tap(); setSel(DEFAULT_SEL); setTyped(EMPTY_TYPED); setExtra(''); }}>
+              <Pressable testID="reset" hitSlop={10} onPress={() => { tap(); editedTraits(); setTraitCheck(null); setSel(DEFAULT_SEL); setTyped(EMPTY_TYPED); setExtra(''); }}>
                 <Text style={[st.more, { color: c.mutedForeground }]}>Reset</Text>
               </Pressable>
             </View>
@@ -292,16 +329,21 @@ export default function CreateScreen() {
               <FieldInput
                 testID="input-extra"
                 value={extra}
-                onChangeText={setExtra}
+                onChangeText={(text) => { editedTraits(); setExtra(text); }}
                 placeholder="e.g. forked tail, white wing bars, a faint eye-ring"
                 placeholderTextColor={c.mutedForeground}
                 multiline
                 maxLength={500}
-                style={[st.input, st.textarea, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius }]}
+                style={[st.input, st.textarea, { borderColor: issuesFor('extra').length ? c.destructive : c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius }]}
               />
             )}
+            {showExtra && <TraitValidationFeedback field="extra" value={traits.extra ?? ''} issues={issuesFor('extra')} />}
 
-            <Button testID="to-review" label="Review chosen details" icon="arrow-right" disabled={!ready} onPress={() => goTo('review')} style={{ marginTop: 24 }} />
+            {currentIssues.length > 0 && <Text testID="traits-invalid" accessibilityRole="alert" style={[st.small, { color: c.destructive, marginTop: 16 }]}>Please change the highlighted non-bird features before reviewing. Rare bird features and unusual combinations are welcome.</Text>}
+            {traitCheck && !traitCheck.result.valid && !traitCheck.result.issues.length && JSON.stringify(traitCheck.input) === JSON.stringify(traits)
+              && <Text accessibilityRole="alert" style={[st.small, { color: c.destructive, marginTop: 16 }]}>{traitCheck.result.message}</Text>}
+            {checkError && <Text testID="trait-check-error" accessibilityRole="alert" style={[st.small, { color: c.destructive, marginTop: 16 }]}>{checkError}</Text>}
+            <Button testID="to-review" label={checkingTraits ? 'Checking bird features…' : 'Review chosen details'} loading={checkingTraits} icon="arrow-right" disabled={!ready} onPress={reviewTraits} style={{ marginTop: 24 }} />
             {!ready && <Text style={[st.small, { color: c.mutedForeground, textAlign: 'center', marginTop: 8 }]}>Fill all six traits to continue.</Text>}
           </View>
         )}

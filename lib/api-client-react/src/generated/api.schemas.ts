@@ -191,6 +191,34 @@ export interface GeneratedEncounter {
   minutes: GeneratedEncounterMinutesItem[];
 }
 
+export type BirdTraitIssueField = typeof BirdTraitIssueField[keyof typeof BirdTraitIssueField];
+
+
+export const BirdTraitIssueField = {
+  body: 'body',
+  beak: 'beak',
+  colors: 'colors',
+  feathers: 'feathers',
+  legs: 'legs',
+  feet: 'feet',
+  extra: 'extra',
+} as const;
+
+export interface BirdTraitIssue {
+  field: BirdTraitIssueField;
+  feature: string;
+  /** @minimum 0 */
+  start: number;
+  /** @minimum 1 */
+  end: number;
+}
+
+export interface BirdTraitCheck {
+  valid: boolean;
+  message: string;
+  issues: BirdTraitIssue[];
+}
+
 export interface HealthStatus {
   status: string;
 }
