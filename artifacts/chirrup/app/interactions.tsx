@@ -2,7 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { Image, ImageSourcePropType, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useAuth } from '@clerk/expo';
 import { useSimulateEncounter } from '@workspace/api-client-react';
 import type { EncounterBird, GeneratedEncounter } from '@workspace/api-client-react';
 import { Button, Eyebrow, tap } from '@/components/ui';
@@ -13,6 +14,7 @@ import { sans, serif } from '@/constants/fonts';
 import { DEFAULT_BIRD_ID, DEFAULT_MALLARD, MALLARD_IMAGE } from '@/constants/defaultBird';
 import { portraitReference } from '@/lib/portraitReference';
 import type { PortraitSource } from '@/lib/portraitReference';
+import { readInteractionBird } from '@/lib/interactionDraft';
 
 const MIN = 2;
 export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
@@ -24,9 +26,12 @@ export default function InteractionsScreen() {
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const { userId } = useAuth();
+  const { draft } = useLocalSearchParams<{ draft?: string }>();
+  const incoming = useMemo(() => readInteractionBird(userId ?? 'guest', draft), [userId, draft]);
   const { birds, loaded } = useCollection();
   const sim = useSimulateEncounter();
-  const [picked, setPicked] = useState<string[]>([]);
+  const [picked, setPicked] = useState<string[]>(() => incoming ? [incoming.id] : []);
   const [result, setResult] = useState<GeneratedEncounter | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [preparing, setPreparing] = useState(false);
@@ -36,13 +41,14 @@ export default function InteractionsScreen() {
   const candidates = useMemo<Candidate[]>(() => {
     const ref: Candidate = { id: DEFAULT_BIRD_ID, name: DEFAULT_MALLARD.name, sub: 'Reference species \u00b7 ' + DEFAULT_MALLARD.scientificName, image: MALLARD_IMAGE, portrait: MALLARD_IMAGE, isReference: true,
       payload: { id: DEFAULT_MALLARD.id, name: DEFAULT_MALLARD.name, traits: DEFAULT_MALLARD.traits, appearance: DEFAULT_MALLARD.appearance, habitat: DEFAULT_MALLARD.habitat, diet: DEFAULT_MALLARD.diet, behavior: DEFAULT_MALLARD.behavior } };
-    const mine: Candidate[] = birds.map((b) => {
+    const available = incoming ? [incoming, ...birds.filter(b => b.id !== incoming.id)] : birds;
+    const mine: Candidate[] = available.map((b) => {
       const name = b.name && b.name.trim() ? b.name.trim() : 'Unnamed bird';
       return { id: b.id, name, sub: b.scientificName, image: { uri: b.imageUri }, portrait: b.imageUri, isReference: false,
         payload: { id: b.id, name, traits: b.traits, appearance: b.appearance, habitat: b.habitat, diet: b.diet, behavior: b.behavior } };
     });
     return [ref, ...mine];
-  }, [birds]);
+  }, [birds, incoming]);
 
   // Derived reconciliation: ids no longer in the collection drop out without effects.
   const valid = useMemo(() => picked.filter((id) => candidates.some((x) => x.id === id)), [picked, candidates]);
@@ -118,6 +124,7 @@ export default function InteractionsScreen() {
       ) : (
         <View>
           <Text style={[s.body, { color: c.mutedForeground }]}>Choose two to six birds. The Mallard is a real reference species and is never added to your library.</Text>
+          {incoming && !birds.some(b => b.id === incoming.id) ? <Text testID="interaction-unsaved-bird" style={[s.body, { color: c.mutedForeground }]}>Your new bird is selected. It has not been saved to your library.</Text> : null}
           <View style={s.countRow}>
             <View style={[s.pill, { backgroundColor: c.primary }]}><Text testID="selected-count" style={[s.pillText, { color: c.primaryForeground }]}>{valid.length + ' selected, max six'}</Text></View>
             {valid.length > 0 ? <Pressable testID="clear-selection" accessibilityRole="button" disabled={pending} onPress={() => { tap(); setPicked([]); }}><Text style={[s.link, { color: c.primary }]}>Clear</Text></Pressable> : null}
@@ -145,7 +152,7 @@ export default function InteractionsScreen() {
                   </Pressable>
                 );
               })}
-              {birds.length === 0 ? (
+              {birds.length === 0 && !incoming ? (
                 <View style={[s.emptyBox, { borderColor: c.border, borderRadius: c.radius + 2 }]}>
                   <Text style={[s.body, { color: c.mutedForeground, marginTop: 0 }]}>Your library is empty. Create a bird to bring it alongside the Mallard.</Text>
                   <Button testID="interactions-create" label="Create a bird" variant="outline" icon="plus" onPress={() => router.navigate('/create')} style={{ marginTop: 12 }} />

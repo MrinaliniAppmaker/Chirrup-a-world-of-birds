@@ -17,7 +17,22 @@ const tube = (path: string, width: number) => `
 // Bird faces RIGHT. Rear toes extend LEFT of the ankle, front toes RIGHT.
 // Distinct endpoints and spaces make the topology countable, not an X-shaped
 // symbol that could be mistaken for four forward-splayed toes.
-const obliqueFoot = (forward: number[], backward: number[]) => {
+const lobedDigitShape = (x: number, y: number, controlX: number, controlY: number) => {
+  const edge = (sign: number) => Array.from({ length: 81 }, (_, i) => {
+    const t = i / 80, u = 1 - t;
+    const px = u * u * 220 + 2 * u * t * controlX + t * t * x;
+    const py = u * u * 225 + 2 * u * t * controlY + t * t * y;
+    const dx = 2 * u * (controlX - 220) + 2 * t * (x - controlX);
+    const dy = 2 * u * (controlY - 225) + 2 * t * (y - controlY);
+    const magnitude = Math.hypot(dx, dy) || 1;
+    const scallop = t > 0.4 ? Math.sin((t - 0.4) / 0.6 * 3 * Math.PI) ** 2 : 0;
+    const width = (9 + 19 * scallop) * (t > 0.94 ? 1 - (t - 0.94) * 8 : 1);
+    return `${(px - sign * dy / magnitude * width).toFixed(2)},${(py + sign * dx / magnitude * width).toFixed(2)}`;
+  });
+  return `<polygon points="${[...edge(-1), ...edge(1).reverse()].join(" ")}" fill="url(#skin)" stroke="#333333" stroke-width="2"/>`;
+};
+
+const obliqueFoot = (forward: number[], backward: number[], lobed = false) => {
   const toes = (digits: number[], front: boolean) => digits.map((digit, i) => {
     const x = front ? 385 - i * 24 : 55 + i * 20;
     const y = 265 + i * 90;
@@ -25,7 +40,7 @@ const obliqueFoot = (forward: number[], backward: number[]) => {
     const claw = front
       ? `M${x} ${y - 8} Q${x + 36} ${y - 2} ${x + 28} ${y + 29} Q${x + 13} ${y + 5} ${x - 3} ${y + 6}Z`
       : `M${x} ${y - 8} Q${x - 36} ${y - 2} ${x - 28} ${y + 29} Q${x - 13} ${y + 5} ${x + 3} ${y + 6}Z`;
-    return `${tube(path, 22)}<path d="${claw}" fill="#303030"/>
+    return `${lobed ? lobedDigitShape(x, y, front ? 290 : 155, y - 20) : tube(path, 22)}<path d="${claw}" fill="#303030"/>
       ${label(x - 8, y + 68, String(digit), 25)}`;
   }).join("");
   return `${tube("M170 55 Q185 145 220 225", 29)}
@@ -63,6 +78,33 @@ export const toeGuide = (forward: number[], backward: number[]) => {
   `);
 };
 
+// Surface examples only: no species, whole-foot digit count or toe directions.
+// Each outline is connected, including all lateral lobes and the central toe.
+export const lobedToeGuide = () => {
+  const digit = (x: number, y: number, length: number, angle: number) => {
+    const side = (sign: number) => Array.from({ length: 81 }, (_, i) => {
+      const t = i / 80;
+      const wave = t > 0.12 && t < 0.96 ? Math.sin((t - 0.12) / 0.84 * 4 * Math.PI) ** 2 : 0;
+      const width = (10 + 21 * wave) * (t > 0.92 ? 1 - (t - 0.92) * 8 : 1);
+      return `${(sign * width).toFixed(2)},${(-t * length).toFixed(2)}`;
+    });
+    return `<g transform="translate(${x} ${y}) rotate(${angle} 0 0)">
+      <polygon points="${[...side(-1), ...side(1).reverse()].join(" ")}" fill="url(#skin)" stroke="#333333" stroke-width="3"/>
+      <path d="M-5 ${-length} Q0 ${-length - 33} 8 ${-length - 8} L5 ${-length + 8}Z" fill="#303030"/>
+      <path d="M0 -14 V${-length + 15}" stroke="#777777" stroke-width="2" fill="none"/>
+    </g>`;
+  };
+  return sheet(`
+    ${label(55, 65, "LOBED TOE EDGES - SURFACE SHAPE ONLY", 36)}
+    ${label(55, 115, "Each drawing is an individual TOE example, not the number of toes on a foot.", 27)}
+    ${digit(260, 660, 410, -12)}${digit(690, 660, 485, 0)}${digit(1120, 660, 390, 12)}
+    ${label(70, 750, "SCALLOPED SIDE LOBES ATTACH TO THEIR OWN TOE ONLY", 30)}
+    ${label(70, 810, "White gaps stay OPEN between neighboring toes and their lobes.", 29)}
+    ${label(70, 870, "Do not fill those gaps with a shared skin sheet or a fan-shaped paddle.", 27)}
+    ${label(70, 960, "Keep the user's toe count, directions, colors and natural skin texture.", 27)}
+  `);
+};
+
 export const billGuide = (up: boolean) => {
   // Both mandibles share the curvature; bill tip is well above/below base.
   const outline = up
@@ -90,7 +132,7 @@ export const billGuide = (up: boolean) => {
 
 // A spatial construction reference eliminates the extra top-view -> posed-foot
 // interpretation step. It is an invented scaffold, not a real species portrait.
-export function anatomyPoseGuide(forward: number[], backward: number[], bill: "upcurved" | "downcurved" | undefined, body: string): string {
+export function anatomyPoseGuide(forward: number[], backward: number[], bill: "upcurved" | "downcurved" | undefined, body: string, lobed = false): string {
   // Only familiar predefined torso labels affect the placeholder proportions.
   // Custom torso anatomy remains governed by the original descriptive data.
   const horizontal = /waterfowl|pheasant|pigeon/i.test(body);
@@ -114,9 +156,9 @@ export function anatomyPoseGuide(forward: number[], backward: number[], bill: "u
     <circle cx="890" cy="330" r="13" fill="#444444"/>
     ${bill ? `<path d="${billShape}" fill="url(#skin)" stroke="#333333" stroke-width="4"/>` : ""}
     <path d="M610 905 L532 1026 M775 905 L772 1056" stroke="#777777" stroke-width="23" stroke-linecap="round"/>
-    <g transform="translate(439 996) scale(.55)">${obliqueFoot(forward, backward)}</g>
-    <g transform="translate(679 1026) scale(.55)">${obliqueFoot(forward, backward)}</g>
-    ${label(75, 1300, "KEEP EACH FOOT'S EXACT FORWARD / BACKWARD BRANCHING - NOT NORMAL 3+1 FEET", 27)}
-    ${label(75, 1350, "Replace grey with natural skin, scales, claws and the selected colors. Output no labels.", 26)}
+    <g transform="translate(439 996) scale(.55)">${obliqueFoot(forward, backward, lobed)}</g>
+    <g transform="translate(679 1026) scale(.55)">${obliqueFoot(forward, backward, lobed)}</g>
+    ${label(75, lobed ? 1365 : 1300, lobed ? "KEEP INDIVIDUAL SCALLOPED LOBES AND OPEN GAPS BETWEEN NEIGHBORING TOES" : "KEEP EACH FOOT'S EXACT FORWARD / BACKWARD BRANCHING - NOT NORMAL 3+1 FEET", 27)}
+    ${label(75, lobed ? 1410 : 1350, "Replace grey with natural skin, scales, claws and the selected colors. Output no labels.", 26)}
   </svg>`;
 }

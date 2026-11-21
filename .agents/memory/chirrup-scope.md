@@ -38,6 +38,12 @@ Backend collections belong to signed-in accounts and contain saved journal birds
 
 **How to apply:** Keep journals and offline caches isolated between accounts; sign-out must hide, not delete, the account's birds. Preserve original portraits and notes during migration and prevent another account from claiming the same legacy collection. Do not automatically archive discarded or unnamed generations.
 
+Cropping a profile picture is a draft step, not a save.
+
+**Why:** The user explicitly requested a separate save action on actual phones rather than treating completion of cropping as saving their profile photo.
+
+**How to apply:** Preview the chosen crop, upload only after “Save photo,” keep the existing avatar when cancelled, retain the draft after a failed upload, and confirm successful persistence. Apply this behavior to both profile-photo entry points.
+
 Your Profile should show the saved-library count as “x birds in library”; tapping it reveals small square portraits and names. Bird sharing must be reachable from both Your Profile and Library.
 
 **Why:** The user explicitly requested the count, expandable small-photo list (roughly one tenth of the shorter phone edge), and both sharing entry points.
@@ -110,6 +116,12 @@ Text fields should retain focus while typing and scrolling, until the user delib
 
 **How to apply:** Avoid timer-based blur, state-dependent component identities or route cleanup triggered by form edits. Preserve multiline newlines, deliberate field changes and accessible keyboard navigation.
 
+Newly generated birds have an “Interact bird” shortcut, including before they are named or saved.
+
+**Why:** The user requested the button under a newly created bird. Requiring or automatically performing a journal save would change that request and the separately defined saved-birds-only collection rule.
+
+**How to apply:** Hand the current portrait and traits into the interaction picker and preselect the new bird without writing it to the journal or placing image data in URLs. Scope the temporary handoff to the current account or guest. This is an intentional exception to discarding the generated result on leaving Create; the next Create visit still starts fresh.
+
 Encounters may include realistic predation and death; survival is not guaranteed. Saved portraits preserve appearance, not starting pose or position.
 
 **Why:** The user explicitly asked for realistic predator-prey outcomes and reported that interaction images were keeping birds fixed in their portrait positions.
@@ -127,6 +139,12 @@ Extra features must remain genuine bird features, even though combinations may b
 **Why:** The user reported that “elephant trunk, catlike ears, and butterfly wings” was accepted and identified this as a major generation error.
 
 **How to apply:** Check both “Type your traits” and “More traits” before opening Review, not only after asking to generate. The user explicitly requested earlier errors and highlighting the offending typed features so they can edit them. Identify the field and exact offending words, preserve all entered text, and never silently remove features. Preserve rare avian anatomy, unusual feather colors, feathered ear tufts, and contradictory combinations of valid bird traits.
+
+Highlight invalid words inside the original editable text box, not in a duplicated copy beneath it.
+
+**Why:** The user explicitly corrected the first implementation: the highlighting belonged “in the text box, not the error message.”
+
+**How to apply:** Keep the real input, plain text, caret and selection intact. Any decorative word-highlighting layer must be noninteractive, hidden from accessibility, clipped to the text area and synchronized with its scroll position. Helper text may explain the error but must not repeat the input as a highlighted example.
 
 Do not display the “6 of 6 traits” counter on Create.
 

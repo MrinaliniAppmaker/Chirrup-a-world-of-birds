@@ -19,3 +19,9 @@ Anatomy guides must not import complete real species. Supply only geometry relev
 **Why:** The user approved visual anatomy guides after prompt-only failures. Whole-species references risk restoring the species bias they explicitly rejected. Their repeated tests found inconsistent bill direction and no correct zygodactyl feet. Subsequent live tests with detailed multi-view feet, higher-priority instructions and a spatial construction base consistently depicted upcurved bills but still did not establish correct 2+2 toes on both feet.
 
 **How to apply:** Keep guides monochrome, exclude negated or conflicting guide selections, and preserve the chosen palette and unrelated anatomy. The current Flash image model treats references as conditioning, not hard geometry locks; do not repeatedly claim toe accuracy from stronger wording or more diagrams. Obtain agreement before changing to a more expensive image model or a materially different rendering pipeline. Saved portraits remain interaction identity references.
+
+Lobed-toe accuracy requires visible lateral lobes on separate digits, not merely the absence of webbing.
+
+**Why:** Live checks on 2026-11-21 showed that individual-toe references could produce ordinary narrow toes. A full-bird construction reference made edge lobes more visible but did not establish reliable natural-looking anatomy. A blanket rendering instruction mentioning membranes had also contradicted non-webbed selections.
+
+**How to apply:** Keep generic rendering instructions neutral about foot surfaces. Request membranes only for selected webbing, and inspect lobe shape, attachment and gaps on both feet. Report improved conditioning separately from verified reliable anatomy; do not add a rejection/retry loop or silently upgrade models to disguise failures.

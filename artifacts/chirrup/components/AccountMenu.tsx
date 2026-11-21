@@ -7,6 +7,7 @@ import { Avatar, Notice, RenameDialog, displayNameOf, useProfileActions } from '
 import { tap } from '@/components/ui';
 import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
+import { ProfilePhotoReview } from '@/components/ProfilePhotoReview';
 
 export async function signOutToHome(signOut: () => Promise<unknown>, router: { replace: (h: '/') => void }) {
   await signOut();
@@ -20,7 +21,7 @@ export function AccountChip() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { rename, changePhoto, photoBusy, photoError, setPhotoError } = useProfileActions();
+  const { rename, changePhoto, savePhoto, cancelPhoto, pendingPhoto, photoBusy, photoError, photoNotice, setPhotoError } = useProfileActions();
   const [open, setOpen] = useState(false);
   const [renaming, setRenaming] = useState(false);
   const [confirmOut, setConfirmOut] = useState(false);
@@ -39,7 +40,7 @@ export function AccountChip() {
   }
 
   const name = displayNameOf(user);
-  const close = () => { setOpen(false); setConfirmOut(false); setPhotoError(null); setLogoutError(null); };
+  const close = () => { if (photoBusy) return; cancelPhoto(); setOpen(false); setConfirmOut(false); setPhotoError(null); setLogoutError(null); };
   const items: { id: string; label: string; icon: keyof typeof Feather.glyphMap; onPress: () => void; danger?: boolean }[] = [
     { id: 'view', label: 'View profile', icon: 'user', onPress: () => { close(); router.push('/profile'); } },
     { id: 'rename', label: 'Rename', icon: 'edit-2', onPress: () => { setOpen(false); setRenaming(true); } },
@@ -67,8 +68,9 @@ export function AccountChip() {
               </View>
             </View>
             <Notice text={photoError} />
+            <Notice text={photoNotice} tone="info" />
             <Notice text={logoutError} />
-            {confirmOut ? (
+            {pendingPhoto ? <ProfilePhotoReview uri={pendingPhoto.uri} busy={photoBusy} onSave={() => { void savePhoto(); }} onCancel={cancelPhoto} /> : confirmOut ? (
               <View style={[s.confirm, { backgroundColor: c.secondary, borderRadius: c.radius }]}>
                 <Text style={[s.confirmText, { color: c.secondaryForeground }]}>Log out of Chirrup? Your birds stay safe in your account and return when you sign back in.</Text>
                 <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>

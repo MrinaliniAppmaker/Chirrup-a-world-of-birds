@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { anatomyGuideParts, anatomyPoseParts, portraitParts } from "./anatomyGuides";
 import { requestedAnatomyFeatures } from "./anatomyGuidance";
 import type { BirdTraits } from "./birdDesign";
-import { billGuide, toeGuide, GUIDE_WIDTH, GUIDE_HEIGHT } from "./anatomyGuideDrawings";
+import { billGuide, lobedToeGuide, toeGuide, GUIDE_WIDTH, GUIDE_HEIGHT } from "./anatomyGuideDrawings";
 import { portraitSystemInstruction } from "./anatomyGuides";
 
 const traits: BirdTraits = {
@@ -90,4 +90,26 @@ test("spatial base binds required toe structures to actual leg ends", () => {
   assert.equal(image.readUInt32BE(20), 1440);
   assert.deepEqual(anatomyPoseParts({ ...traits, feet: "plain toes" }), []);
   assert.deepEqual(anatomyPoseParts({ ...traits, feet: "zygodactyl or heterodactyl" }), []);
+});
+
+test("lobed toes receive a separate surface guide, not a webbed-foot or digit-count guide", () => {
+  const input = { ...traits, beak: "short straight bill", feet: "lobed swimming toes" };
+  assert.deepEqual(requestedAnatomyFeatures(input), ["lobed"]);
+  const parts = anatomyGuideParts(input);
+  assert.equal(parts.length, 2);
+  assert.match(parts[0].text!, /TOE SURFACE ONLY/);
+  assert.match(parts[0].text!, /Preserve open gaps/);
+  assert.match(parts[0].text!, /not a toe-count diagram/);
+  assert.equal(Buffer.from(parts[1].inlineData!.data!, "base64").subarray(1, 4).toString(), "PNG");
+  assert.match(lobedToeGuide(), /White gaps stay OPEN/);
+  assert.equal((lobedToeGuide().match(/<polygon /g) ?? []).length, 3);
+  assert.deepEqual(requestedAnatomyFeatures({ ...input, feet: "not lobed" }), []);
+  assert.deepEqual(requestedAnatomyFeatures({ ...input, feet: "plain", extra: "lobed tail" }), []);
+  assert.deepEqual(requestedAnatomyFeatures({ ...input, feet: "plain", extra: "lobate toes" }), ["lobed"]);
+  const combined = anatomyGuideParts({ ...input, feet: "zygodactyl lobed toes" });
+  assert.equal(combined.filter(p => p.inlineData).length, 2, "surface and toe-direction guides must coexist");
+  const spatial = anatomyPoseParts(input);
+  assert.equal(spatial.filter(p => p.inlineData).length, 1);
+  assert.match(spatial.at(-1)!.text!, /ordinary skinny toes/);
+  assert.deepEqual(anatomyPoseParts({ ...input, feet: "lobed toes, five forward toes" }), [], "never replace a custom count with the default scaffold");
 });

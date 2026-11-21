@@ -97,7 +97,7 @@ export const FEET_OPTIONS: TraitOption[] = [
   { id: 'webbed', label: 'Webbed feet', value: 'fully webbed paddling feet' },
   { id: 'talons', label: 'Talons', value: 'curved grasping talons' },
   { id: 'zygodactyl', label: 'Zygodactyl', value: 'zygodactyl climbing feet, two toes back' },
-  { id: 'lobed', label: 'Lobed toes', value: 'lobed swimming toes' },
+  { id: 'lobed', label: 'Lobed toes', value: 'lobed swimming toes, each toe edged with scalloped side lobes and open gaps between toes, no webbing between toes' },
 ];
 
 export const TRAIT_LABELS: Record<TraitKey, string> = {

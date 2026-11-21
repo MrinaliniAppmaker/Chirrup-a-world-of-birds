@@ -12,6 +12,8 @@ import { useCheckBirdTraits, useGenerateBird, type BirdTraitCheck, type BirdTrai
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FieldInput } from '@/components/FieldInput';
 import { TraitValidationFeedback } from '@/components/TraitValidationFeedback';
+import { traitInputRanges } from '@/lib/traitHighlights';
+import { stageInteractionBird } from '@/lib/interactionDraft';
 import { BirdNameDialog } from '@/components/BirdNameDialog';
 import { BirdProfile, Button, Eyebrow, tap } from '@/components/ui';
 import { TraitChoiceGrid } from '@/components/TraitChoiceGrid';
@@ -304,6 +306,7 @@ export default function CreateScreen() {
                     <FieldInput
                       testID={`input-${k}`}
                       value={typed[k]}
+                      highlightRanges={traitInputRanges(typed[k], issuesFor(k))}
                       onChangeText={(t) => { editedTraits(); setTyped((current) => ({ ...current, [k]: t })); }}
                       placeholder={optionFor(k, DEFAULT_SEL[k])?.value}
                       placeholderTextColor={c.mutedForeground}
@@ -311,7 +314,7 @@ export default function CreateScreen() {
                       returnKeyType="next"
                       style={[st.input, { borderColor: issuesFor(k).length ? c.destructive : c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius }]}
                     />
-                    <TraitValidationFeedback field={k} value={traits[k]} issues={issuesFor(k)} />
+                    <TraitValidationFeedback field={k} issues={issuesFor(k)} />
                   </View>
                 ))}
               </View>
@@ -329,6 +332,7 @@ export default function CreateScreen() {
               <FieldInput
                 testID="input-extra"
                 value={extra}
+                highlightRanges={traitInputRanges(extra, issuesFor('extra'))}
                 onChangeText={(text) => { editedTraits(); setExtra(text); }}
                 placeholder="e.g. forked tail, white wing bars, a faint eye-ring"
                 placeholderTextColor={c.mutedForeground}
@@ -337,7 +341,7 @@ export default function CreateScreen() {
                 style={[st.input, st.textarea, { borderColor: issuesFor('extra').length ? c.destructive : c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius }]}
               />
             )}
-            {showExtra && <TraitValidationFeedback field="extra" value={traits.extra ?? ''} issues={issuesFor('extra')} />}
+            {showExtra && <TraitValidationFeedback field="extra" issues={issuesFor('extra')} />}
 
             {currentIssues.length > 0 && <Text testID="traits-invalid" accessibilityRole="alert" style={[st.small, { color: c.destructive, marginTop: 16 }]}>Please change the highlighted non-bird features before reviewing. Rare bird features and unusual combinations are welcome.</Text>}
             {traitCheck && !traitCheck.result.valid && !traitCheck.result.issues.length && JSON.stringify(traitCheck.input) === JSON.stringify(traits)
@@ -404,6 +408,11 @@ export default function CreateScreen() {
                 ) : (
                   <Button testID="save-bird" label="Save to my journal" icon="bookmark" loading={saving} onPress={() => { void onSave(); }} style={{ marginTop: 24 }} />
                 )}
+                <Button testID="interact-bird" label="Interact bird" icon="users" variant="outline" disabled={saving}
+                  onPress={() => {
+                    const token = stageInteractionBird(owner, { ...bird, name: (editingName ? nameDraft : birdName).trim() });
+                    router.push({ pathname: '/interactions', params: { draft: token } });
+                  }} style={{ marginTop: 10 }} />
                 <Button testID="regenerate" label="Imagine again with same traits" variant="outline" onPress={runGenerate} style={{ marginTop: 10 }} />
                 <Button testID="start-over" label="Start a new bird" variant="ghost" onPress={reset} style={{ marginTop: 4 }} />
               </View>

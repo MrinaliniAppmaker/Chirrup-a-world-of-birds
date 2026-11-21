@@ -230,6 +230,9 @@ export function useProfileActions() {
   const { user } = useUser();
   const [photoBusy, setPhotoBusy] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoNotice, setPhotoNotice] = useState<string | null>(null);
+  const [pendingPhoto, setPendingPhoto] = useState<{ owner: string; uri: string; file: string } | null>(null);
+  const photoLock = useRef(false);
   const rename = async (raw: string): Promise<string | null> => {
     const name = raw.trim();
     if (name.length < 1) return 'Please enter a name.';
@@ -243,19 +246,44 @@ export function useProfileActions() {
     catch (err) { return readableError(err, 'Could not save your name. Please try again.'); }
   };
   const changePhoto = async () => {
-    setPhotoError(null);
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) { setPhotoError('Photo access is off. Allow photo access in Settings to choose a profile picture.'); return; }
-    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.7, base64: true });
-    if (res.canceled || !res.assets[0]) return;
-    const a = res.assets[0];
-    if (!a.base64) { setPhotoError('Could not read that photo. Try another one.'); return; }
-    setPhotoBusy(true);
-    try { await user?.setProfileImage({ file: `data:${a.mimeType ?? 'image/jpeg'};base64,${a.base64}` }); }
-    catch (err) { setPhotoError(readableError(err, 'Could not upload that photo. Please try again.')); }
-    finally { setPhotoBusy(false); }
+    if (photoLock.current || !user) return;
+    photoLock.current = true;
+    setPhotoError(null); setPhotoNotice(null);
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) { setPhotoError('Photo access is off. Allow photo access in Settings to choose a profile picture.'); return; }
+      const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.7, base64: true });
+      if (res.canceled || !res.assets[0]) return;
+      const a = res.assets[0];
+      if (!a.base64) { setPhotoError('Could not read that photo. Try another one.'); return; }
+      setPendingPhoto({ owner: user.id, uri: a.uri, file: `data:${a.mimeType ?? 'image/jpeg'};base64,${a.base64}` });
+    } catch (err) {
+      setPhotoError(readableError(err, 'Could not choose that photo. Please try again.'));
+    } finally { photoLock.current = false; }
   };
-  return { rename, changePhoto, photoBusy, photoError, setPhotoError };
+  const savePhoto = async () => {
+    if (photoLock.current || !pendingPhoto) return;
+    if (!user || pendingPhoto.owner !== user.id) {
+      setPendingPhoto(null); setPhotoError('Sign in again to change your profile photo.'); return;
+    }
+    photoLock.current = true;
+    setPhotoBusy(true);
+    setPhotoError(null); setPhotoNotice(null);
+    try {
+      await user.setProfileImage({ file: pendingPhoto.file });
+      setPendingPhoto(null);
+      try { await user.reload(); setPhotoNotice('Profile photo saved.'); }
+      catch { setPhotoNotice('Your photo was saved. Reopen your profile to refresh its preview.'); }
+    } catch (err) {
+      // Retain the draft so a failed upload can be retried without picking again.
+      setPhotoError(readableError(err, 'Could not confirm the photo was saved. Your selected photo is kept; please try again.'));
+    } finally { photoLock.current = false; setPhotoBusy(false); }
+  };
+  const cancelPhoto = () => {
+    if (photoLock.current) return;
+    setPendingPhoto(null); setPhotoError(null); setPhotoNotice(null);
+  };
+  return { rename, changePhoto, savePhoto, cancelPhoto, pendingPhoto: pendingPhoto?.owner === user?.id ? pendingPhoto : null, photoBusy, photoError, photoNotice, setPhotoError };
 }
 
 export function RenameDialog({ visible, initial, onClose, onSave }: { visible: boolean; initial: string; onClose: () => void; onSave: (name: string) => Promise<string | null> }) {

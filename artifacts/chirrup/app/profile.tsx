@@ -7,6 +7,7 @@ import { Avatar, Notice, RenameDialog, displayNameOf, useProfileActions } from '
 import { signOutToHome } from '@/components/AccountMenu';
 import { Button, Eyebrow } from '@/components/ui';
 import { LibraryShelf } from '@/components/LibraryShelf';
+import { ProfilePhotoReview } from '@/components/ProfilePhotoReview';
 import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
 export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
@@ -18,7 +19,7 @@ export default function ProfileScreen() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const { signOut } = useClerk();
-  const { rename, changePhoto, photoBusy, photoError } = useProfileActions();
+  const { rename, changePhoto, savePhoto, cancelPhoto, pendingPhoto, photoBusy, photoError, photoNotice } = useProfileActions();
   const [renaming, setRenaming] = useState(false);
   const [confirmOut, setConfirmOut] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -52,10 +53,12 @@ export default function ProfileScreen() {
       <LibraryShelf />
       <Button testID="profile-share-birds" label="Share birds" icon="share-2" variant="outline" onPress={() => router.push('/share-birds')} style={{ marginBottom: 8 }} />
       <Notice text={photoError} />
+      <Notice text={photoNotice} tone="info" />
       <Notice text={logoutError} />
       <View style={{ gap: 10, marginTop: 6 }}>
         <Button testID="profile-rename" label="Rename" icon="edit-2" variant="outline" onPress={() => setRenaming(true)} />
-        <Button testID="profile-change-photo" label={user.hasImage ? 'Change photo' : 'Choose a photo'} icon="camera" variant="outline" loading={photoBusy} onPress={() => { void changePhoto(); }} />
+        {pendingPhoto ? <ProfilePhotoReview uri={pendingPhoto.uri} busy={photoBusy} onSave={() => { void savePhoto(); }} onCancel={cancelPhoto} />
+          : <Button testID="profile-change-photo" label={user.hasImage ? 'Change photo' : 'Choose a photo'} icon="camera" variant="outline" onPress={() => { void changePhoto(); }} />}
       </View>
       <View style={[s.out, { borderTopColor: c.border }]}>
         <Text style={[s.body, { color: c.mutedForeground }]}>Logging out keeps every bird safe in your account. They return when you sign back in.</Text>

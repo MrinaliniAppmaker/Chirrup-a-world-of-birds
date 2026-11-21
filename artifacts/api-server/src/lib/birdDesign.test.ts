@@ -48,6 +48,18 @@ test("lobed feet and zygodactyl feet receive distinct physical descriptions", ()
   assert.match(portraitPrompt({ ...traits, feet: "zygodactyl climbing feet, two toes back" }), /two forward-pointing toes and two backward-pointing toes/);
 });
 
+test("lobed toes keep open gaps and are not given the generic membrane instruction", () => {
+  for (const feet of ["lobed swimming toes", "lobate feet", "lobed"]) {
+    const prompt = portraitPrompt({ ...traits, feet });
+    assert.match(prompt, /EACH INDIVIDUAL TOE/);
+    assert.match(prompt, /open air gaps between neighboring toes/);
+    assert.match(prompt, /not in water or mud/);
+    assert.doesNotMatch(prompt, /membranes visible|membranes prominently/);
+  }
+  assert.doesNotMatch(portraitPrompt({ ...traits, feet: "perching feet with three toes forward" }), /membranes visible|membranes prominently/);
+  assert.match(portraitPrompt(traits), /continuous fan-shaped skin membranes/);
+});
+
 test("typed uncommon toe terms and the reported spelling expand without replacing custom traits", () => {
   for (const feet of ["zygodactyl", "zygodactyly", "zygodactylity", "zygodactlity", "violet ZYGODACTYLOUS feet"]) {
     const prompt = portraitPrompt({ ...traits, feet });

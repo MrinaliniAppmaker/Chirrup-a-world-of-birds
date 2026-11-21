@@ -30,7 +30,19 @@ A focused-looking border is not proof that an input accepts keyboard editing.
 
 **Why:** After earlier focus repairs, the user explicitly reported that fields appeared selected but could not be typed into, and requested a complete fix rather than stronger apparent selection.
 
-**How to apply:** Verify actual keyboard characters, deletion, paste and the value used by the form, not just styling, focus APIs or scripted filling. Reflect real blur in styling and do not let focus recovery compete with another editable control. Keep error highlights separate from the editable control so feedback cannot intercept typing.
+**How to apply:** Verify actual keyboard characters, deletion, paste and the value used by the form, not just styling, focus APIs or scripted filling. Reflect real blur in styling and do not let focus recovery compete with another editable control. In-field word highlights must be a noninteractive decoration of the real input, never a second editable or focusable overlay; do not substitute a highlighted copy in the error message.
+
+Check single-line highlight clipping separately from multiline wrapping.
+
+**Why:** A browser check found the final characters lost their highlight in a horizontally scrolled input even though textarea alignment passed.
+
+**How to apply:** Do not assume the two controls expose identical padding and scrolling measurements. Match their actual content bounds, exclude textarea scrollbar gutters, and check the end of long marked words as well as their start.
+
+Separate browser-tab checks do not verify the user's Replit phone preview.
+
+**Why:** The user confirmed they use “Phone preview inside Replit” and still saw selection disappear within a second while the field stayed green after separate-browser checks passed. A separate browser tab was offered as a workaround; the user has not confirmed it fixes their environment, and publishing is not a proven solution.
+
+**How to apply:** Establish the phone preview's selected target before claiming native or embedded-preview coverage. Distinguish actual simulator testing, an embedded web frame and a top-level Expo web page. Keep the original focus problem open until verified in the affected environment.
 
 Inspect actual read-only/disabled state before adding focus recovery. [A cancelled Google popup](browser-oauth-cancellation.md) left shared provider loading stuck and disabled otherwise correctly focused email fields.
 

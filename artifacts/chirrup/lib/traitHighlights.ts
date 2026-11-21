@@ -1,7 +1,7 @@
 import type { BirdTraitIssue } from '@workspace/api-client-react';
 
 /** Render exact source slices; merge overlapping model ranges without repeating text. */
-export function traitHighlightParts(value: string, issues: Pick<BirdTraitIssue, 'start' | 'end'>[]) {
+export function traitHighlightParts(value: string, issues: readonly Pick<BirdTraitIssue, 'start' | 'end'>[]) {
   const ranges: { start: number; end: number }[] = [];
   for (const issue of [...issues].sort((a, b) => a.start - b.start)) {
     const start = Math.max(0, Math.min(value.length, issue.start));
@@ -20,4 +20,10 @@ export function traitHighlightParts(value: string, issues: Pick<BirdTraitIssue, 
   }
   if (from < value.length) parts.push({ text: value.slice(from), invalid: false });
   return parts;
+}
+
+/** Validation sees trimmed traits; the editor must mark the original source. */
+export function traitInputRanges(value: string, issues: readonly Pick<BirdTraitIssue, 'start' | 'end'>[]) {
+  const leading = value.length - value.trimStart().length;
+  return issues.map(({ start, end }) => ({ start: start + leading, end: end + leading }));
 }

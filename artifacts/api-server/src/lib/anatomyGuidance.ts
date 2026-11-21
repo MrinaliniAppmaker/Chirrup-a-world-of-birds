@@ -22,6 +22,12 @@ const definitions = [
     meaning: "Pamprodactyl: all FOUR toes can rotate to point forward. Show the requested orientation; do not automatically add a backward-facing toe.",
   },
   {
+    id: "lobed",
+    part: "feet",
+    term: /\b(?:lobed|lobate)\b/i,
+    meaning: "Lobed / lobate toes: EACH INDIVIDUAL TOE is edged with broad scalloped lateral skin lobes, like a separate narrow articulated paddle. The lobes attach to that toe alone. Keep open air gaps between neighboring toes from beyond the ankle junction all the way to their separate claws. Do not bridge those gaps with a shared sheet of skin: lobed toes are NOT webbed feet. Preserve independently requested toe counts and directions; lobes change a toe's edges, not its branching.",
+  },
+  {
     id: "totipalmate",
     part: "feet",
     term: /\btotipalmate\b/i,
@@ -46,8 +52,11 @@ export type AnatomyFeature = (typeof definitions)[number]["id"];
 // A diagram is a positive structural constraint. Never attach one for a term
 // the user negated, or for e.g. an upturned tail mentioned in extra traits.
 export function requestedAnatomyFeatures(traits: BirdTraits): AnatomyFeature[] {
-  return definitions.filter(({ part, term }) => {
-    const extra = traits.extra ?? "";
+  return definitions.filter(({ id, part, term }) => {
+    const extra = id === "lobed"
+      ? (traits.extra ?? "").split(/[.;,\n]/).filter(clause =>
+        /\b(?:(?:lobed|lobate)(?:[-\s]+swimming)?[-\s]+(?:toes?|feet|foot|digits?)|(?:toes?|feet|foot|digits?)(?:[-\s]+\w+){0,3}[-\s]+(?:lobed|lobate|lobes))\b/i.test(clause)).join("; ")
+      : traits.extra ?? "";
     const fields = [traits[part], ...(part === "feet" || /\b(?:bill|beak|mandibles?)\b/i.test(extra) ? [extra] : [])];
     return fields.some((field) => {
       const matches = field.matchAll(new RegExp(term.source, "gi"));
@@ -60,8 +69,9 @@ export function requestedAnatomyFeatures(traits: BirdTraits): AnatomyFeature[] {
 }
 
 export function anatomyGuidance(traits: BirdTraits): string {
+  const requested = new Set(requestedAnatomyFeatures(traits));
   const meanings = definitions
-    .filter(({ part, term }) => term.test(`${traits[part]}\n${traits.extra ?? ""}`))
+    .filter(({ id }) => requested.has(id))
     .map(({ meaning }) => meaning);
   if (!meanings.length) return "";
   return `ANATOMY DEFINITIONS FOR TERMS IN THE SELECTED TRAITS:

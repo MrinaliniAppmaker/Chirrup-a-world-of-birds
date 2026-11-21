@@ -95,7 +95,7 @@ assert.equal(externalBrowserInputValue(inputState, '', 'soft down'), '', 'an int
 assert.equal(externalBrowserInputValue(inputState, 'restored draft', ''), 'restored draft', 'external prefilling still works');
 console.log('PASS: stale prop replays, keystroke echoes, explicit resets and restored drafts');
 
-const { traitHighlightParts } = load('lib/traitHighlights.ts');
+const { traitHighlightParts, traitInputRanges } = load('lib/traitHighlights.ts');
 const highlighted = traitHighlightParts('white feathers, catlike ears', [{ start: 16, end: 28 }]);
 assert.equal(highlighted.map(part => part.text).join(''), 'white feathers, catlike ears');
 assert.equal(highlighted.filter(part => part.invalid).map(part => part.text).join(''), 'catlike ears');
@@ -104,3 +104,26 @@ assert.equal(overlap.map(part => part.text).join(''), 'abcdef', 'overlapping spa
 assert.equal(overlap.filter(part => part.invalid)[0].text, 'bcde');
 assert.equal(traitHighlightParts('abc', [{ start: 30, end: 40 }]).map(part => part.text).join(''), 'abc');
 console.log('PASS: exact invalid-word highlighting, overlapping and out-of-range spans');
+
+const rawTrait = ' \n  forked tail, butterfly wings  ';
+const trimmedStart = rawTrait.trim().indexOf('butterfly wings');
+const rawRanges = traitInputRanges(rawTrait, [{ start: trimmedStart, end: trimmedStart + 15 }]);
+assert.equal(rawTrait.slice(rawRanges[0].start, rawRanges[0].end), 'butterfly wings');
+assert.equal(traitHighlightParts(rawTrait, rawRanges).map(p => p.text).join(''), rawTrait);
+assert.deepEqual(JSON.parse(JSON.stringify(traitInputRanges('zygodactyl toes', []))), []);
+console.log('PASS: in-field offsets preserve leading whitespace and multiline source text');
+
+const interactionDraft = load('lib/interactionDraft.ts');
+const sampleBird = { id: 'unit-bird', name: 'Unit bird', imageUri: 'test-only-portrait' };
+const handoff = interactionDraft.stageInteractionBird('unit-owner', sampleBird);
+assert.equal(interactionDraft.readInteractionBird('unit-owner', handoff).imageUri, sampleBird.imageUri);
+assert.equal(interactionDraft.readInteractionBird('other-owner', handoff), undefined);
+assert.equal(interactionDraft.readInteractionBird('unit-owner', 'wrong-token'), undefined);
+assert.equal(interactionDraft.readInteractionBird('unit-owner', undefined), undefined);
+sampleBird.name = 'Changed after staging';
+assert.equal(interactionDraft.readInteractionBird('unit-owner', handoff).name, 'Unit bird');
+const replacement = interactionDraft.stageInteractionBird('unit-owner', sampleBird);
+assert.equal(interactionDraft.readInteractionBird('unit-owner', handoff), undefined);
+clock += 30 * 60 * 1000 + 1;
+assert.equal(interactionDraft.readInteractionBird('unit-owner', replacement), undefined);
+console.log('PASS: unsaved interaction handoff preserves portrait, isolates owners, replaces stale drafts and expires');

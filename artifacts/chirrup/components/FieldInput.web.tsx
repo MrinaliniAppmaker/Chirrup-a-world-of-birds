@@ -2,19 +2,24 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useLayo
 import { StyleSheet, type TextInputInstance, type TextInputProps } from 'react-native';
 import { useColors } from '@/hooks/useColors';
 import { externalBrowserInputValue, type BrowserInputValueState } from '@/lib/browserInputValue';
+import type { FieldInputProps } from './FieldInput.types';
+import { traitHighlightParts } from '@/lib/traitHighlights';
 
 // A real DOM input bypasses RN Web's TextInput responder/blur bookkeeping.
 // Its DOM identity does not change while typing. Native builds continue to use
 // FieldInput.tsx. Recover only unintended blurs, never deliberate navigation.
-export const FieldInput = forwardRef<TextInputInstance, TextInputProps & { onEditingComplete?: () => void }>(function FieldInput({
+export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(function FieldInput({
   value, defaultValue, onChangeText, style, multiline = false, editable = true,
   testID, accessibilityLabel, placeholder, placeholderTextColor, maxLength,
   autoCapitalize = 'sentences', autoCorrect = true, keyboardType, returnKeyType,
   autoFocus, secureTextEntry, selectTextOnFocus, onEditingComplete,
-  onFocus, onBlur, onSubmitEditing, onKeyPress, autoComplete,
+  onFocus, onBlur, onSubmitEditing, onKeyPress, autoComplete, highlightRanges, onScroll,
 }, ref) {
   const c = useColors();
   const element = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const highlightViewport = useRef<HTMLDivElement | null>(null);
+  const highlightContent = useRef<HTMLDivElement | null>(null);
+  const hasHighlightLayer = highlightRanges !== undefined;
   const initialValue = useRef(value ?? defaultValue ?? '');
   const valueState = useRef<BrowserInputValueState>({ prop: value, reported: initialValue.current });
   const synchronizedNode = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
@@ -25,6 +30,42 @@ export const FieldInput = forwardRef<TextInputInstance, TextInputProps & { onEdi
   const restorations = useRef(0);
   const lastRestore = useRef(0);
   const attach = useCallback((node: HTMLInputElement | HTMLTextAreaElement | null) => { element.current = node; }, []);
+  const syncHighlightLayer = useCallback(() => {
+    const node = element.current;
+    const viewport = highlightViewport.current;
+    const content = highlightContent.current;
+    if (!node || !viewport || !content) return;
+    const computed = getComputedStyle(node);
+    // Match the real input's metrics, including browser default padding. This
+    // changes only the decorative layer, never input.value, focus or selection.
+    for (const property of [
+      'font-family', 'font-size', 'font-weight', 'font-style', 'font-variant',
+      'font-feature-settings', 'font-kerning', 'line-height', 'letter-spacing',
+      'text-align', 'text-indent', 'text-transform', 'direction', 'tab-size',
+    ]) content.style.setProperty(property, computed.getPropertyValue(property));
+    viewport.style.left = `${parseFloat(computed.borderLeftWidth) + parseFloat(computed.paddingLeft)}px`;
+    const verticalCenter = node.tagName === 'INPUT' ? Math.max(0, (
+      node.clientHeight - parseFloat(computed.paddingTop) - parseFloat(computed.paddingBottom)
+      - parseFloat(computed.lineHeight)
+    ) / 2) : 0;
+    viewport.style.top = `${parseFloat(computed.borderTopWidth) + parseFloat(computed.paddingTop) + verticalCenter}px`;
+    // INPUT's internal scrolling editor can report clientWidth without its
+    // horizontal padding. Measure its border box instead of subtracting that
+    // padding twice. TEXTAREA needs clientWidth to exclude scrollbar gutters.
+    const innerWidth = node.tagName === 'INPUT'
+      ? node.offsetWidth - parseFloat(computed.borderLeftWidth) - parseFloat(computed.borderRightWidth)
+      : node.clientWidth;
+    viewport.style.width = `${Math.max(0, innerWidth - parseFloat(computed.paddingLeft) - parseFloat(computed.paddingRight))}px`;
+    viewport.style.height = `${Math.max(0, node.clientHeight - parseFloat(computed.paddingTop) - parseFloat(computed.paddingBottom) - 2 * verticalCenter)}px`;
+    content.style.transform = `translate(${-node.scrollLeft}px, ${-node.scrollTop}px)`;
+  }, []);
+  useLayoutEffect(() => { syncHighlightLayer(); });
+  useEffect(() => {
+    if (!hasHighlightLayer || !element.current || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(syncHighlightLayer);
+    observer.observe(element.current);
+    return () => observer.disconnect();
+  }, [hasHighlightLayer, syncHighlightLayer]);
 
   useLayoutEffect(() => {
     const node = element.current;
@@ -150,6 +191,10 @@ export const FieldInput = forwardRef<TextInputInstance, TextInputProps & { onEdi
     autoCorrect: autoCorrect ? 'on' : 'off',
     spellCheck: autoCorrect,
     style: css,
+    onScroll: (event: React.UIEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      syncHighlightLayer();
+      onScroll?.(event as unknown as Parameters<NonNullable<TextInputProps['onScroll']>>[0]);
+    },
     onFocus: (event: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       deliberateBlur.current = false;
       if (!restoring.current) restorations.current = 0;
@@ -213,11 +258,35 @@ export const FieldInput = forwardRef<TextInputInstance, TextInputProps & { onEdi
       onChangeText?.(event.currentTarget.value);
     },
   };
-  return <>
-    <style>{'.chirrup-field::placeholder { color: var(--chirrup-placeholder); opacity: 1; }'}</style>
-    {multiline ? <textarea {...common} rows={3} /> : <input {...common}
+  const inputStyle = hasHighlightLayer ? {
+    ...css, width: '100%', display: 'block', margin: 0,
+    backgroundColor: 'transparent', position: 'relative', zIndex: 1,
+  } as CSSProperties : css;
+  const input = multiline ? <textarea {...common} style={inputStyle} rows={3} /> : <input {...common} style={inputStyle}
       type={secureTextEntry ? 'password' : keyboardType === 'email-address' ? 'email' : 'text'}
       inputMode={keyboardType === 'numeric' || keyboardType === 'number-pad' ? 'numeric' : keyboardType === 'decimal-pad' ? 'decimal' : undefined}
-      enterKeyHint={returnKeyType === 'next' ? 'next' : returnKeyType === 'search' ? 'search' : undefined} />}
+      enterKeyHint={returnKeyType === 'next' ? 'next' : returnKeyType === 'search' ? 'search' : undefined} />;
+  return <>
+    <style>{'.chirrup-field::placeholder { color: var(--chirrup-placeholder); opacity: 1; }'}</style>
+    {hasHighlightLayer ? <div style={{
+      position: 'relative', isolation: 'isolate', minWidth: 0, borderRadius: css.borderRadius,
+      backgroundColor: css.backgroundColor, marginTop: css.marginTop,
+      marginBottom: css.marginBottom, marginLeft: css.marginLeft, marginRight: css.marginRight,
+    }}>
+      <div ref={highlightViewport} aria-hidden="true" data-testid={`${testID}-highlights`} style={{
+        position: 'absolute', zIndex: 0, overflow: 'hidden', pointerEvents: 'none', userSelect: 'none', opacity: 0.24,
+      }}>
+        <div ref={highlightContent} style={{
+          whiteSpace: multiline ? 'pre-wrap' : 'pre', overflowWrap: multiline ? 'break-word' : 'normal',
+          color: 'transparent',
+        }}>
+          {traitHighlightParts(value ?? '', highlightRanges ?? []).map((part, i) => (
+            <span key={i} data-invalid={part.invalid || undefined}
+              style={part.invalid ? { backgroundColor: c.destructive } : undefined}>{part.text}</span>
+          ))}
+        </div>
+      </div>
+      {input}
+    </div> : input}
   </>;
 });
