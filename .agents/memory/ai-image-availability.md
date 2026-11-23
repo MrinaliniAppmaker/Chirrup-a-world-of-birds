@@ -25,3 +25,9 @@ Lobed-toe accuracy requires visible lateral lobes on separate digits, not merely
 **Why:** Live checks on 2026-11-21 showed that individual-toe references could produce ordinary narrow toes. A full-bird construction reference made edge lobes more visible but did not establish reliable natural-looking anatomy. A blanket rendering instruction mentioning membranes had also contradicted non-webbed selections.
 
 **How to apply:** Keep generic rendering instructions neutral about foot surfaces. Request membranes only for selected webbing, and inspect lobe shape, attachment and gaps on both feet. Report improved conditioning separately from verified reliable anatomy; do not add a rejection/retry loop or silently upgrade models to disguise failures.
+
+The user selected a coot foot as the model for lobed toe anatomy; copy only its foot surfaces, not whole-species traits.
+
+**Why:** After recognizing that the toes had become distinct but were still incorrect, the user explicitly suggested a coot foot. On 2026-11-23, a real foot-only photographic reference produced more visible lateral lobes than a coot-inspired vector guide, but still did not establish consistent full coot-like anatomy.
+
+**How to apply:** Use the actual foot geometry without importing coot plumage, bill, body or leg color. Preserve separately requested toe directions/counts. Report live visual results honestly; source-photo conditioning is still not a guarantee.

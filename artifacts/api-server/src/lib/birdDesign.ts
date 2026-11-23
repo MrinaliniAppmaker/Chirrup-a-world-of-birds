@@ -42,7 +42,7 @@ const feetGeometry: Record<string, string> = {
   "perching feet with three toes forward": "three separate forward-pointing toes and one backward-pointing toe on each foot",
   "curved grasping talons": "strong grasping toes ending in long sharply curved talons",
   "zygodactyl climbing feet, two toes back": "two forward-pointing toes and two backward-pointing toes on each foot; four toes total per foot, digits II and III forward, digits I and IV backward; not three forward and one backward",
-  "lobed swimming toes": "separate toes each edged with individual broad lateral skin lobes; scalloped flanges attach only to their own toe, with clear open gaps separating neighboring toes, never an inter-toe skin sheet",
+  "lobed swimming toes": "coot-like toe surfaces only: separate toes each edged with broad flat leaf-like lateral skin lobes and shallow joint notches; scalloped flanges attach only to their own toe, with clear open gaps separating neighboring toes, never an inter-toe skin sheet. Not spines or beads. Keep all independently selected body, bill, plumage and leg colors; do not make the whole bird a coot",
 };
 
 export function portraitPrompt(traits: BirdTraits): string {

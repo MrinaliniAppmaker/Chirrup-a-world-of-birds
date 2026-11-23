@@ -17,7 +17,21 @@ const tube = (path: string, width: number) => `
 // Bird faces RIGHT. Rear toes extend LEFT of the ankle, front toes RIGHT.
 // Distinct endpoints and spaces make the topology countable, not an X-shaped
 // symbol that could be mistaken for four forward-splayed toes.
+// Coot-foot reference: broad, flat lateral flaps at the phalanges, shallow
+// joint notches and a narrow central scaled toe. Not beads or pointed spikes.
+// Opposite margins are slightly offset, as in the real coot foot.
+const cootToeWidth = (t: number, side: number) => {
+  const shifted = t + (side < 0 ? -0.014 : 0.014);
+  const lobes = [[0.10, 0.38, 0.073], [0.38, 0.68, 0.088], [0.68, 0.96, 0.061]];
+  const flange = lobes.reduce((width, [start, end, amplitude]) => {
+    if (shifted <= start || shifted >= end) return width;
+    return width + amplitude * Math.sin(Math.PI * (shifted - start) / (end - start)) ** 0.52;
+  }, 0);
+  return (0.018 + flange) * (t > 0.96 ? 1 - (t - 0.96) * 18 : 1);
+};
+
 const lobedDigitShape = (x: number, y: number, controlX: number, controlY: number) => {
+  const length = Math.hypot(x - 220, y - 225);
   const edge = (sign: number) => Array.from({ length: 81 }, (_, i) => {
     const t = i / 80, u = 1 - t;
     const px = u * u * 220 + 2 * u * t * controlX + t * t * x;
@@ -25,8 +39,7 @@ const lobedDigitShape = (x: number, y: number, controlX: number, controlY: numbe
     const dx = 2 * u * (controlX - 220) + 2 * t * (x - controlX);
     const dy = 2 * u * (controlY - 225) + 2 * t * (y - controlY);
     const magnitude = Math.hypot(dx, dy) || 1;
-    const scallop = t > 0.4 ? Math.sin((t - 0.4) / 0.6 * 3 * Math.PI) ** 2 : 0;
-    const width = (9 + 19 * scallop) * (t > 0.94 ? 1 - (t - 0.94) * 8 : 1);
+    const width = length * cootToeWidth(t, sign);
     return `${(px - sign * dy / magnitude * width).toFixed(2)},${(py + sign * dx / magnitude * width).toFixed(2)}`;
   });
   return `<polygon points="${[...edge(-1), ...edge(1).reverse()].join(" ")}" fill="url(#skin)" stroke="#333333" stroke-width="2"/>`;
@@ -84,23 +97,27 @@ export const lobedToeGuide = () => {
   const digit = (x: number, y: number, length: number, angle: number) => {
     const side = (sign: number) => Array.from({ length: 81 }, (_, i) => {
       const t = i / 80;
-      const wave = t > 0.12 && t < 0.96 ? Math.sin((t - 0.12) / 0.84 * 4 * Math.PI) ** 2 : 0;
-      const width = (10 + 21 * wave) * (t > 0.92 ? 1 - (t - 0.92) * 8 : 1);
+      const width = length * cootToeWidth(t, sign);
       return `${(sign * width).toFixed(2)},${(-t * length).toFixed(2)}`;
     });
     return `<g transform="translate(${x} ${y}) rotate(${angle} 0 0)">
       <polygon points="${[...side(-1), ...side(1).reverse()].join(" ")}" fill="url(#skin)" stroke="#333333" stroke-width="3"/>
       <path d="M-5 ${-length} Q0 ${-length - 33} 8 ${-length - 8} L5 ${-length + 8}Z" fill="#303030"/>
       <path d="M0 -14 V${-length + 15}" stroke="#777777" stroke-width="2" fill="none"/>
+      ${Array.from({ length: 17 }, (_, i) => {
+        const y = -(0.07 + i * 0.05) * length;
+        return `<path d="M-7 ${y} Q0 ${y + 4} 7 ${y}" stroke="#666" stroke-width="2" fill="none"/>`;
+      }).join("")}
     </g>`;
   };
   return sheet(`
-    ${label(55, 65, "LOBED TOE EDGES - SURFACE SHAPE ONLY", 36)}
+    ${label(55, 65, "COOT-STYLE LOBED TOES - FOOT SURFACE ONLY", 34)}
     ${label(55, 115, "Each drawing is an individual TOE example, not the number of toes on a foot.", 27)}
     ${digit(260, 660, 410, -12)}${digit(690, 660, 485, 0)}${digit(1120, 660, 390, 12)}
-    ${label(70, 750, "SCALLOPED SIDE LOBES ATTACH TO THEIR OWN TOE ONLY", 30)}
+    ${label(70, 750, "BROAD FLAT SIDE LOBES - NOT SPIKES, BEADS OR FEATHERS", 30)}
     ${label(70, 810, "White gaps stay OPEN between neighboring toes and their lobes.", 29)}
     ${label(70, 870, "Do not fill those gaps with a shared skin sheet or a fan-shaped paddle.", 27)}
+    ${label(70, 915, "Use coot FOOT anatomy only, never its body, plumage, bill or leg color.", 27)}
     ${label(70, 960, "Keep the user's toe count, directions, colors and natural skin texture.", 27)}
   `);
 };

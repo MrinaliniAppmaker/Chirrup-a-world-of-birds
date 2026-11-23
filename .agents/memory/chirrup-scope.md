@@ -14,11 +14,11 @@ Home, Create and Library are the bottom-bar destinations. Interactions remains a
 
 **How to apply:** Consult the original Figma screens and asset exports before changing navigation or trait visuals. Mobile adaptation must not remove page boundaries or alter the meaning of illustrated choices.
 
-Create starts a fresh bird whenever the user returns after leaving that page. During generation, use the Create icon rather than the Chirrup brand mark.
+Create normally starts a fresh bird when the user returns after leaving that page. Exception: an unsigned-in user's newly generated bird must survive Create → Home → Sign in → Create. During generation, use the Create icon rather than the Chirrup brand mark.
 
-**Why:** The user explicitly requested a new creation session on reopening Create, and disliked the Chirrup mark as the pre-image placeholder.
+**Why:** The user requested a new creation session on reopening Create, but later explicitly exempted the Home/sign-in detour so signing in does not destroy the bird they just made. They disliked the Chirrup mark as the pre-image placeholder.
 
-**How to apply:** Discard unsaved draft/result state on deliberate page exit, including late-arriving generation results, without deleting already saved birds. Error recovery is not a deliberate exit: retain the current route, selections, generated portrait and unfinished bird name when retrying a failed screen, and keep the signed-in session.
+**How to apply:** Discard unsaved draft/result state on ordinary deliberate page exit, including late-arriving generation results, without deleting saved birds. Preserve a completed guest bird, its traits and unfinished name through the Home/sign-in detour; never transfer one signed-in account's draft to another. Error recovery is not a deliberate exit: retain the current route, selections, generated portrait and unfinished bird name when retrying a failed screen, and keep the signed-in session.
 
 Recovering from a screen error must not send an already signed-in user back to sign-in or discard the bird they were working on.
 

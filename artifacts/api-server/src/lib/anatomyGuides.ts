@@ -7,7 +7,7 @@ import { anatomyPoseGuide, billGuide, lobedToeGuide, toeGuide } from "./anatomyG
 
 type Guide = { id: AnatomyFeature; caption: string; svg: string };
 const guides: Guide[] = [
-  { id: "lobed", caption: "TOE SURFACE ONLY - INDIVIDUAL LOBES: each drawing is one isolated toe surface example, not a toe-count diagram. Copy the attached scalloped flanges down the sides of EACH requested digit. Preserve open gaps between neighboring toes; do not join them into a shared skin sheet. Keep the toe count and directions from the user's selections or other toe-layout guides. Repeat the lobed surface on BOTH feet with natural skin and claws. Do not copy gray, labels, illustration style or diagram panels.", svg: lobedToeGuide() },
+  { id: "lobed", caption: "TOE SURFACE ONLY - COOT FOOT REFERENCE: each drawing is one isolated toe surface example, not a toe-count diagram. Use the coot's broad, flat leaf-like lateral skin flaps and shallow joint notches, with a narrow scaled central toe and a terminal claw. Copy the attached scalloped flanges down the sides of EACH requested digit, not spikes, beads, plates or feathers. Preserve open gaps between neighboring toes; do not join them into a shared skin sheet. Keep the toe count and directions from the user's selections or other toe-layout guides. Repeat the lobed surface on BOTH feet with natural skin and claws. Copy coot FOOT geometry only, never a coot's body, head, bill, black plumage, white forehead or green legs. Do not copy gray, labels, illustration style or diagram panels.", svg: lobedToeGuide() },
   { id: "upcurved", caption: "BILL SHAPE ONLY, side view facing right: copy the continuous UPWARD sweep to the raised tip, with the head level. The grey oval is orientation context only, not the requested head shape. Do not copy grey coloring, scale or illustration style.", svg: billGuide(true) },
   { id: "downcurved", caption: "BILL SHAPE ONLY, side view facing right: copy the continuous DOWNWARD bill curve. Grey head is orientation context only; keep the user's own head shape, bill dimensions and palette.", svg: billGuide(false) },
   { id: "zygodactyl", caption: "TOE ARRANGEMENT ONLY - MANDATORY 2+2 TOPOLOGY: this sheet shows the SAME four-toed foot from oblique and top views, then both feet. With the bird facing right, exactly TWO toes (2,3) extend right/forward of EACH ankle, and exactly TWO toes (1,4) extend left/backward of EACH ankle. Eight toes across the pair, not two forward toes on one foot and two backward on the other. Give the rear pair a visible gap. Match the articulated toe branches in the oblique view, not ordinary three-forward/one-back feet. Keep natural skin and claws in the selected colors. No labels, diagram panels or grey-color copying in the final photograph.", svg: toeGuide([2, 3], [1, 4]) },
@@ -61,8 +61,19 @@ export function anatomyGuideParts(traits: BirdTraits): Part[] {
   return parts;
 }
 
-export function portraitParts(traits: BirdTraits): Part[] {
+export function portraitParts(traits: BirdTraits, cootPhoto?: Part): Part[] {
   const referenceParts = anatomyGuideParts(traits);
+  // Swap the lobed surface drawing for the actual foot crop in production.
+  // Other guides (bill curvature and independently selected toe counts) stay.
+  if (cootPhoto && requestedAnatomyFeatures(traits).includes("lobed")) {
+    const caption = referenceParts.findIndex((part) => part.text?.includes("COOT FOOT REFERENCE"));
+    if (caption >= 0) {
+      referenceParts[caption] = {
+        text: "REAL COOT FOOT — TOE SURFACE ONLY: the next photograph is a close-up of actual coot toes. Transfer these broad, flat lateral skin lobes, scalloped joint notches, central scaled toe shafts and separate claws onto BOTH feet of the selected bird. Gaps remain open between toes; no shared webbing. Preserve any independently selected toe count/direction instead of copying the reference's arrangement. Do not copy its leg/skin colors, grass, scale in frame, stance or background. Keep the user's body, beak, feathers and palette; this is NOT a request for a coot.",
+      };
+      referenceParts[caption + 1] = cootPhoto;
+    }
+  }
   return [
     ...(referenceParts.length ? [{
       text: "The following images are STRUCTURAL ANATOMY GUIDES: construction constraints, not optional inspiration. They are not species references, finished bird portraits, palette references or output panels. Transfer each guide's specified toe topology, toe-edge surface or bill-curvature direction to the selected bird. Preserve the original user selections for every other part. Return ONE photorealistic bird, never a diagram, collage, inset or comparison sheet.",

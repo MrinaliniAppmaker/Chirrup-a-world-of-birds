@@ -100,8 +100,12 @@ test("lobed toes receive a separate surface guide, not a webbed-foot or digit-co
   assert.match(parts[0].text!, /TOE SURFACE ONLY/);
   assert.match(parts[0].text!, /Preserve open gaps/);
   assert.match(parts[0].text!, /not a toe-count diagram/);
+  assert.match(parts[0].text!, /COOT FOOT REFERENCE/);
+  assert.match(parts[0].text!, /broad, flat leaf-like/);
+  assert.match(parts[0].text!, /never a coot's body/);
   assert.equal(Buffer.from(parts[1].inlineData!.data!, "base64").subarray(1, 4).toString(), "PNG");
   assert.match(lobedToeGuide(), /White gaps stay OPEN/);
+  assert.match(lobedToeGuide(), /NOT SPIKES, BEADS OR FEATHERS/);
   assert.equal((lobedToeGuide().match(/<polygon /g) ?? []).length, 3);
   assert.deepEqual(requestedAnatomyFeatures({ ...input, feet: "not lobed" }), []);
   assert.deepEqual(requestedAnatomyFeatures({ ...input, feet: "plain", extra: "lobed tail" }), []);

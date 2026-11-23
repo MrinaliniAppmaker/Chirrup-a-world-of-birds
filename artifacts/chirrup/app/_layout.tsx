@@ -17,7 +17,7 @@ import { ClerkLoaded, ClerkProvider, useAuth } from '@clerk/expo';
 import { tokenCache } from '@clerk/expo/token-cache';
 import { setAuthTokenGetter, setBaseUrl } from '@workspace/api-client-react';
 import { CollectionProvider } from '@/context/CollectionContext';
-import { clearCreateRecoveryDrafts } from '@/lib/createRecovery';
+import { changeCreateRecoveryOwner } from '@/lib/createRecovery';
 import { noteInputTouch } from '@/lib/inputFocus';
 import colors from '@/constants/colors';
 import { serif } from '@/constants/fonts';
@@ -77,7 +77,7 @@ function AuthBoundary({ children }: { children: React.ReactNode }) {
     if (current === undefined) return;
     if (prevUser.current !== undefined && prevUser.current !== current) {
       qc.clear();
-      clearCreateRecoveryDrafts();
+      changeCreateRecoveryOwner(prevUser.current ?? 'guest', current ?? 'guest');
     }
     prevUser.current = current;
   }, [current, qc]);

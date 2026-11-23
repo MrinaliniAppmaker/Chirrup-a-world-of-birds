@@ -127,3 +127,48 @@ assert.equal(interactionDraft.readInteractionBird('unit-owner', handoff), undefi
 clock += 30 * 60 * 1000 + 1;
 assert.equal(interactionDraft.readInteractionBird('unit-owner', replacement), undefined);
 console.log('PASS: unsaved interaction handoff preserves portrait, isolates owners, replaces stale drafts and expires');
+
+const recovery = load('lib/createRecovery.ts');
+const generatedDraft = {
+  step: 'result', mode: 'typed', sel: {}, typed: { body: 'compact' },
+  expanded: {}, showExtra: true, extra: 'white eye spot',
+  bird: sampleBird, birdName: '', nameDraft: 'My unfinished name',
+  editingName: true, showNameDialog: true, popupName: '',
+};
+recovery.keepCreateRecoveryDraft('guest', generatedDraft);
+recovery.parkGuestBirdForSignIn('guest', 'index', recovery.getCreateRecoveryDraft('guest'));
+recovery.discardCreateRecoveryDraft('guest');
+recovery.changeCreateRecoveryOwner('guest', 'signed-in-owner');
+assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner').bird.imageUri, sampleBird.imageUri);
+assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner').nameDraft, 'My unfinished name');
+assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner').extra, 'white eye spot');
+assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner').showNameDialog, false);
+assert.equal(recovery.getCreateRecoveryDraft('guest'), undefined);
+recovery.changeCreateRecoveryOwner('signed-in-owner', 'other-owner');
+assert.equal(recovery.getCreateRecoveryDraft('other-owner'), undefined, 'never transfer between signed-in accounts');
+assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner'), undefined);
+for (const destination of ['library', 'interactions', undefined]) {
+  recovery.clearCreateRecoveryDrafts();
+  recovery.parkGuestBirdForSignIn('guest', destination, generatedDraft);
+  recovery.changeCreateRecoveryOwner('guest', 'signed-in-owner');
+  assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner'), undefined, 'ordinary exits do not transfer');
+}
+recovery.parkGuestBirdForSignIn('guest', 'index', { ...generatedDraft, bird: null, step: 'build' });
+recovery.changeCreateRecoveryOwner('guest', 'signed-in-owner');
+assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner'), undefined, 'only completed generated birds transfer');
+recovery.parkGuestBirdForSignIn('guest', 'index', generatedDraft);
+recovery.discardGuestSignInBird();
+recovery.changeCreateRecoveryOwner('guest', 'signed-in-owner');
+assert.equal(recovery.getCreateRecoveryDraft('signed-in-owner'), undefined, 'explicit reset cancels parked draft');
+console.log('PASS: guest Home/sign-in handoff preserves generated bird and editing state without cross-account leakage');
+
+recovery.clearCreateRecoveryDrafts();
+recovery.parkGuestBirdForSignIn('guest', 'index', generatedDraft);
+assert.equal(recovery.getCreateRecoveryDraft('early-mounted-owner').bird.id, sampleBird.id);
+assert.equal(recovery.getCreateRecoveryDraft('unrelated-owner'), undefined, 'only the first authenticated owner can claim');
+recovery.changeCreateRecoveryOwner('guest', 'early-mounted-owner');
+assert.equal(recovery.getCreateRecoveryDraft('early-mounted-owner').nameDraft, generatedDraft.nameDraft,
+  'parent auth cleanup preserves a draft claimed by an earlier child mount');
+recovery.changeCreateRecoveryOwner('early-mounted-owner', 'guest');
+assert.equal(recovery.getCreateRecoveryDraft('guest'), undefined, 'signing out never exposes account drafts');
+console.log('PASS: early account screen mount and later auth cleanup preserve one-time guest handoff');

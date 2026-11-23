@@ -6,7 +6,7 @@ import { Image } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { useNavigation, useRouter } from 'expo-router';
 import { useAuth } from '@clerk/expo';
-import { discardCreateRecoveryDraft, getCreateRecoveryDraft, keepCreateRecoveryDraft } from '@/lib/createRecovery';
+import { discardCreateRecoveryDraft, discardGuestSignInBird, getCreateRecoveryDraft, keepCreateRecoveryDraft, parkGuestBirdForSignIn } from '@/lib/createRecovery';
 import { SymbolView } from 'expo-symbols';
 import { useCheckBirdTraits, useGenerateBird, type BirdTraitCheck, type BirdTraitIssue, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
@@ -149,6 +149,7 @@ export default function CreateScreen() {
 
   const resetMutation = generate.reset;
   const reset = useCallback(() => {
+    if (owner === 'guest') discardGuestSignInBird();
     generationId.current += 1;
     checkVersion.current += 1;
     checkingLock.current = null; setCheckingTraits(false);
@@ -157,14 +158,19 @@ export default function CreateScreen() {
     setMode('visual'); setExpanded({}); setSaveError(null); setSaving(false);
     setBird(null); setBirdName(''); setNameDraft(''); setEditingName(true);
     setShowNameDialog(false); setPopupName(''); resetMutation(); setStep('build');
-  }, [resetMutation]);
+  }, [owner, resetMutation]);
 
-  // A real navigation blur discards the draft. An error-boundary unmount does not.
+  // Ordinary exits still reset. A completed guest bird alone can be parked for
+  // Home -> sign in; it is adopted as the new account's screen mounts.
   const resetOnExit = useRef(reset);
   resetOnExit.current = reset;
   useEffect(() => navigation.addListener('blur', () => {
+    const draft = getCreateRecoveryDraft(owner);
+    const state = navigation.getState();
+    const destination = state?.routes[state.index ?? 0]?.name;
     discardCreateRecoveryDraft(owner);
     resetOnExit.current();
+    parkGuestBirdForSignIn(owner, destination, draft);
   }), [navigation, owner]);
   useEffect(() => () => { generationId.current += 1; checkVersion.current += 1; checkingLock.current = null; }, []);
 

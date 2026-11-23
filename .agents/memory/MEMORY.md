@@ -9,3 +9,4 @@
 - [Expo verification resources](expo-export-resources.md) — serialize heavy checks and use one export worker; parallel verification has coincided with workspace disconnections.
 - [Live API generation safety](live-api-generation.md) — keep imported API helpers available during regeneration; a clean-output gap caused a real Home preview failure.
 - [Browser OAuth cancellation](browser-oauth-cancellation.md) — a closed Google popup can leave shared SDK loading stuck; email forms need their own request state.
+- [Auth navigation continuity](auth-navigation-continuity.md) — keep navigation mounted during sign-in; a temporary empty shell stranded valid sessions on a blank screen.

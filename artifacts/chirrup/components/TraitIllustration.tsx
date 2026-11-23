@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { G, Path } from 'react-native-svg';
 import { useColors } from '@/hooks/useColors';
 
 // Paths exported from the user's Figma trait panels. Keep these anatomical
@@ -35,8 +35,33 @@ const featherPaths: Record<string, { viewBox: string; d: string }> = {
   filoplumes: { viewBox: '0 0 38 38', d: 'M0.600155 36.6001L11.5567 10.7251M11.5567 10.7251L2.16537 3.97509M11.5567 10.7251L9.99146 0.600085M11.5567 10.7251L19.3828 2.85009M16.2523 36.6001L25.6436 17.4751M25.6436 17.4751L17.8175 9.60009M25.6436 17.4751L28.7741 7.35009M25.6436 17.4751L36.6002 11.8501' },
 };
 
+// Curled feather with a frilled (scalloped) trailing edge, drawn in a 25.5 box.
+// Shared by 'downFlight' (offset underneath basic) and 'fineDown' (alone).
+const CURLED_FRILLED = 'M2.5 23.5C6 18 9.5 12.5 14 8.5C17 6 20.5 4.2 23.6 3.2C23.4 6.4 22.4 9.6 20.6 12.4L22.4 13.4L19.4 14.6L20.6 16.4L17.4 17.2L18 19.2L14.8 19.4L14.8 21.4L11.8 21C10 22.6 7.6 23.4 5 23.2C6.4 21.4 8.2 19.8 10.2 18.6M2.5 23.5C1.6 22 1.4 20.2 2.2 18.6M9.2 17.4C12.4 13.4 16 9.6 20.2 6.6';
+// Long thin contour feather with a slightly pointed tip and central shaft.
+const CONTOUR = 'M2.2 23.4C5.4 17.2 9.8 11 15.2 6.2C18.2 3.6 21.2 1.6 23.8 0.8C23.4 3.6 21.8 6.6 19.4 9.6C15 15 9.4 19.8 4 23.2C3.4 23.6 2.8 23.7 2.2 23.4ZM0.8 24.8L2.2 23.4L19.6 4.4';
+
 export function TraitIllustration({ name }: { name: string }) {
   const c = useColors();
+  const stroke = { stroke: c.primary, strokeWidth: 1.2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  if (name === 'downFlight') {
+    return (
+      <Svg width={60} height={36} viewBox="0 0 31 31">
+        <G transform="translate(5.2 5.2)"><Path d={CURLED_FRILLED} fill="none" {...stroke} /></G>
+        <Path d={featherPaths.basic.d} fill={c.card} {...stroke} />
+      </Svg>
+    );
+  }
+  if (name === 'fineDown') {
+    return (
+      <Svg width={60} height={36} viewBox="0 0 25.5 25.5"><Path d={CURLED_FRILLED} fill="none" {...stroke} /></Svg>
+    );
+  }
+  if (name === 'contour') {
+    return (
+      <Svg width={60} height={36} viewBox="0 0 25.5 25.5"><Path d={CONTOUR} fill="none" {...stroke} /></Svg>
+    );
+  }
   const silhouette = silhouettes[name];
   const feather = featherPaths[name];
   const drawing = silhouette ?? feather;

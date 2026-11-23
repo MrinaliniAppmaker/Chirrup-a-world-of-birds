@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import type { EncounterBird } from "@workspace/api-zod";
 import { anonymousParticipants, restoreBirdNames, encounterParts, referencePart, InvalidReferenceError } from "./encounterReference";
 import { encounterNarratorPrompt } from "./encounterNarrative";
+import { Resvg } from "@resvg/resvg-js";
 
-const png = `data:image/png;base64,${Buffer.from([137, 80, 78, 71, 13, 10, 26, 10, 1]).toString("base64")}`;
+const png = `data:image/png;base64,${new Resvg('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8" fill="teal"/></svg>').render().asPng().toString("base64")}`;
 const jpeg = `data:image/jpeg;base64,${Buffer.from([255, 216, 255, 224, 2]).toString("base64")}`;
 const bird = (id: string, referenceImage: string): EncounterBird => ({
   id, name: id, referenceImage,
@@ -37,11 +38,22 @@ test("display names are restored only in returned text, without altering their s
   assert.equal(restoreBirdNames("BIRD_10 is not a participant.", birds), "BIRD_10 is not a participant.");
 });
 
-test("all six selected birds have separate references without extra image copies", () => {
+test("all six selected birds use one labelled group sheet without extra image copies", () => {
   const parts = encounterParts(Array.from({ length: 6 }, (_, i) => bird(`bird-${i}`, png)), "shore", "feeding");
-  assert.equal(parts.filter((part) => part.inlineData).length, 6);
+  assert.equal(parts.filter((part) => part.inlineData).length, 1);
   assert.match(parts[0].text!, /exactly 6 individual birds/);
+  assert.match(parts[1].text!, /BIRD_6 = row 2, column 3/);
+  assert.match(parts[1].text!, /ORIGINAL portraits/);
+  assert.match(parts[1].text!, /NOT a collage/);
   assert.ok(parts.every((part) => !part.text?.includes(png)));
+});
+
+test("group sheet and neutral labels do not depend on user-chosen names", () => {
+  for (const count of [4, 5, 6]) {
+    const birds = Array.from({ length: count }, (_, i) => bird(`falcon-${i}`, png));
+    const renamed = birds.map((entry) => ({ ...entry, name: "swan", id: "different" }));
+    assert.deepEqual(encounterParts(birds, "marsh", "BIRD_1 lands"), encounterParts(renamed, "marsh", "BIRD_1 lands"));
+  }
 });
 
 test("encounters allow realistic predation without forced deaths or resurrection", () => {

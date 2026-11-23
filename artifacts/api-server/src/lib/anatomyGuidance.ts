@@ -25,7 +25,7 @@ const definitions = [
     id: "lobed",
     part: "feet",
     term: /\b(?:lobed|lobate)\b/i,
-    meaning: "Lobed / lobate toes: EACH INDIVIDUAL TOE is edged with broad scalloped lateral skin lobes, like a separate narrow articulated paddle. The lobes attach to that toe alone. Keep open air gaps between neighboring toes from beyond the ankle junction all the way to their separate claws. Do not bridge those gaps with a shared sheet of skin: lobed toes are NOT webbed feet. Preserve independently requested toe counts and directions; lobes change a toe's edges, not its branching.",
+    meaning: "Lobed / lobate toes: use a COOT'S FOOT as the anatomical model for the toe surfaces ONLY. EACH INDIVIDUAL TOE has broad, flat leaf-like lateral skin flaps along its phalanges, interrupted by shallow notches at the joints; a narrow scaled central digit ends in its own claw. These are soft continuous skin lobes, not pointed spikes, beads, armored plates, feathers or ordinary skinny perching toes. The lobes attach to that toe alone. Keep open air gaps between neighboring toes from beyond the ankle junction all the way to their separate claws. Do not bridge those gaps with a shared sheet of skin: lobed toes are NOT webbed feet. Preserve independently requested toe counts and directions; lobes change a toe's edges, not its branching. Do NOT copy a coot's body, head, bill, black plumage, white forehead or green leg color; all other selected traits remain unchanged.",
   },
   {
     id: "totipalmate",

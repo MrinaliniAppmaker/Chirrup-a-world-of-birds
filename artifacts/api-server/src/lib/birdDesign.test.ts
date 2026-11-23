@@ -44,7 +44,7 @@ test("free-form traits and markings are preserved verbatim, not mapped to famili
 });
 
 test("lobed feet and zygodactyl feet receive distinct physical descriptions", () => {
-  assert.match(portraitPrompt({ ...traits, feet: "lobed swimming toes" }), /individual broad lateral skin lobes/);
+  assert.match(portraitPrompt({ ...traits, feet: "lobed swimming toes" }), /broad flat leaf-like lateral skin lobes/);
   assert.match(portraitPrompt({ ...traits, feet: "zygodactyl climbing feet, two toes back" }), /two forward-pointing toes and two backward-pointing toes/);
 });
 
