@@ -12,7 +12,13 @@ Use the exact tagline “A world of birds” in the Home subtitle and alongside 
 
 **Why:** The user said “field studio” did not fit the app and corrected the earlier “Welcome to the world of birds” wording.
 
-**How to apply:** Keep the phrase standalone in both places; do not add a greeting or change the bird mark.
+**How to apply:** Keep the phrase standalone in both places; do not add a greeting or change the bird mark. Beside the logo, use uppercase with “A WORLD” on the first line and “OF BIRDS” on the second.
+
+One-time sign-in emails should show “Chirrup” as the sender, not “Bird Forge.”
+
+**Why:** The user received an OTP from the old name and pointed out that it could confuse recipients.
+
+**How to apply:** Check the sender display name in the managed authentication email settings. App logo text does not set this name, and the separate production settings should be verified rather than assuming publishing fixes it.
 
 Home, Create and Library are the bottom-bar destinations. Interactions remains a separate page reached from a Library button, not a fourth tab. Preserve the original Chirrup bird mark and anatomical illustrations.
 

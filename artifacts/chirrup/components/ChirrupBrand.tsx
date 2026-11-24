@@ -20,11 +20,17 @@ export function ChirrupLogo({ size = 32, color = '#284D3C' }: { size?: number; c
 
 export function ChirrupBrand({ size = 28, showSubtitle = true, style, testID }: { size?: number; showSubtitle?: boolean; style?: ViewStyle; testID?: string }) {
   const c = useColors();
+  const subtitleStyle = [s.sub, { color: c.mutedForeground }];
   return (
     <View testID={testID} accessibilityRole="header" accessibilityLabel={showSubtitle ? `Chirrup — ${CHIRRUP_TAGLINE}` : 'Chirrup'} style={[s.row, style]}>
       <ChirrupLogo size={size} />
       <Text style={[s.brand, { color: c.foreground, fontSize: Math.round(size * 0.86) }]}>Chirrup</Text>
-      {showSubtitle ? <Text style={[s.sub, { color: c.mutedForeground }]}>{CHIRRUP_TAGLINE}</Text> : null}
+      {showSubtitle ? (
+        <View style={s.tagline}>
+          <Text style={subtitleStyle}>A WORLD</Text>
+          <Text style={subtitleStyle}>OF BIRDS</Text>
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -34,5 +40,6 @@ export default ChirrupBrand;
 const s = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   brand: { fontFamily: serif },
-  sub: { fontFamily: sans.medium, fontSize: 9, letterSpacing: 1.2, marginTop: 4, flexShrink: 1 },
+  tagline: { marginTop: 4, flexShrink: 0 },
+  sub: { fontFamily: sans.medium, fontSize: 9, letterSpacing: 1.2, lineHeight: 11 },
 });

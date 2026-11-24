@@ -109,7 +109,7 @@ export function AccountChip() {
 const s = StyleSheet.create({
   signIn: { minHeight: 44, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', gap: 6, borderWidth: 1 },
   signInText: { fontFamily: sans.semibold, fontSize: 14 },
-  chip: { minHeight: 44, maxWidth: 150, flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 4, paddingRight: 12, paddingVertical: 4, borderRadius: 24, borderWidth: 1 },
+  chip: { minHeight: 44, maxWidth: 150, flexShrink: 1, flexDirection: 'row', alignItems: 'center', gap: 8, paddingLeft: 4, paddingRight: 12, paddingVertical: 4, borderRadius: 24, borderWidth: 1 },
   chipName: { fontFamily: sans.semibold, fontSize: 13, flexShrink: 1 },
   scrim: { flex: 1, backgroundColor: 'rgba(31,42,34,0.4)', justifyContent: 'center', padding: 20 },
   menu: { borderWidth: 1, padding: 16, width: '100%', maxWidth: 380, alignSelf: 'center' },
