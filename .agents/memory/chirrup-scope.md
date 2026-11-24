@@ -22,7 +22,7 @@ One-time sign-in emails should show “Chirrup” as the sender, not “Bird For
 
 **How to apply:** Check the sender display name in the managed authentication email settings. App logo text does not set this name, and the separate production settings should be verified rather than assuming publishing fixes it.
 
-The user approved a temporary note about “Bird Forge” on the sign-in code screen. Keep the note until a real email from the published app confirms that the sender appears as “Chirrup.”
+The user wants the “Bird Forge” clarification immediately after the OTP in the email itself. The temporary in-app note is separate and does not fulfill that request. Verify the actual production email before removing the warning or claiming the sender has changed.
 
 Home, Create and Library are the bottom-bar destinations. Interactions remains a separate page reached from a Library button, not a fourth tab. Preserve the original Chirrup bird mark and anatomical illustrations.
 
