@@ -6,7 +6,13 @@ CHIRRUP turns the user's Figma bird generator into an actual mobile app. The use
 
 **Why:** The user supplied an existing visual direction and asked for functioning mobile behavior, not a replacement concept or a static mockup.
 
-**How to apply:** Preserve the field-studio identity while adapting to mobile. Keep feature selection and real generation central. Clearly distinguish invented birds from real species facts.
+**How to apply:** Preserve Chirrup's bird mark and keep feature selection and real generation central. Clearly distinguish invented birds from real species facts.
+
+Use the exact tagline “A world of birds” in the Home subtitle and alongside the logo.
+
+**Why:** The user said “field studio” did not fit the app and corrected the earlier “Welcome to the world of birds” wording.
+
+**How to apply:** Keep the phrase standalone in both places; do not add a greeting or change the bird mark.
 
 Home, Create and Library are the bottom-bar destinations. Interactions remains a separate page reached from a Library button, not a fourth tab. Preserve the original Chirrup bird mark and anatomical illustrations.
 

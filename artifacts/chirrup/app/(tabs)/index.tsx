@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Button, Eyebrow, tap } from '@/components/ui';
-import { ChirrupBrand, ChirrupLogo } from '@/components/ChirrupBrand';
+import { CHIRRUP_TAGLINE, ChirrupBrand, ChirrupLogo } from '@/components/ChirrupBrand';
 import { AccountChip } from '@/components/AccountMenu';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
@@ -36,7 +36,7 @@ export default function HomeScreen() {
       </View>
       <View style={[s.hero, { backgroundColor: c.card, borderColor: c.border, borderRadius: c.radius + 4 }]}>
         <View style={[s.mark, { backgroundColor: c.secondary }]}><ChirrupLogo size={44} /></View>
-        <Eyebrow style={{ marginTop: 18 }}>Welcome to the world of birds</Eyebrow>
+        <Eyebrow style={{ marginTop: 18 }}>{CHIRRUP_TAGLINE}</Eyebrow>
         <Text accessibilityRole="header" style={[s.h1, { color: c.foreground }]}>A world of birds of your creation</Text>
         <Text style={[s.intro, { color: c.mutedForeground }]}>Invent a bird from its anatomy, name it yourself, keep it in your library, and imagine who it meets.</Text>
         <Button testID="home-create" label="Create a bird" icon="plus" onPress={() => { tap(); router.navigate('/create'); }} style={{ marginTop: 18 }} />
