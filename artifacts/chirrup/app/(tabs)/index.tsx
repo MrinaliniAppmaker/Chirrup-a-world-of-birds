@@ -36,7 +36,7 @@ export default function HomeScreen() {
       </View>
       <View style={[s.hero, { backgroundColor: c.card, borderColor: c.border, borderRadius: c.radius + 4 }]}>
         <View style={[s.mark, { backgroundColor: c.secondary }]}><ChirrupLogo size={44} /></View>
-        <Eyebrow style={{ marginTop: 18 }}>Welcome to the field studio</Eyebrow>
+        <Eyebrow style={{ marginTop: 18 }}>Welcome to the world of birds</Eyebrow>
         <Text accessibilityRole="header" style={[s.h1, { color: c.foreground }]}>A world of birds of your creation</Text>
         <Text style={[s.intro, { color: c.mutedForeground }]}>Invent a bird from its anatomy, name it yourself, keep it in your library, and imagine who it meets.</Text>
         <Button testID="home-create" label="Create a bird" icon="plus" onPress={() => { tap(); router.navigate('/create'); }} style={{ marginTop: 18 }} />
