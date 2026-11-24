@@ -114,7 +114,7 @@ export default function SignInScreen() {
         <Notice text={message} testID="sign-in-error" />
         <AuthField testID="sign-in-code" label="One-time code" value={code} onChangeText={setCode} keyboardType="number-pad" editable={!busy}
           autoComplete="one-time-code" textContentType="oneTimeCode" maxLength={8} onSubmitEditing={verify} error={errors.fields.code?.message} />
-        <Notice tone="info" testID="sign-in-sender-note" text="The email may show “Bird Forge” as the sender. Only enter a code you just requested, and never share it." />
+        <Notice tone="info" testID="sign-in-sender-note" text={'The email may show "Bird Forge" as the sender, but this is actually from the Chirrup app.'} />
         <Button testID="sign-in-verify" label="Verify and continue" onPress={verify} loading={busy} disabled={!code.trim()} />
         <Button testID="sign-in-resend" label={resendWait ? 'Wait before resending' : 'Send a new code'} variant="ghost" onPress={resend} disabled={busy || resendWait} />
         <LinkText testID="sign-in-start-over" label="Use a different email" onPress={startOver} />
