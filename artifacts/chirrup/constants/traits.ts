@@ -71,7 +71,7 @@ export const TRAIT_GROUPS: TraitGroup[] = [
   {
     key: 'feathers', title: 'Feather types', hint: 'Texture',
     options: [
-      { id: 'flight', label: 'Down + flight', value: 'soft down with crisp flight feathers', illustration: 'downFlight', description: 'Soft body, defined wings' },
+      { id: 'flight', label: 'Down + flight', value: 'soft down with crisp flight feathers', illustration: 'basic', description: 'Soft body, defined wings' },
       { id: 'contour', label: 'Contour', value: 'sleek tight contour feathers', illustration: 'contour', description: 'Smooth, layered coverage' },
       { id: 'fine-down', label: 'Fine down', value: 'fine delicate fluffy down feathers', illustration: 'fineDown', description: 'Delicate, fluffy softness' },
       { id: 'flight-feathers', label: 'Flight feathers', value: 'long structured flight feathers', illustration: 'flightFeather', description: 'Long, structured vanes' },

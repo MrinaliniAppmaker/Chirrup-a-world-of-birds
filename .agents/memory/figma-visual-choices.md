@@ -10,6 +10,8 @@ Use the visible artwork in the selected Body shape popup, Beak popup, and Refine
 
 Down + flight, Contour and Fine down must have distinct feather illustrations.
 
-**Why:** The user specified that Down + flight retains the original feather over a curled, frilled feather peeking out at the right and bottom; Contour is long and thin with a slightly pointed tip; Fine down is that same curled feather alone.
+**Why:** The user replaced the earlier layered Down + flight direction after seeing it. The second feather did not work visually, and the opaque foreground fill looked like it sat above the selected tile. They also asked for Contour and Fine down to match the other feather drawings.
 
-**How to apply:** Reuse the identical curled-feather shape in the combined and standalone choices, and preserve the original foreground drawing in Down + flight rather than replacing every option with a new generic feather.
+**How to apply:** Keep only the original feather in Down + flight and let the selection color show through the artwork. Keep Contour long, slender, and slightly pointed, and Fine down curled and fluffy. Use the same rounded linework as the other feather choices.
+
+The user approved these three revised drawings and asked to keep them as they are. Preserve the approved artwork unless they ask for another change.

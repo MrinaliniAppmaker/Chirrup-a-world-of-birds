@@ -14,7 +14,7 @@ Home, Create and Library are the bottom-bar destinations. Interactions remains a
 
 **How to apply:** Consult the original Figma screens and asset exports before changing navigation or trait visuals. Mobile adaptation must not remove page boundaries or alter the meaning of illustrated choices.
 
-Create normally starts a fresh bird when the user returns after leaving that page. Exception: an unsigned-in user's newly generated bird must survive Create → Home → Sign in → Create. During generation, use the Create icon rather than the Chirrup brand mark.
+Create normally starts a fresh bird when the user returns after leaving that page. Exception: an unsigned-in user's newly generated bird must survive Create → Home → Sign in → Create. The user confirmed that this exception works. During generation, use the Create icon rather than the Chirrup brand mark.
 
 **Why:** The user requested a new creation session on reopening Create, but later explicitly exempted the Home/sign-in detour so signing in does not destroy the bird they just made. They disliked the Chirrup mark as the pre-image placeholder.
 

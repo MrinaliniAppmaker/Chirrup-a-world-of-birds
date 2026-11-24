@@ -31,3 +31,5 @@ The user selected a coot foot as the model for lobed toe anatomy; copy only its 
 **Why:** After recognizing that the toes had become distinct but were still incorrect, the user explicitly suggested a coot foot. On 2026-11-23, a real foot-only photographic reference produced more visible lateral lobes than a coot-inspired vector guide, but still did not establish consistent full coot-like anatomy.
 
 **How to apply:** Use the actual foot geometry without importing coot plumage, bill, body or leg color. Preserve separately requested toe directions/counts. Report live visual results honestly; source-photo conditioning is still not a guarantee.
+
+The user confirmed the resulting lobed toes were good enough and the appearance changes during interactions were solved. Do not pursue further changes to those pipelines without a new request.
