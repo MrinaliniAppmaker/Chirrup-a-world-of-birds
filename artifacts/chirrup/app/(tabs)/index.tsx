@@ -25,7 +25,7 @@ export default function HomeScreen() {
   const entries: { id: string; title: string; body: string; icon: keyof typeof Feather.glyphMap; href: '/create' | '/library' | '/interactions' }[] = [
     { id: 'create', title: 'Create', body: 'Choose a body, beak, colors and feet. Bring a new species to life and give it a name.', icon: 'feather', href: '/create' },
     { id: 'library', title: 'Library', body: loaded ? (birds.length === 1 ? '1 bird kept in your field journal.' : birds.length + ' birds kept in your field journal.') : 'Opening your field journal.', icon: 'book-open', href: '/library' },
-    { id: 'interactions', title: 'Interactions', body: 'Bring two to six birds together and imagine five minutes of their meeting.', icon: 'users', href: '/interactions' },
+    { id: 'interactions', title: 'Interactions', body: 'Make two to six of your birds meet in an imagined location for five minutes', icon: 'users', href: '/interactions' },
   ];
 
   return (
