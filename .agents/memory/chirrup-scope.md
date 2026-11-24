@@ -14,6 +14,8 @@ Use the exact tagline “A world of birds” in the Home subtitle and alongside 
 
 **How to apply:** Keep the phrase standalone in both places; do not add a greeting or change the bird mark. Beside the logo, use uppercase with “A WORLD” on the first line and “OF BIRDS” on the second.
 
+The user confirmed this two-line layout in their own preview after it was refreshed. Keep the approved line break rather than relying on the available width to wrap it.
+
 One-time sign-in emails should show “Chirrup” as the sender, not “Bird Forge.”
 
 **Why:** The user received an OTP from the old name and pointed out that it could confuse recipients.
