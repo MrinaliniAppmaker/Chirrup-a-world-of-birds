@@ -54,7 +54,8 @@ export default function BirdDetail() {
           <>
             <BirdProfile bird={bird} />
             {error || syncError ? <Text accessibilityRole="alert" style={{ color: c.destructive, marginTop: 16 }}>{error ?? syncError}</Text> : null}
-            <Button testID="delete-bird" label={deleting ? 'Removing…' : 'Remove from journal'} icon="trash-2" variant="danger" disabled={deleting} onPress={confirmDelete} style={{ marginTop: 28 }} />
+            <Button testID="detail-back-library" label="Back to library" icon="arrow-left" variant="outline" onPress={() => router.navigate('/library')} style={{ marginTop: 28 }} />
+            <Button testID="delete-bird" label={deleting ? 'Removing…' : 'Remove from journal'} icon="trash-2" variant="danger" disabled={deleting} onPress={confirmDelete} style={{ marginTop: 10 }} />
           </>
         ) : loaded && !syncing ? (
           <View style={s.missing}>
