@@ -42,7 +42,7 @@ export default function HomeScreen() {
         <Button testID="home-create" label="Create a bird" icon="plus" onPress={() => { tap(); router.navigate('/create'); }} style={{ marginTop: 18 }} />
       </View>
       <Image testID="home-waiting-bird" source={require('../../assets/images/waiting-to-be-generated.png')}
-        accessibilityRole="image" accessibilityLabel="A dashed-outline bird holding a phone and thinking: Wondering when i will be generated..."
+        accessibilityRole="image" accessibilityLabel="A dashed-outline bird holding a phone and thinking: Waiting to be generated..."
         resizeMode="contain" style={[s.waitingBird, { height: illustrationSize, marginTop: illustrationGap }]} />
       <Eyebrow style={{ marginTop: illustrationGap, marginBottom: 10 }}>Where to next</Eyebrow>
       <View style={{ gap: 10 }}>
