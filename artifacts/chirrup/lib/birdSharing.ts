@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import * as Linking from 'expo-linking';
 import type { Href } from 'expo-router';
+import { hasGuestBirdSignInReturn } from './createRecovery';
 
 const PENDING_SHARE_KEY = 'chirrup.pending-bird-share.v1';
 const validToken = (token: string) => /^[A-Za-z0-9_-]{43}$/.test(token);
@@ -59,5 +60,5 @@ export async function goAfterSignIn(router: { replace: (href: Href) => void }): 
   } catch {
     // Sign-in succeeded even if this optional navigation hint could not be read.
   }
-  router.replace('/');
+  router.replace(hasGuestBirdSignInReturn() ? '/create' : '/');
 }

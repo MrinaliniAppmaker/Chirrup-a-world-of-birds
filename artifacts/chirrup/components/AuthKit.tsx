@@ -1,5 +1,5 @@
-import React, { forwardRef, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Modal, Platform, Pressable, StyleSheet, Text, View, type TextInputInstance, type TextInputProps } from 'react-native';
+import React, { forwardRef, useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, BackHandler, Image, Modal, Platform, Pressable, StyleSheet, Text, View, type TextInputInstance, type TextInputProps } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
@@ -7,8 +7,9 @@ import * as AuthSession from 'expo-auth-session';
 import * as ImagePicker from 'expo-image-picker';
 import { useClerk, useSignIn, useSignUp, useSSO, useUser } from '@clerk/expo';
 import { waitForGooglePopup } from '@/lib/googlePopup';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { goAfterSignIn } from '@/lib/birdSharing';
+import { hasGuestBirdSignInReturn } from '@/lib/createRecovery';
 import { noteInputTouch } from '@/lib/inputFocus';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
 import { FieldInput } from '@/components/FieldInput';
@@ -39,6 +40,15 @@ export function AuthShell({ eyebrow, title, subtitle, children, testID }: { eyeb
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  useFocusEffect(useCallback(() => {
+    if (Platform.OS !== 'android') return;
+    const listener = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!hasGuestBirdSignInReturn()) return false;
+      router.replace('/create');
+      return true;
+    });
+    return () => listener.remove();
+  }, [router]));
   const top = Platform.OS === 'web' ? 67 : insets.top + 8;
   return (
     <View style={{ flex: 1, backgroundColor: c.background }} testID={testID}>
@@ -50,7 +60,12 @@ export function AuthShell({ eyebrow, title, subtitle, children, testID }: { eyeb
       >
         <View style={s.topRow}>
           <Pressable testID="auth-close" accessibilityRole="button" accessibilityLabel="Close"
-            onPress={() => { tap(); if (router.canGoBack()) router.back(); else router.replace('/'); }}
+            onPress={() => {
+              tap();
+              if (hasGuestBirdSignInReturn()) router.replace('/create');
+              else if (router.canGoBack()) router.back();
+              else router.replace('/');
+            }}
             style={[s.iconBtn, { borderColor: c.border, backgroundColor: c.card }]}>
             <Feather name="x" size={18} color={c.foreground} />
           </Pressable>

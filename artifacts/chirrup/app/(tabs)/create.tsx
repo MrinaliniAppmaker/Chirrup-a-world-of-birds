@@ -4,9 +4,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import { useAuth } from '@clerk/expo';
-import { discardCreateRecoveryDraft, discardGuestSignInBird, getCreateRecoveryDraft, keepCreateRecoveryDraft, parkGuestBirdForSignIn } from '@/lib/createRecovery';
+import { discardCreateRecoveryDraft, discardGuestSignInBird, getCreateRecoveryDraft, keepCreateRecoveryDraft, parkGuestBirdForSignIn, takeGuestBirdSignInReturn } from '@/lib/createRecovery';
 import { SymbolView } from 'expo-symbols';
 import { useCheckBirdTraits, useGenerateBird, type BirdTraitCheck, type BirdTraitIssue, type BirdTraits, type GeneratedBird } from '@workspace/api-client-react';
 import { KeyboardAwareScrollViewCompat } from '@/components/KeyboardAwareScrollViewCompat';
@@ -88,6 +88,15 @@ export default function CreateScreen() {
       editingName, showNameDialog, popupName,
     });
   }, [owner, step, mode, sel, typed, expanded, showExtra, extra, bird, birdName, nameDraft, editingName, showNameDialog, popupName]);
+  useFocusEffect(useCallback(() => {
+    const draft = takeGuestBirdSignInReturn(owner);
+    if (!draft) return;
+    setStep(draft.step); setMode(draft.mode); setSel(draft.sel); setTyped(draft.typed);
+    setExpanded(draft.expanded); setShowExtra(draft.showExtra); setExtra(draft.extra);
+    setBird(draft.bird); setBirdName(draft.birdName); setNameDraft(draft.nameDraft);
+    setEditingName(draft.editingName); setShowNameDialog(false); setPopupName(draft.popupName);
+    setSaveError(null);
+  }, [owner]));
 
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 + 84 : insets.bottom + 90;
@@ -408,7 +417,12 @@ export default function CreateScreen() {
                       style={[st.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius, marginBottom: 16 }]} />
                   </View>
                 ) : undefined} />
-                {saveError && !showNameDialog && <Text accessibilityRole="alert" style={[st.small, { color: c.destructive, marginTop: 16 }]}>{saveError}</Text>}
+                {saveError && !showNameDialog && (
+                  <View style={{ marginTop: 16 }}>
+                    <Text accessibilityRole="alert" style={[st.small, { color: c.destructive }]}>{saveError}</Text>
+                    {!userId && <Text testID="guest-bird-reassurance" style={[st.small, { color: c.mutedForeground, marginTop: 6 }]}>Don't worry: This bird won't fly away</Text>}
+                  </View>
+                )}
                 {isSaved(bird.id) ? (
                   <Button testID="view-library" label="Saved · open in journal" icon="book-open" variant="outline" onPress={() => router.push(`/bird/${bird.id}`)} style={{ marginTop: 24 }} />
                 ) : (
@@ -428,7 +442,8 @@ export default function CreateScreen() {
       </KeyboardAwareScrollViewCompat>
       <BirdNameDialog visible={showNameDialog} value={popupName} onChange={setPopupName}
         onCancel={() => { setShowNameDialog(false); setSaveError(null); }}
-        onSave={() => { void onSave(popupName); }} saving={saving} error={saveError} />
+        onSave={() => { void onSave(popupName); }} saving={saving} error={saveError}
+        reassurance={!userId && saveError ? "Don't worry: This bird won't fly away" : undefined} />
     </View>
   );
 }

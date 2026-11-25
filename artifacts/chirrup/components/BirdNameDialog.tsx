@@ -9,7 +9,7 @@ import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
 import { noteInputTouch } from '@/lib/inputFocus';
 
-export function BirdNameDialog({ visible, value, onChange, onCancel, onSave, saving, error }: {
+export function BirdNameDialog({ visible, value, onChange, onCancel, onSave, saving, error, reassurance }: {
   visible: boolean;
   value: string;
   onChange: (value: string) => void;
@@ -17,6 +17,7 @@ export function BirdNameDialog({ visible, value, onChange, onCancel, onSave, sav
   onSave: () => void;
   saving: boolean;
   error: string | null;
+  reassurance?: string;
 }) {
   const c = useColors();
   const insets = useSafeAreaInsets();
@@ -44,6 +45,7 @@ export function BirdNameDialog({ visible, value, onChange, onCancel, onSave, sav
               placeholderTextColor={c.mutedForeground} returnKeyType="done"
               style={[s.input, { borderColor: c.input, backgroundColor: c.card, color: c.foreground, borderRadius: c.radius }]} />
             {error ? <Text accessibilityRole="alert" style={[s.error, { color: c.destructive }]}>{error}</Text> : null}
+            {reassurance ? <Text testID="guest-bird-reassurance" style={[s.error, { color: c.mutedForeground }]}>{reassurance}</Text> : null}
             <Button testID="confirm-bird-name" label="Save to my journal" icon="bookmark"
               disabled={!value.trim()} loading={saving} onPress={onSave} />
           </View>

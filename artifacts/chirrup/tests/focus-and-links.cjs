@@ -8,9 +8,13 @@ const ts = require('typescript');
 // a native runtime in Node. Browser interaction tests cover the actual inputs.
 const appState = { currentState: 'active' };
 let clock = 1000;
+const modules = new Map();
+const stored = new Map();
 function load(relative) {
+  if (modules.has(relative)) return modules.get(relative);
   const filename = resolve(__dirname, '..', relative);
   const mod = { exports: {} };
+  modules.set(relative, mod.exports);
   const output = ts.transpileModule(readFileSync(filename, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
@@ -20,6 +24,11 @@ function load(relative) {
     Date: { now: () => clock },
     require: (name) => {
       if (name === 'react-native') return { AppState: appState };
+      if (name === './createRecovery') return load('lib/createRecovery.ts');
+      if (name === '@react-native-async-storage/async-storage') return {
+        getItem: async (key) => stored.get(key) ?? null,
+        removeItem: async (key) => stored.delete(key),
+      };
       // The link parser itself must not use clipboard, storage, or the network.
       return new Proxy({}, { get: (_, key) => {
         if (key === '__esModule') return false;
@@ -172,3 +181,47 @@ assert.equal(recovery.getCreateRecoveryDraft('early-mounted-owner').nameDraft, g
 recovery.changeCreateRecoveryOwner('early-mounted-owner', 'guest');
 assert.equal(recovery.getCreateRecoveryDraft('guest'), undefined, 'signing out never exposes account drafts');
 console.log('PASS: early account screen mount and later auth cleanup preserve one-time guest handoff');
+
+recovery.clearCreateRecoveryDrafts();
+recovery.parkGuestBirdForSignIn('guest', 'index', generatedDraft);
+assert.equal(recovery.hasGuestBirdSignInReturn(), true);
+assert.equal(recovery.takeGuestBirdSignInReturn('guest').bird.imageUri, sampleBird.imageUri);
+assert.equal(recovery.getCreateRecoveryDraft('guest').nameDraft, generatedDraft.nameDraft);
+assert.equal(recovery.hasGuestBirdSignInReturn(), false);
+assert.equal(recovery.takeGuestBirdSignInReturn('guest'), undefined, 'return is consumed once');
+for (const cleanupFirst of [true, false]) {
+  recovery.clearCreateRecoveryDrafts();
+  recovery.parkGuestBirdForSignIn('guest', 'index', generatedDraft);
+  if (cleanupFirst) recovery.changeCreateRecoveryOwner('guest', 'return-owner');
+  assert.equal(recovery.hasGuestBirdSignInReturn(), true);
+  assert.equal(recovery.takeGuestBirdSignInReturn('return-owner').bird.imageUri, sampleBird.imageUri);
+  if (!cleanupFirst) recovery.changeCreateRecoveryOwner('guest', 'return-owner');
+  assert.equal(recovery.getCreateRecoveryDraft('return-owner').nameDraft, generatedDraft.nameDraft);
+  assert.equal(recovery.hasGuestBirdSignInReturn(), false);
+  recovery.changeCreateRecoveryOwner('return-owner', 'different-owner');
+  assert.equal(recovery.getCreateRecoveryDraft('different-owner'), undefined);
+  assert.equal(recovery.hasGuestBirdSignInReturn(), false);
+}
+console.log('PASS: closing sign-in restores the guest bird; successful sign-in returns once without account leakage');
+
+(async () => {
+  const sharing = load('lib/birdSharing.ts');
+  const paths = [];
+  const router = { replace: (path) => paths.push(path) };
+  recovery.clearCreateRecoveryDrafts();
+  await sharing.goAfterSignIn(router);
+  assert.equal(paths.pop(), '/', 'ordinary sign-in still returns Home');
+  recovery.parkGuestBirdForSignIn('guest', 'index', generatedDraft);
+  await sharing.goAfterSignIn(router);
+  assert.equal(paths.pop(), '/create', 'a waiting bird returns straight to Create');
+  stored.set('chirrup.pending-bird-share.v1', 'a'.repeat(43));
+  await sharing.goAfterSignIn(router);
+  const share = paths.pop();
+  assert.equal(share.pathname, '/receive-bird', 'explicit shared bird destination retains precedence');
+  assert.equal(share.params.token, 'a'.repeat(43));
+  assert.equal(stored.size, 0);
+  recovery.discardGuestSignInBird();
+  await sharing.goAfterSignIn(router);
+  assert.equal(paths.pop(), '/', 'reset never returns to a discarded bird');
+  console.log('PASS: post-sign-in routing preserves shared links and ordinary Home navigation');
+})().catch((error) => { console.error(error); process.exitCode = 1; });

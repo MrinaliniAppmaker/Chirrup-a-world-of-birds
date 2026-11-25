@@ -36,6 +36,12 @@ Create normally starts a fresh bird when the user returns after leaving that pag
 
 **How to apply:** Discard unsaved draft/result state on ordinary deliberate page exit, including late-arriving generation results, without deleting saved birds. Preserve a completed guest bird, its traits and unfinished name through the Home/sign-in detour; never transfer one signed-in account's draft to another. Error recovery is not a deliberate exit: retain the current route, selections, generated portrait and unfinished bird name when retrying a failed screen, and keep the signed-in session.
 
+For the guest-bird detour, leaving sign-in should return directly to the generated bird, not leave the user on Home. Below the guest save/sign-in message, show “Don't worry: This bird won't fly away”.
+
+**Why:** The user said people may not realize their generated bird is still waiting after signing in from Home.
+
+**How to apply:** Restore the same image, traits and name after successful sign-in or closing sign-in without completing it. Do not save automatically or change ordinary sign-in and fresh-Create behavior when no guest bird is waiting.
+
 Recovering from a screen error must not send an already signed-in user back to sign-in or discard the bird they were working on.
 
 **Why:** The user reported recovery repeatedly returning to sign-in while they were creating a bird and explicitly asked for error prevention or return to their prior work.

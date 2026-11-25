@@ -22,6 +22,7 @@ export interface CreateRecoveryDraft {
 const drafts = new Map<string, CreateRecoveryDraft>();
 let guestSignInDraft: CreateRecoveryDraft | undefined;
 let claimedGuestOwner: string | undefined;
+let guestBirdReturnPending = false;
 export function getCreateRecoveryDraft(owner: string) {
   // An account-keyed navigator can mount Create before the parent's auth
   // effect. Claim once, synchronously, without blanking/unmounting navigation.
@@ -33,22 +34,41 @@ export function getCreateRecoveryDraft(owner: string) {
   return drafts.get(owner);
 }
 export const keepCreateRecoveryDraft = (owner: string, draft: CreateRecoveryDraft) => { drafts.set(owner, draft); };
-export const clearCreateRecoveryDrafts = () => { drafts.clear(); guestSignInDraft = undefined; claimedGuestOwner = undefined; };
+export const clearCreateRecoveryDrafts = () => { drafts.clear(); discardGuestSignInBird(); };
 export const discardCreateRecoveryDraft = (owner: string) => { drafts.delete(owner); };
 
 export function parkGuestBirdForSignIn(owner: string, destination: string | undefined, draft: CreateRecoveryDraft | undefined) {
   if (owner === 'guest' && destination === 'index' && draft?.step === 'result' && draft.bird) {
     guestSignInDraft = { ...draft, showNameDialog: false };
+    guestBirdReturnPending = true;
   }
 }
 
-export const discardGuestSignInBird = () => { guestSignInDraft = undefined; claimedGuestOwner = undefined; };
+export const discardGuestSignInBird = () => { guestSignInDraft = undefined; claimedGuestOwner = undefined; guestBirdReturnPending = false; };
+
+export const hasGuestBirdSignInReturn = () => guestBirdReturnPending;
+
+/** Restore once on focus, including when closing sign-in without signing in. */
+export function takeGuestBirdSignInReturn(owner: string): CreateRecoveryDraft | undefined {
+  if (!guestBirdReturnPending) return undefined;
+  const draft = owner === 'guest' ? guestSignInDraft : getCreateRecoveryDraft(owner);
+  if (!draft || (owner !== 'guest' && claimedGuestOwner !== owner)) return undefined;
+  drafts.set(owner, draft);
+  guestSignInDraft = undefined;
+  guestBirdReturnPending = false;
+  return draft;
+}
 
 export function changeCreateRecoveryOwner(previous: string, next: string) {
   if (previous === next) return;
   const transferable = previous === 'guest' && next !== 'guest'
     ? guestSignInDraft ?? (claimedGuestOwner === next ? drafts.get(next) : undefined)
     : undefined;
+  const returnPending = guestBirdReturnPending;
   clearCreateRecoveryDrafts();
-  if (transferable) drafts.set(next, transferable);
+  if (transferable) {
+    drafts.set(next, transferable);
+    claimedGuestOwner = next;
+    guestBirdReturnPending = returnPending;
+  }
 }
