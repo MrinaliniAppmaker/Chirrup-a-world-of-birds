@@ -11,7 +11,7 @@
       "supportsTablet": false
     },
     "android": {
-      "package": "app.ChirrupAWorldOfBirdsGeneratingApp.MrinaliniKhetan"
+      "package": "app.chirrupaworldofbirdsgeneratingapp.mrinalinikhetan"
     },
     "web": {
       "favicon": "./assets/images/chirrup-icon.png",
