@@ -3,11 +3,9 @@ const { verifyProductionAndroid } = require('../scripts/verify-production-androi
 const app = require('../app.json').expo;
 const eas = require('../eas.json');
 
-const linkedApp = {
-  ...app,
-  owner: 'mrinaliniappmaker',
-  extra: { eas: { projectId: '12345678-1234-4234-9234-123456789abc' } },
-};
+const linkedApp = app;
+assert.equal(app.owner, 'mrinaliniappmaker');
+assert.equal(app.extra.eas.projectId, 'f3a06196-821b-4ef5-9b84-fa99bdfc72e1');
 const env = {
   EAS_BUILD_PLATFORM: 'android',
   EAS_BUILD_PROFILE: 'production',
@@ -29,8 +27,10 @@ for (const override of [
 }
 for (const override of [
   { owner: 'another-owner' },
+  { slug: 'different-app' },
   { extra: {} },
   { extra: { eas: { projectId: 'not-a-project-id' } } },
+  { extra: { eas: { projectId: '12345678-1234-4234-9234-123456789abc' } } },
   { android: { ...app.android, package: 'different.package' } },
   { android: { ...app.android, versionCode: 0 } },
 ]) {

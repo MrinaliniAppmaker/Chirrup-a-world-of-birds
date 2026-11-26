@@ -7,19 +7,24 @@ now exists in `eas.json`. This does not change Replit's hosted publishing flow
 or create a native binary.
 
 - Expo project: https://expo.dev/accounts/mrinaliniappmaker/projects/chirrup
+- Linked project ID: `f3a06196-821b-4ef5-9b84-fa99bdfc72e1`
 - Package: `app.chirrupaworldofbirdsgeneratingapp.mrinalinikhetan`
 - App version: `1.0.0`; Android version code: `1`
 - Production backend confirmed by deployment metadata:
   https://chirrup-a-world-of-birds.replit.app
 - No previous Android builds were returned by the connected Expo project.
-- The project UUID, signing credentials, GitHub linkage and Expo production
-  environment still require verification. **No signed `.aab` has been created.**
+- The supplied project UUID is linked in the mobile configuration. Expo accepted
+  a build-list request specifying both that UUID and the existing account/project
+  name without error.
+- Signing credentials, GitHub linkage and the Expo production environment still
+  require verification. **No signed `.aab` has been created.**
 
 ## Setup and build sequence
 
-1. In the Expo project's settings, copy its **Project ID**. Link that exact
-   verified UUID as `expo.extra.eas.projectId` in `app.json` and set
-   `expo.owner` to `mrinaliniappmaker`. Do not invent an ID or change the package.
+1. **Completed:** the existing project UUID is linked as
+   `expo.extra.eas.projectId` in `artifacts/chirrup/app.json`, with
+   `expo.owner` set to `mrinaliniappmaker`. Do not create a replacement project.
+   The repository-root `app.json` is empty and is not the mobile configuration.
 2. Connect the Expo GitHub App to the existing
    `MrinaliniAppmaker/Chirrup-a-world-of-birds` repository. Set the application's
    base directory to **`artifacts/chirrup`**, not the repository root.

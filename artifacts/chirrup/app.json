@@ -2,6 +2,12 @@
   "expo": {
     "name": "CHIRRUP",
     "slug": "chirrup",
+    "owner": "mrinaliniappmaker",
+    "extra": {
+      "eas": {
+        "projectId": "f3a06196-821b-4ef5-9b84-fa99bdfc72e1"
+      }
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/chirrup-icon.png",

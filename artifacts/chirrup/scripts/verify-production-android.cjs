@@ -14,8 +14,8 @@ function verifyProductionAndroid(env, app, eas) {
     fail('Android versionCode must be a positive integer.');
   }
   if (
-    app.owner !== 'mrinaliniappmaker' ||
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(app.extra?.eas?.projectId || '')
+    app.owner !== 'mrinaliniappmaker' || app.slug !== 'chirrup' ||
+    app.extra?.eas?.projectId !== 'f3a06196-821b-4ef5-9b84-fa99bdfc72e1'
   ) {
     fail('Link the verified mrinaliniappmaker/chirrup Expo project ID in app.json before building.');
   }
