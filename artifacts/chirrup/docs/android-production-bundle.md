@@ -2,9 +2,9 @@
 
 ## Current state
 
-The app uses Expo / React Native SDK 58. A separate Expo-account build profile
-now exists in `eas.json`. This does not change Replit's hosted publishing flow
-or create a native binary.
+The app uses Expo / React Native SDK 58. The separate Expo-account production
+profile in `eas.json` has successfully produced a signed native Android App
+Bundle. Replit's hosted publishing flow is unchanged.
 
 - Expo project: https://expo.dev/accounts/mrinaliniappmaker/projects/chirrup
 - Linked project ID: `f3a06196-821b-4ef5-9b84-fa99bdfc72e1`
@@ -12,12 +12,20 @@ or create a native binary.
 - App version: `1.0.0`; Android version code: `1`
 - Production backend confirmed by deployment metadata:
   https://chirrup-a-world-of-birds.replit.app
-- No previous Android builds were returned by the connected Expo project.
-- The supplied project UUID is linked in the mobile configuration. Expo accepted
-  a build-list request specifying both that UUID and the existing account/project
-  name without error.
-- Signing credentials, GitHub linkage and the Expo production environment still
-  require verification. **No signed `.aab` has been created.**
+- Successful build: `dcb31ce7-f92c-4fbc-a480-975b8c433691`, platform `ANDROID`,
+  distribution `STORE`, profile `production`.
+- Built source: `dae26338c1077eb3ed14ba16038cc938d1f69a8a`, verified present on
+  GitHub before the build was requested.
+- Bundle: https://expo.dev/artifacts/eas/6TImUloWMe41YS2mczXTgsJPr80p7B8gOvgVqNZQHd0.aab
+- Downloaded copy: `generated-artifacts/chirrup-1.0.0-1-production.aab`.
+- SHA-256: `9425696d0c9d6530b34849f7633fb7ba4b12b105bdf299a4390925c3be10e7e1`.
+- Verified ZIP integrity, the CMS/JAR signature, the signed manifest digest and
+  all 1,485 signed payload-entry digests, with no unsigned payload entries.
+- The owner reported existing signing credentials configured. The build log
+  reported remote Android credentials; no new-keystore-generation message was
+  found. Matching the certificate against an independently supplied Google Play
+  upload-certificate fingerprint has not been performed.
+- **No Google Play submission or installed-device functional test was performed.**
 
 ## Setup and build sequence
 
@@ -25,17 +33,18 @@ or create a native binary.
    `expo.extra.eas.projectId` in `artifacts/chirrup/app.json`, with
    `expo.owner` set to `mrinaliniappmaker`. Do not create a replacement project.
    The repository-root `app.json` is empty and is not the mobile configuration.
-2. Connect the Expo GitHub App to the existing
+2. **Completed for this build:** connect the Expo GitHub App to the existing
    `MrinaliniAppmaker/Chirrup-a-world-of-birds` repository. Set the application's
    base directory to **`artifacts/chirrup`**, not the repository root.
    The new build configuration and the verified project linkage must be
    committed and pushed to the exact Git reference selected for the build.
-3. Configure the Expo project's **production** environment:
+3. **Reported configured by the owner; the build succeeded:** keep the Expo
+   project's **production** environment configured:
    - `EXPO_PUBLIC_DOMAIN`: `chirrup-a-world-of-birds.replit.app`
    - `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY`: the actual live production publishable
      key used by the published app, not the workspace test key.
-   - If production authentication uses a Clerk proxy, also configure
-     `EXPO_PUBLIC_CLERK_PROXY_URL` with the same published proxy URL.
+    - `EXPO_PUBLIC_CLERK_PROXY_URL`:
+      `https://chirrup-a-world-of-birds.replit.app/api/__clerk`
    Replit injects managed values for its own publishing flow; that does not
    establish that a separate Expo-account build has those values.
    Never copy Clerk secret keys, AI keys, database credentials or storage
@@ -46,11 +55,12 @@ or create a native binary.
    because this Expo project is new. If no signing key has ever existed, obtain
    owner approval for first-time key creation. Record and compare certificate
    fingerprints without exposing private keys or passwords.
-5. Complete any initial native-build/signing prerequisites required by Expo.
-   Expo's GitHub-build documentation requires a previously successful platform
-   build. The connected tools can request builds for configured projects but
-   cannot create projects or manage signing credentials. Do not treat this
-   document as proof that those initial prerequisites can be completed here.
+5. **Completed:** the first native Android build succeeded through the connected
+   Expo integration after account-side configuration, without a local native
+   build or EAS CLI run by the agent. Expo's generic GitHub guide describes a
+   previous platform build as a prerequisite, but that did not prevent this
+   configured remote workflow. The connected tools still do not manage signing
+   keys or create Expo projects.
 6. Once prerequisites are satisfied, request an Expo build using:
    - Project: `@mrinaliniappmaker/chirrup`
    - Platform: `ANDROID`

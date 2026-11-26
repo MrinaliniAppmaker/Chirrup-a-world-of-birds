@@ -14,3 +14,17 @@ mtime_ms = 1794913775126
 storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:5c3e6851-70e1-49d1-9fd4-c363e33cb61d/92c88a73-cf17-4626-a7a1-394c79a036b2/4cad4a86-6a3b-4945-a138-eeaf31316a5e"
 storage_version_token = "1794913793403290"
 content_type = "image/png"
+
+[[outputs]]
+id = "vM5JLf6blwvSvegpXhqPJ"
+uri = "file://generated-artifacts/chirrup-1.0.0-1-production.aab"
+type = "unspecified"
+title = "CHIRRUP — Production Android App Bundle"
+description = "Signed production Android App Bundle (.aab), version 1.0.0, version code 1. Package: app.chirrupaworldofbirdsgeneratingapp.mrinalinikhetan. Bundle signature and all payload-entry digests verified. Not submitted to Google Play."
+logical_id = "e5771429-128d-44d5-802e-ddc32bc32baf"
+content_hash = "sha256:9425696d0c9d6530b34849f7633fb7ba4b12b105bdf299a4390925c3be10e7e1"
+size = 78309513
+mtime_ms = 1795693532368
+storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:5c3e6851-70e1-49d1-9fd4-c363e33cb61d/e5771429-128d-44d5-802e-ddc32bc32baf/6a3c27e8-74aa-4372-bcf4-3e3d6227b6f8"
+storage_version_token = "1795693625305096"
+content_type = "application/octet-stream"

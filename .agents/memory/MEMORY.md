@@ -14,3 +14,4 @@
 - [Auth navigation continuity](auth-navigation-continuity.md) — keep navigation mounted during sign-in; a temporary empty shell stranded valid sessions on a blank screen.
 - [Expo dashboard navigation](expo-dashboard-navigation.md) — do not assume Settings → General exposes the project UUID; verify the current interface before repeating directions.
 - [Expo build approvals](expo-build-approvals.md) — budget confirmations bind the confirmation mode; obtain the final-mode preview before asking for chat approval.
+- [Expo Android cloud builds](expo-android-cloud-builds.md) — the connected Expo service can produce a first production AAB without a local native build after account-side setup.
