@@ -13,3 +13,4 @@
 - [Browser OAuth cancellation](browser-oauth-cancellation.md) — a closed Google popup can leave shared SDK loading stuck; email forms need their own request state.
 - [Auth navigation continuity](auth-navigation-continuity.md) — keep navigation mounted during sign-in; a temporary empty shell stranded valid sessions on a blank screen.
 - [Expo dashboard navigation](expo-dashboard-navigation.md) — do not assume Settings → General exposes the project UUID; verify the current interface before repeating directions.
+- [Expo build approvals](expo-build-approvals.md) — budget confirmations bind the confirmation mode; obtain the final-mode preview before asking for chat approval.
