@@ -5,6 +5,92 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type AccountDeletionInputConfirmation = typeof AccountDeletionInputConfirmation[keyof typeof AccountDeletionInputConfirmation];
+
+
+export const AccountDeletionInputConfirmation = {
+  DELETE: 'DELETE',
+} as const;
+
+export interface AccountDeletionInput {
+  confirmation: AccountDeletionInputConfirmation;
+}
+
+export type AccountDeletionStateRequestStatus = typeof AccountDeletionStateRequestStatus[keyof typeof AccountDeletionStateRequestStatus];
+
+
+export const AccountDeletionStateRequestStatus = {
+  requested: 'requested',
+  processing: 'processing',
+  completed: 'completed',
+} as const;
+
+/**
+ * @nullable
+ */
+export type AccountDeletionStateRequest = {
+  id: string;
+  status: AccountDeletionStateRequestStatus;
+  createdAt: string;
+  /** @nullable */
+  eligibleAt?: string | null;
+} | null;
+
+export interface AccountDeletionState {
+  /** @nullable */
+  request: AccountDeletionStateRequest;
+}
+
+export type ContentReportInputSurface = typeof ContentReportInputSurface[keyof typeof ContentReportInputSurface];
+
+
+export const ContentReportInputSurface = {
+  creation: 'creation',
+  journal: 'journal',
+  interaction: 'interaction',
+} as const;
+
+export type ContentReportInputReason = typeof ContentReportInputReason[keyof typeof ContentReportInputReason];
+
+
+export const ContentReportInputReason = {
+  unsafe: 'unsafe',
+  inaccurate: 'inaccurate',
+  privacy: 'privacy',
+  other: 'other',
+} as const;
+
+export type ContentReportInputContent = {
+  /**
+     * @minLength 1
+     * @maxLength 128
+     */
+  id: string;
+  /** @maxLength 200 */
+  title: string;
+  /** @maxLength 12000 */
+  text: string;
+  /**
+     * Optional bounded inline JPEG, PNG or WebP snapshot; never a remote URL
+     * @maxLength 1400000
+     */
+  image?: string;
+};
+
+export interface ContentReportInput {
+  submissionId: string;
+  surface: ContentReportInputSurface;
+  reason: ContentReportInputReason;
+  /** @maxLength 1500 */
+  details: string;
+  content: ContentReportInputContent;
+}
+
+export interface ContentReportReceipt {
+  id: string;
+  received: boolean;
+}
+
 export interface BirdShareSelection {
   /**
      * @minItems 1

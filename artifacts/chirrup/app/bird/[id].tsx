@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { BirdProfile, Button } from '@/components/ui';
+import { ReportContent } from '@/components/ReportContent';
+import { birdReportContent } from '@/lib/reportContent';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
@@ -53,6 +55,9 @@ export default function BirdDetail() {
         {bird ? (
           <>
             <BirdProfile bird={bird} />
+            <View style={{ marginTop: 16, alignItems: 'flex-start' }}>
+              <ReportContent surface="journal" content={birdReportContent(bird)} />
+            </View>
             {error || syncError ? <Text accessibilityRole="alert" style={{ color: c.destructive, marginTop: 16 }}>{error ?? syncError}</Text> : null}
             <Button testID="detail-back-library" label="Back to library" icon="arrow-left" variant="outline" onPress={() => router.navigate('/library')} style={{ marginTop: 28 }} />
             <Button testID="delete-bird" label={deleting ? 'Removing…' : 'Remove from journal'} icon="trash-2" variant="danger" disabled={deleting} onPress={confirmDelete} style={{ marginTop: 10 }} />

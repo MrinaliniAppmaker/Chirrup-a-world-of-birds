@@ -78,6 +78,33 @@ export async function deletePortrait(path: string) {
   await location(path).file.delete({ ignoreNotFound: true });
 }
 
+/** Evidence stays private and separate from both saved and shared birds. */
+export async function storeReportPortrait(reportId: string, mimeType: string, bytes: Buffer) {
+  if (!/^[0-9a-f-]{36}$/i.test(reportId) || bytes.length > 1_050_000) throw new Error("Invalid report portrait.");
+  const path = `content-reports/${reportId}/${randomUUID()}`;
+  await location(path).file.save(bytes, { resumable: false, metadata: { contentType: mimeType } });
+  return path;
+}
+
+export async function readReportPortrait(path: string) {
+  if (!/^content-reports\/[0-9a-f-]{36}\/[0-9a-f-]{36}$/i.test(path)) throw new Error("Invalid report evidence path.");
+  const { file } = location(path);
+  const [metadata] = await file.getMetadata();
+  if (Number(metadata.size) > 1_050_000) throw new Error("Report evidence is too large.");
+  const [bytes] = await file.download();
+  if (!["image/jpeg", "image/png", "image/webp"].includes(metadata.contentType ?? "")) throw new Error("Invalid report image type.");
+  return `data:${metadata.contentType};base64,${bytes.toString("base64")}`;
+}
+
+/** Operator deletion only: the UUID-bounded prefix cannot include other journals. */
+export async function deleteJournalPortraits(installationId: string) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(installationId)) {
+    throw new Error("Invalid journal identity.");
+  }
+  const { bucket, object } = location(`journal-portraits/${installationId}/`);
+  await storage.bucket(bucket).deleteFiles({ prefix: object, force: false });
+}
+
 /** Independent private copy: deleting either journal's bird cannot break the other. */
 export async function copyJournalPortrait(source: string, installationId: string, birdId: string) {
   const destination = `journal-portraits/${installationId}/${birdId}/${randomUUID()}`;

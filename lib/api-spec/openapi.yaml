@@ -11,6 +11,70 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /account/deletion:
+    get:
+      operationId: getAccountDeletion
+      summary: Get the signed-in account's deletion request
+      responses:
+        "200":
+          description: Current request, if any
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionState"
+        "401": { description: Sign-in required }
+    post:
+      operationId: requestAccountDeletion
+      summary: Request deletion of the signed-in account and its associated data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountDeletionInput"
+      responses:
+        "200":
+          description: Request recorded; no data has yet been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionState"
+        "400": { description: Explicit confirmation required }
+        "401": { description: Sign-in required }
+    delete:
+      operationId: cancelAccountDeletion
+      summary: Cancel the signed-in account's request before processing starts
+      responses:
+        "204": { description: Request cancelled or no pending request }
+        "401": { description: Sign-in required }
+        "409": { description: Deletion is already being processed }
+  /content-reports:
+    post:
+      operationId: submitContentReport
+      summary: Privately report generated content without leaving the app or requiring an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentReportInput"
+      responses:
+        "201":
+          description: Report stored privately for developer review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentReportReceipt"
+        "200":
+          description: Same submission already received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentReportReceipt"
+        "400": { description: Invalid report }
+        "409": { description: Submission identifier already used for different content }
+        "429": { description: Too many reports }
+        "503": { description: Report could not be stored; retry is safe }
   /legal/privacy:
     get:
       operationId: getPublicPrivacyPolicy
@@ -370,6 +434,52 @@ components:
       scheme: bearer
       description: Random installation credential, never a phone hardware identifier.
   schemas:
+    AccountDeletionInput:
+      type: object
+      additionalProperties: false
+      required: [confirmation]
+      properties:
+        confirmation: { type: string, enum: [DELETE] }
+    AccountDeletionState:
+      type: object
+      required: [request]
+      properties:
+        request:
+          type: object
+          nullable: true
+          required: [id, status, createdAt]
+          properties:
+            id: { type: string, format: uuid }
+            status: { type: string, enum: [requested, processing, completed] }
+            createdAt: { type: string }
+            eligibleAt: { type: string, nullable: true }
+    ContentReportInput:
+      type: object
+      additionalProperties: false
+      required: [submissionId, surface, reason, details, content]
+      properties:
+        submissionId: { type: string, format: uuid }
+        surface: { type: string, enum: [creation, journal, interaction] }
+        reason: { type: string, enum: [unsafe, inaccurate, privacy, other] }
+        details: { type: string, maxLength: 1500 }
+        content:
+          type: object
+          additionalProperties: false
+          required: [id, title, text]
+          properties:
+            id: { type: string, minLength: 1, maxLength: 128 }
+            title: { type: string, maxLength: 200 }
+            text: { type: string, maxLength: 12000 }
+            image:
+              type: string
+              maxLength: 1400000
+              description: Optional bounded inline JPEG, PNG or WebP snapshot; never a remote URL
+    ContentReportReceipt:
+      type: object
+      required: [id, received]
+      properties:
+        id: { type: string, format: uuid }
+        received: { type: boolean }
     BirdShareSelection:
       type: object
       additionalProperties: false

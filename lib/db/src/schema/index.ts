@@ -20,3 +20,5 @@
 export * from "./journal-installations";
 export * from "./journal-birds";
 export * from "./bird-shares";
+export * from "./content-reports";
+export * from "./account-deletions";

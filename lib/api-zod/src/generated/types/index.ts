@@ -6,6 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './accountDeletionInput';
+export * from './accountDeletionInputConfirmation';
+export * from './accountDeletionState';
+export * from './accountDeletionStateRequest';
+export * from './accountDeletionStateRequestStatus';
 export * from './birdShareClaim';
 export * from './birdShareInput';
 export * from './birdShareLink';
@@ -15,6 +20,11 @@ export * from './birdTraitCheck';
 export * from './birdTraitIssue';
 export * from './birdTraitIssueField';
 export * from './birdTraits';
+export * from './contentReportInput';
+export * from './contentReportInputContent';
+export * from './contentReportInputReason';
+export * from './contentReportInputSurface';
+export * from './contentReportReceipt';
 export * from './encounterBird';
 export * from './encounterRequest';
 export * from './generatedBird';

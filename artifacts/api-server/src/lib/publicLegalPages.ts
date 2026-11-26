@@ -24,6 +24,7 @@ const privacy: Section[] = [
       "Accounts use an email address, a user identifier, a display name, authentication/session information, and an optional profile photograph. If you choose Google sign-in, the authentication service receives the information authorised in that sign-in flow.",
       "The app processes bird traits and extra features you enter, generated bird pictures and descriptions, names you give saved birds, interaction settings and selected bird pictures, and saved-library records. Do not enter private or sensitive information in generation prompts or bird names.",
       "The app and its service providers also process technical request, security and error information needed to operate and protect the service. The app keeps account-specific library caches on the device and uses authentication storage to maintain your session.",
+      "If you report generated content, the app sends the selected output text, your chosen reason, optional details and, if you leave it enabled, a resized picture snapshot. These are stored privately for developer review. You do not need to sign in or provide an email to report content. Do not include personal information in a report.",
     ],
   },
   {
@@ -48,6 +49,7 @@ const privacy: Section[] = [
     paragraphs: [
       "Sharing creates a link to the saved birds you selected. Anyone holding a valid link can preview or import those birds. Share links currently expire after seven days; removing the source bird also makes its single-bird link unavailable.",
       "A recipient imports an independent copy. Removing your bird or account does not remove copies someone else has already imported. Do not put personal information into bird names or descriptions you intend to share.",
+      "A separately submitted content report is a review record, not a saved-library bird. Removing a bird does not automatically remove an anonymous report about its output. Contact support about report-related privacy concerns, giving the report reference but never a sign-in code.",
       "The app opens an email composition or sharing action for you to review. It does not automatically send an email on your behalf.",
     ],
   },
@@ -86,6 +88,7 @@ const deletion: Section[] = [
   {
     title: "Request account and associated data deletion",
     paragraphs: [
+      "In the app, open Request account deletion from Home or Your profile. Sign in, read the consequences and type DELETE to submit a request. The request is stored for developer review, not immediate deletion. You can cancel it there before processing starts.",
       `You can request deletion without installing or signing in to the app. Send an email to ${SUPPORT_EMAIL} with the subject “Chirrup account deletion”, preferably from the email address associated with your Chirrup account.`,
       "Include the account email address and say that you want the account and its associated data deleted. Never include your password, one-time sign-in code or identity-document scans. A parent or guardian can explain that they are making a request for a child.",
       "The button below opens an email draft. You must send the email yourself. Opening this page, opening the draft, or pressing the button does not delete anything and does not submit a request automatically. If no email app opens, copy the address and send the request using your normal email service.",
@@ -96,6 +99,7 @@ const deletion: Section[] = [
     paragraphs: [
       "The developer reviews the request and may verify account ownership or a parent's or guardian's authority before deletion. Do not send sign-in codes to support to prove ownership. Support will confirm the outcome by email; this page does not imply immediate or automatic deletion.",
       "Deletion of the account and owned library is permanent once completed. You will lose access to its saved birds. Save any copies you want to keep before requesting deletion.",
+      "When processing begins, account access and sharing links are blocked. Storage cleanup waits for previously issued upload authorisations to expire and requires a follow-up operator pass. A pseudonymous security record is retained to stop old tokens from recreating the deleted journal. An offline phone's existing files and third-party backups cannot be remotely erased by this operation.",
     ],
   },
   {

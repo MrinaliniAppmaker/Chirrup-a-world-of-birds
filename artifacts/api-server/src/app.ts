@@ -1,4 +1,5 @@
-import express, { type Express } from "express";
+import express, { type Express, type ErrorRequestHandler } from "express";
+import { AccountDeletionBlocked } from "./lib/accountDeletion";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
@@ -37,6 +38,7 @@ app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 app.use(cors({ credentials: true, origin: true }));
 // Up to six compressed portrait references; keep other endpoints' smaller limit.
 app.use("/api/birds/interact", express.json({ limit: "9mb" }));
+app.use("/api/content-reports", express.json({ limit: "2mb" }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(
@@ -49,5 +51,13 @@ app.use(
 );
 
 app.use("/api", router);
+const deletionError: ErrorRequestHandler = (error, _req, res, next) => {
+  if (error instanceof AccountDeletionBlocked) {
+    res.status(410).json({ error: "Account deletion is being processed. This journal is no longer writable. Please sign out." });
+    return;
+  }
+  next(error);
+};
+app.use(deletionError);
 
 export default app;

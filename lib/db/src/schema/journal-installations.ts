@@ -7,6 +7,7 @@ export const journalInstallations = pgTable("journal_installations", {
   tokenHash: text("token_hash").notNull().unique(),
   accountId: text("account_id").unique(),
   claimedBy: text("claimed_by"),
+  lockedAt: timestamp("locked_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

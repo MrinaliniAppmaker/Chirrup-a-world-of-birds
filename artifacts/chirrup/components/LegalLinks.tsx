@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Linking, Platform, StyleSheet, Text, View } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
+import { useRouter } from 'expo-router';
 import { Button } from '@/components/ui';
 import { useColors } from '@/hooks/useColors';
 import { sans } from '@/constants/fonts';
 
 export function LegalLinks() {
+  const router = useRouter();
   const c = useColors();
   const [error, setError] = useState<string | null>(null);
   const open = async (page: 'privacy' | 'delete-account') => {
@@ -23,7 +25,7 @@ export function LegalLinks() {
   return (
     <View style={[s.container, { borderTopColor: c.border }]}>
       <Button testID="legal-privacy" label="Privacy policy" icon="shield" variant="ghost" onPress={() => { void open('privacy'); }} />
-      <Button testID="legal-delete-account" label="Request account deletion" icon="user-x" variant="ghost" onPress={() => { void open('delete-account'); }} />
+      <Button testID="legal-delete-account" label="Request account deletion" icon="user-x" variant="ghost" onPress={() => router.push('/account-deletion')} />
       {error ? <Text accessibilityRole="alert" style={[s.error, { color: c.destructive }]}>{error}</Text> : null}
     </View>
   );

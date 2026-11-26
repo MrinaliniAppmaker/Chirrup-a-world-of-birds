@@ -1,0 +1,71 @@
+import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
+import test from "node:test";
+import { eq, inArray } from "drizzle-orm";
+import { accountDeletions, db, journalBirds, journalInstallations, pool } from "@workspace/db";
+import { accountHash, cancelDeletion, fulfillAccountDeletion, getDeletionRequest, requestDeletion, UPLOAD_DRAIN_MS } from "./accountDeletion";
+import { accountJournal, claimInstallation, createInstallation, persistSavedBird } from "./journalRepository";
+import { createBirdShareLink, findBirdShare, importSharedBird } from "./birdShares";
+import { authorizePortrait, deleteJournalPortraits, portraitReadUrl } from "./journalPortraits";
+
+test("deletion is scoped, restartable and preserves independent imported birds", async () => {
+  assert.notEqual(process.env.NODE_ENV, "production", "Never run fixture writes in production");
+  const fakeOwner = `release-delete-fixture-${randomUUID()}`;
+  const fakeRecipient = `release-recipient-fixture-${randomUUID()}`;
+  const installationIds: string[] = [];
+  const authCalls: string[] = [];
+  const bytes = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j2ioAAAAASUVORK5CYII=", "base64");
+  try {
+    const source = await createInstallation();
+    installationIds.push(source.installationId);
+    const portrait = await authorizePortrait(source.installationId, "fixture-bird");
+    const uploaded = await fetch(portrait.uploadUrl, { method: "PUT", headers: { "Content-Type": "image/png" }, body: bytes });
+    assert.equal(uploaded.ok, true);
+    await persistSavedBird(source.installationId, { id: "fixture-bird", name: "Deletion fixture" }, portrait.portraitPath);
+    const owner = await accountJournal(fakeOwner);
+    const recipient = await accountJournal(fakeRecipient);
+    installationIds.push(owner, recipient);
+    await claimInstallation(fakeOwner, source.token);
+    const link = await createBirdShareLink(owner, "fixture-bird");
+    const independent = await importSharedBird(recipient, link.token);
+    assert.notEqual(independent.portraitPath, portrait.portraitPath);
+    const first = await requestDeletion(fakeOwner);
+    assert.equal((await requestDeletion(fakeOwner)).id, first.id);
+    await cancelDeletion(fakeOwner);
+    await assert.rejects(fulfillAccountDeletion(first.id, async () => { throw new Error("MUST NOT CALL AUTH"); }));
+    const request = await requestDeletion(fakeOwner);
+    const started = new Date();
+    await assert.rejects(fulfillAccountDeletion(request.id, async id => {
+      authCalls.push(id); throw new Error("simulated auth outage");
+    }, started));
+    assert.equal((await getDeletionRequest(fakeOwner))?.status, "processing");
+    assert.equal((await db.select().from(journalBirds).where(eq(journalBirds.installationId, owner))).length, 1, "auth failure cannot purge journal rows");
+    await assert.rejects(accountJournal(fakeOwner), "processing account cannot recreate/access journal");
+    await assert.rejects(cancelDeletion(fakeOwner), "processing cannot be cancelled halfway");
+    await assert.rejects(persistSavedBird(owner, { id: "blocked" }, portrait.portraitPath));
+    await assert.rejects(findBirdShare(link.token), "sharing is revoked at processing start");
+    const waiting = await fulfillAccountDeletion(request.id, async id => { authCalls.push(id); }, started);
+    assert.equal(waiting.completed, false, "do not purge while signed uploads may still be valid");
+    const finished = await fulfillAccountDeletion(request.id, async id => { authCalls.push(id); }, new Date(started.getTime() + UPLOAD_DRAIN_MS + 60_000));
+    assert.equal(finished.completed, true);
+    assert.ok(authCalls.every(id => id === fakeOwner), "only the exact requested auth account is passed to deletion");
+    const complete = await getDeletionRequest(fakeOwner);
+    assert.equal(complete?.accountId, null);
+    assert.deepEqual(complete?.installationIds, []);
+    assert.equal(complete?.status, "completed");
+    assert.equal((await db.select().from(journalBirds).where(eq(journalBirds.installationId, owner))).length, 0);
+    assert.equal((await db.select().from(journalBirds).where(eq(journalBirds.installationId, recipient))).length, 1);
+    assert.equal(await accountJournal(fakeRecipient), recipient);
+    await assert.rejects(accountJournal(fakeOwner), "old tokens cannot create a fresh journal after completion");
+    assert.equal((await fetch(await portraitReadUrl(portrait.portraitPath))).status, 404, "claimed phone-journal image was purged");
+    const kept = await fetch(await portraitReadUrl(independent.portraitPath));
+    assert.equal(kept.ok, true);
+    assert.deepEqual(Buffer.from(await kept.arrayBuffer()), bytes, "recipient's independent portrait bytes remain unchanged");
+    assert.equal((await fulfillAccountDeletion(request.id, async () => { throw new Error("MUST NOT CALL AUTH"); })).completed, true);
+  } finally {
+    for (const id of installationIds) await deleteJournalPortraits(id);
+    if (installationIds.length) await db.delete(journalInstallations).where(inArray(journalInstallations.id, installationIds));
+    await db.delete(accountDeletions).where(inArray(accountDeletions.accountHash, [accountHash(fakeOwner), accountHash(fakeRecipient)]));
+    await pool.end();
+  }
+});

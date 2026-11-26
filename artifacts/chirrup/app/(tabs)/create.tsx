@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Platform, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'react-native';
@@ -19,6 +19,8 @@ import { BirdProfile, Button, Eyebrow, tap } from '@/components/ui';
 import { TraitChoiceGrid } from '@/components/TraitChoiceGrid';
 import { TraitOptionStrip } from '@/components/TraitOptionStrip';
 import { ChirrupBrand } from '@/components/ChirrupBrand';
+import { ReportContent } from '@/components/ReportContent';
+import { birdReportContent } from '@/lib/reportContent';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
@@ -48,6 +50,7 @@ function optionFor(key: TraitKey, id: string) {
 }
 
 export default function CreateScreen() {
+  const { width } = useWindowDimensions();
   const c = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -217,7 +220,8 @@ export default function CreateScreen() {
             <Feather name="arrow-left" size={16} color={c.foreground} />
             <Text style={{ fontFamily: sans.medium, fontSize: 13, color: c.foreground }}>Home</Text>
           </Pressable>
-          <ChirrupBrand size={24} />
+          <ReportContent compact surface="creation" content={bird ? birdReportContent(bird, birdName) : undefined} />
+          <ChirrupBrand size={24} showSubtitle={width >= 360} />
         </View>
         <View style={st.steps}>
           {['Shape & features', 'Review', 'Meet your bird'].map((label, i) => (

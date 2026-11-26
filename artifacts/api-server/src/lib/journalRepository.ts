@@ -1,8 +1,9 @@
 import { createHash, randomBytes } from "node:crypto";
 import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
-import { db, journalBirds, journalInstallations, type JournalBirdRecord } from "@workspace/db";
+import { accountDeletions, db, journalBirds, journalInstallations, type JournalBirdRecord } from "@workspace/db";
 import { ListJournalBirdsResponseItem } from "@workspace/api-zod";
 import { portraitReadUrl } from "./journalPortraits";
+import { AccountDeletionBlocked, accountHash, accountLock } from "./accountDeletion";
 
 export const MAX_JOURNAL_BIRDS = 100;
 export class JournalFullError extends Error {}
@@ -21,19 +22,25 @@ export async function authenticateInstallation(token: string) {
   const [row] = await db.select({ id: journalInstallations.id }).from(journalInstallations)
     .where(and(
       eq(journalInstallations.tokenHash, createHash("sha256").update(token).digest("hex")),
-      isNull(journalInstallations.accountId), isNull(journalInstallations.claimedBy),
+      isNull(journalInstallations.accountId), isNull(journalInstallations.claimedBy), isNull(journalInstallations.lockedAt),
     )).limit(1);
   return row?.id ?? null;
 }
 
 export async function accountJournal(accountId: string) {
-  // Unique account identity makes concurrent first sign-ins idempotent.
-  await db.insert(journalInstallations).values({
-    accountId, tokenHash: createHash("sha256").update(randomBytes(48)).digest("hex"),
-  }).onConflictDoNothing({ target: journalInstallations.accountId });
-  const [row] = await db.select({ id: journalInstallations.id }).from(journalInstallations)
-    .where(eq(journalInstallations.accountId, accountId));
-  return row.id;
+  return db.transaction(async tx => {
+    await tx.execute(accountLock(accountId));
+    const [deletion] = await tx.select({ status: accountDeletions.status }).from(accountDeletions)
+      .where(eq(accountDeletions.accountHash, accountHash(accountId)));
+    if (deletion && deletion.status !== "requested") throw new AccountDeletionBlocked();
+    // Unique account identity makes concurrent first sign-ins idempotent.
+    await tx.insert(journalInstallations).values({
+      accountId, tokenHash: createHash("sha256").update(randomBytes(48)).digest("hex"),
+    }).onConflictDoNothing({ target: journalInstallations.accountId });
+    const [row] = await tx.select().from(journalInstallations).where(eq(journalInstallations.accountId, accountId));
+    if (row.lockedAt) throw new AccountDeletionBlocked();
+    return row.id;
+  });
 }
 
 export class JournalClaimError extends Error {}
@@ -46,6 +53,7 @@ export async function claimInstallation(accountId: string, token: string) {
       .where(sql`${journalInstallations.id} = ${targetId} OR ${journalInstallations.tokenHash} = ${hash}`)
       .orderBy(journalInstallations.id).for("update");
     const source = rows.find(row => row.tokenHash === hash);
+    if (rows.some(row => row.lockedAt)) throw new AccountDeletionBlocked();
     if (!source || source.accountId || (source.claimedBy && source.claimedBy !== accountId)) {
       throw new JournalClaimError("This phone journal is unavailable or already belongs to another account. No birds were changed.");
     }
@@ -82,8 +90,9 @@ export async function persistSavedBird(
 ) {
   return db.transaction(async (tx) => {
     // Serialize writes for this installation: concurrent saves cannot exceed 100.
-    await tx.select({ id: journalInstallations.id }).from(journalInstallations)
+    const [journal] = await tx.select().from(journalInstallations)
       .where(eq(journalInstallations.id, installationId)).for("update");
+    if (!journal || journal.lockedAt) throw new AccountDeletionBlocked();
     const [existing] = await tx.select().from(journalBirds).where(scope(installationId, bird.id));
     if (existing) return existing;
     const [{ total }] = await tx.select({ total: count() }).from(journalBirds)

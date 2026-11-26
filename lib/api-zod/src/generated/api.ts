@@ -9,6 +9,76 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Get the signed-in account's deletion request
+ */
+export const GetAccountDeletionResponse = zod.object({
+  "request": zod.object({
+  "id": zod.string().uuid(),
+  "status": zod.enum(['requested', 'processing', 'completed']),
+  "createdAt": zod.string(),
+  "eligibleAt": zod.string().nullish()
+}).nullable()
+})
+
+
+/**
+ * @summary Request deletion of the signed-in account and its associated data
+ */
+export const RequestAccountDeletionBody = zod.object({
+  "confirmation": zod.enum(['DELETE'])
+})
+
+export const RequestAccountDeletionResponse = zod.object({
+  "request": zod.object({
+  "id": zod.string().uuid(),
+  "status": zod.enum(['requested', 'processing', 'completed']),
+  "createdAt": zod.string(),
+  "eligibleAt": zod.string().nullish()
+}).nullable()
+})
+
+
+/**
+ * @summary Cancel the signed-in account's request before processing starts
+ */
+export const CancelAccountDeletionResponse = zod.void()
+
+
+/**
+ * @summary Privately report generated content without leaving the app or requiring an account
+ */
+export const submitContentReportBodyDetailsMax = 1500;
+
+export const submitContentReportBodyContentIdMax = 128;
+
+export const submitContentReportBodyContentTitleMax = 200;
+
+export const submitContentReportBodyContentTextMax = 12000;
+
+export const submitContentReportBodyContentImageMax = 1400000;
+
+
+
+export const SubmitContentReportBody = zod.object({
+  "submissionId": zod.string().uuid(),
+  "surface": zod.enum(['creation', 'journal', 'interaction']),
+  "reason": zod.enum(['unsafe', 'inaccurate', 'privacy', 'other']),
+  "details": zod.string().max(submitContentReportBodyDetailsMax),
+  "content": zod.object({
+  "id": zod.string().min(1).max(submitContentReportBodyContentIdMax),
+  "title": zod.string().max(submitContentReportBodyContentTitleMax),
+  "text": zod.string().max(submitContentReportBodyContentTextMax),
+  "image": zod.string().max(submitContentReportBodyContentImageMax).optional().describe('Optional bounded inline JPEG, PNG or WebP snapshot; never a remote URL')
+})
+})
+
+export const SubmitContentReportResponse = zod.object({
+  "id": zod.string().uuid(),
+  "received": zod.boolean()
+})
+
+
+/**
  * @summary Public pre-release privacy policy HTML, accessible without authentication
  */
 export const GetPublicPrivacyPolicyResponse = zod.unknown()

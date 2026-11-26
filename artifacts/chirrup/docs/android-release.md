@@ -23,6 +23,18 @@ Keep the existing Chirrup design, bird artwork and package identity.
   at `/api/legal/privacy` and `/api/legal/delete-account`, without loading Clerk.
   Home and Profile link to them. The deletion email button only composes a
   request; it does not send email or delete data.
+- In-app generated-content reporting is available on Create, interaction results
+  and saved-bird profiles, including for guests. Reports and optional picture
+  evidence are private; retries are idempotent. Local operator review/export and
+  outcome recording are documented in the API's content-report review guide.
+- Home and Profile now also open a confirmed in-app account-deletion request.
+  The backend binds it to the signed-in account, not a posted identity. Requests
+  can be cancelled until processing starts.
+- Operator deletion has a read-only preview, explicit verified-request
+  confirmation, revoked sharing/session access, an upload-expiry wait, and
+  restartable cleanup of owned and previously claimed journals. Independent
+  recipient copies remain untouched. The second operator pass is required;
+  no scheduler or immediate automatic deletion is claimed.
 
 ## Checks performed
 
@@ -51,10 +63,13 @@ Keep the existing Chirrup design, bird artwork and package identity.
   Confirm the managed AI service's eligibility for that audience; Google's
   standard Gemini API terms restrict under-18 use, and the broker agreement's
   applicability has not been established.
-- Implement and verify the operator's account/data deletion fulfilment process.
-  Request instructions alone do not prove deletion of authentication, database,
-  stored portraits, sharing links, caches, or provider-retained records.
-- Add in-app AI-content reporting with developer review.
+- Establish production access and responsibility for report review and both
+  account-deletion passes. Verify the real Clerk deletion and cleanup using only
+  an explicitly disposable production test account. Fixture tests use a mocked
+  authentication deletion operation; no real accounts were deleted in development.
+- Finalise retention for reports, pseudonymous deletion records, support
+  correspondence, provider logs/backups and local caches. No remote wipe of an
+  offline phone is promised.
 - Complete Play Console verification, Data safety, audience/content rating,
   reviewer access, listing assets, and any account-specific testing requirements.
 - Verify native installation, final permissions, icon masks, edge-to-edge layout,

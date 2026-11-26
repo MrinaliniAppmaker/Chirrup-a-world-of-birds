@@ -53,6 +53,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(auth)" options={{ headerShown: false, presentation: 'modal' }} />
       <Stack.Screen name="sso-callback" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ title: 'Your profile' }} />
+      <Stack.Screen name="account-deletion" options={{ title: 'Account deletion' }} />
       <Stack.Screen name="share-birds" options={{ title: 'Share birds' }} />
       <Stack.Screen name="receive-bird" options={{ title: 'Shared bird' }} />
     </Stack>

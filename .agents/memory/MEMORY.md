@@ -1,5 +1,6 @@
 - [CHIRRUP scope](chirrup-scope.md) — Figma-led mobile bird creation; generated birds are imagined, not species identification.
 - [Mixed-age audience](chirrup-audience.md) — children under 13 and older users are intended; child-access and AI-service eligibility must be verified before release.
+- [Deletion safety](release-deletion-safety.md) — verified operator handling is deliberate; login revocation does not cancel signed uploads or wipe offline devices.
 - [AI image availability](ai-image-availability.md) — documented OpenAI image model rejected by proxy; Gemini image generation verified.
 - [Input focus compatibility](input-focus-compatibility.md) — native submit behavior does not fully control browser blur; preserve intentional focus changes.
 - [Figma visual choices](figma-visual-choices.md) — updated body and beak artwork overlays hidden legacy vectors; use the visible selected screens.

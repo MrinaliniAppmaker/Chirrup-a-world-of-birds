@@ -8,6 +8,8 @@ import { useSimulateEncounter } from '@workspace/api-client-react';
 import type { EncounterBird, GeneratedEncounter } from '@workspace/api-client-react';
 import { Button, Eyebrow, tap } from '@/components/ui';
 import { ChirrupBrand } from '@/components/ChirrupBrand';
+import { ReportContent } from '@/components/ReportContent';
+import { encounterReportContent } from '@/lib/reportContent';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 import { sans, serif } from '@/constants/fonts';
@@ -101,6 +103,9 @@ export default function InteractionsScreen() {
           <View style={[s.notice, { backgroundColor: c.accent, borderRadius: c.radius }]}>
             <Feather name="info" size={14} color={c.primary} />
             <Text style={[s.noticeText, { color: c.accentForeground }]}>Imagined scene. Not a real observation or prediction of behavior.</Text>
+          </View>
+          <View style={{ alignItems: 'flex-end', marginBottom: 10 }}>
+            <ReportContent surface="interaction" content={encounterReportContent(result)} />
           </View>
           <Image testID="encounter-image" source={{ uri: result.imageUri }} style={[s.scene, { borderRadius: c.radius + 2, backgroundColor: c.secondary }]} resizeMode="cover" accessibilityLabel={'Illustrated scene: ' + result.title} />
           <Text style={[s.meta, { color: c.mutedForeground }]}>{'Setting \u00b7 ' + result.habitat}</Text>

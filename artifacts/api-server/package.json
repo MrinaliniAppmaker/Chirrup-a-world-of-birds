@@ -10,7 +10,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:journal": "node tests/run-journal.mjs",
     "test:accounts": "node tests/run-account-journal.mjs",
-    "test:sharing": "node tests/run-bird-sharing.mjs"
+    "test:sharing": "node tests/run-bird-sharing.mjs",
+    "reports:review": "node scripts/run-maintenance.mjs reports",
+    "accounts:delete": "node scripts/run-maintenance.mjs delete-account"
   },
   "dependencies": {
     "@clerk/express": "^2.1.93",

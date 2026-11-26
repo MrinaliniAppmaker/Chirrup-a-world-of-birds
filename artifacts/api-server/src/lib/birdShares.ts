@@ -11,8 +11,9 @@ const birdScope = (installationId: string, birdId: string) =>
 
 export async function createBirdShareLink(installationId: string, birdId: string) {
   return db.transaction(async tx => {
-    await tx.select({ id: journalInstallations.id }).from(journalInstallations)
+    const [journal] = await tx.select().from(journalInstallations)
       .where(eq(journalInstallations.id, installationId)).for("update");
+    if (!journal || journal.lockedAt) throw new BirdShareUnavailable();
     const [bird] = await tx.select().from(journalBirds).where(birdScope(installationId, birdId));
     if (!bird) throw new BirdShareUnavailable();
     const token = randomBytes(32).toString("base64url");
@@ -29,6 +30,8 @@ export async function findBirdShare(token: string) {
       eq(birdShares.installationId, journalBirds.installationId), eq(birdShares.birdId, journalBirds.birdId),
     )).where(and(eq(birdShares.tokenHash, digest(token)), gt(birdShares.expiresAt, new Date())));
   if (!record) throw new BirdShareUnavailable();
+  const [journal] = await db.select().from(journalInstallations).where(eq(journalInstallations.id, record.share.installationId));
+  if (!journal || journal.lockedAt) throw new BirdShareUnavailable();
   return record;
 }
 
@@ -39,9 +42,10 @@ export async function importSharedBird(targetId: string, token: string) {
     return await db.transaction(async tx => {
       const sourceId = initial.share.installationId;
       // Same ordering as journal claims; serialize deletion, imports and normal saves.
-      await tx.select({ id: journalInstallations.id }).from(journalInstallations)
+      const journals = await tx.select().from(journalInstallations)
         .where(sql`${journalInstallations.id} = ${targetId} OR ${journalInstallations.id} = ${sourceId}`)
         .orderBy(journalInstallations.id).for("update");
+      if (journals.length !== new Set([targetId, sourceId]).size || journals.some(row => row.lockedAt)) throw new BirdShareUnavailable();
       const [active] = await tx.select().from(birdShares).where(and(
         eq(birdShares.tokenHash, digest(token)), gt(birdShares.expiresAt, new Date()),
       ));
@@ -71,8 +75,9 @@ export async function importSharedBird(targetId: string, token: string) {
 export async function createBirdShareBatchLink(installationId: string, birdIds: string[]) {
   if (!birdIds.length || birdIds.length > 100 || new Set(birdIds).size !== birdIds.length) throw new BirdShareUnavailable();
   return db.transaction(async tx => {
-    await tx.select({ id: journalInstallations.id }).from(journalInstallations)
+    const [journal] = await tx.select().from(journalInstallations)
       .where(eq(journalInstallations.id, installationId)).for("update");
+    if (!journal || journal.lockedAt) throw new BirdShareUnavailable();
     const birds = await tx.select().from(journalBirds).where(and(
       eq(journalBirds.installationId, installationId), inArray(journalBirds.birdId, birdIds),
     ));
@@ -93,6 +98,8 @@ export async function findSharedBirds(token: string) {
     const single = await findBirdShare(token);
     return { birds: [single.bird], expiresAt: single.share.expiresAt };
   }
+  const [journal] = await db.select().from(journalInstallations).where(eq(journalInstallations.id, batch.installationId));
+  if (!journal || journal.lockedAt) throw new BirdShareUnavailable();
   const birds = await db.select().from(journalBirds).where(and(
     eq(journalBirds.installationId, batch.installationId), inArray(journalBirds.birdId, batch.birdIds),
   ));
@@ -106,9 +113,10 @@ export async function importSharedBirdBatch(targetId: string, token: string) {
   const copiedPaths: string[] = [];
   try {
     return await db.transaction(async tx => {
-      await tx.select({ id: journalInstallations.id }).from(journalInstallations)
+      const journals = await tx.select().from(journalInstallations)
         .where(sql`${journalInstallations.id} = ${targetId} OR ${journalInstallations.id} = ${sourceId}`)
         .orderBy(journalInstallations.id).for("update");
+      if (journals.length !== new Set([targetId, sourceId]).size || journals.some(row => row.lockedAt)) throw new BirdShareUnavailable();
       const [batch] = await tx.select().from(birdShareBatches).where(and(
         eq(birdShareBatches.tokenHash, digest(token)), gt(birdShareBatches.expiresAt, new Date()),
       ));
