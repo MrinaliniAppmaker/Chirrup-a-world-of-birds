@@ -19,6 +19,10 @@ Keep the existing Chirrup design, bird artwork and package identity.
 - The hosted production build refuses preview/local domains and development
   Clerk publishable keys. It also refuses to reuse another Metro process whose
   compiled service environment may differ. Normal development stays unchanged.
+- Public pre-release privacy and manual account-deletion request pages are served
+  at `/api/legal/privacy` and `/api/legal/delete-account`, without loading Clerk.
+  Home and Profile link to them. The deletion email button only composes a
+  request; it does not send email or delete data.
 
 ## Checks performed
 
@@ -42,8 +46,15 @@ Keep the existing Chirrup design, bird artwork and package identity.
   prove an external native build pipeline.
 - Confirm release signing, the upload-key owner and recovery, and Play App Signing.
   Never commit private signing keys or credentials.
-- Add account/data deletion, a public deletion-request resource, an in-app and
-  public privacy policy, and in-app AI-content reporting with developer review.
+- Review and finalise the privacy draft, including provider retention and
+  children/family access. The intended audience includes children under 13.
+  Confirm the managed AI service's eligibility for that audience; Google's
+  standard Gemini API terms restrict under-18 use, and the broker agreement's
+  applicability has not been established.
+- Implement and verify the operator's account/data deletion fulfilment process.
+  Request instructions alone do not prove deletion of authentication, database,
+  stored portraits, sharing links, caches, or provider-retained records.
+- Add in-app AI-content reporting with developer review.
 - Complete Play Console verification, Data safety, audience/content rating,
   reviewer access, listing assets, and any account-specific testing requirements.
 - Verify native installation, final permissions, icon masks, edge-to-edge layout,

@@ -74,6 +74,208 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
+export const getGetPublicPrivacyPolicyUrl = () => {
+
+
+
+
+  return `/api/legal/privacy`
+}
+
+/**
+ * @summary Public pre-release privacy policy HTML, accessible without authentication
+ */
+export const getPublicPrivacyPolicy = async ( options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getGetPublicPrivacyPolicyUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicPrivacyPolicyQueryKey = () => {
+    return [
+    `/api/legal/privacy`
+    ] as const;
+    }
+
+
+export const getGetPublicPrivacyPolicyQueryOptions = <TData = Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicPrivacyPolicyQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>> = ({ signal }) => getPublicPrivacyPolicy({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPublicPrivacyPolicyQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>>
+export type GetPublicPrivacyPolicyQueryError = ErrorType<unknown>
+
+
+export function useGetPublicPrivacyPolicy<TData = Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicPrivacyPolicy>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicPrivacyPolicy>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicPrivacyPolicy<TData = Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicPrivacyPolicy>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicPrivacyPolicy>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicPrivacyPolicy<TData = Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Public pre-release privacy policy HTML, accessible without authentication
+ */
+
+export function useGetPublicPrivacyPolicy<TData = Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPrivacyPolicy>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPublicPrivacyPolicyQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetPublicAccountDeletionUrl = () => {
+
+
+
+
+  return `/api/legal/delete-account`
+}
+
+/**
+ * @summary Public instructions and email composition link for manual account-deletion requests
+ */
+export const getPublicAccountDeletion = async ( options?: Parameters<typeof customFetch>[1]): Promise<string> => {
+
+  return customFetch<string>(getGetPublicAccountDeletionUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicAccountDeletionQueryKey = () => {
+    return [
+    `/api/legal/delete-account`
+    ] as const;
+    }
+
+
+export const getGetPublicAccountDeletionQueryOptions = <TData = Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicAccountDeletionQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicAccountDeletion>>> = ({ signal }) => getPublicAccountDeletion({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPublicAccountDeletionQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicAccountDeletion>>>
+export type GetPublicAccountDeletionQueryError = ErrorType<unknown>
+
+
+export function useGetPublicAccountDeletion<TData = Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicAccountDeletion>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicAccountDeletion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicAccountDeletion<TData = Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicAccountDeletion>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicAccountDeletion>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicAccountDeletion<TData = Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Public instructions and email composition link for manual account-deletion requests
+ */
+
+export function useGetPublicAccountDeletion<TData = Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicAccountDeletion>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPublicAccountDeletionQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getCreateBirdShareBatchUrl = () => {
 
 

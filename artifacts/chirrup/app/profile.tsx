@@ -8,6 +8,7 @@ import { signOutToHome } from '@/components/AccountMenu';
 import { Button, Eyebrow } from '@/components/ui';
 import { LibraryShelf } from '@/components/LibraryShelf';
 import { ProfilePhotoReview } from '@/components/ProfilePhotoReview';
+import { LegalLinks } from '@/components/LegalLinks';
 import { useColors } from '@/hooks/useColors';
 import { sans, serif } from '@/constants/fonts';
 export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
@@ -34,6 +35,7 @@ export default function ProfileScreen() {
         <Text style={[s.body, { color: c.mutedForeground, textAlign: 'center' }]}>Sign in to keep your journal with your account.</Text>
         <Button testID="profile-sign-in" label="Sign in" icon="log-in" onPress={() => router.push('/(auth)/sign-in')} style={{ marginTop: 18, alignSelf: 'stretch' }} />
         <Button testID="profile-home" label="Back to Home" icon="home" variant="ghost" onPress={() => router.replace('/')} />
+        <LegalLinks />
       </View>
     );
   }
@@ -76,6 +78,7 @@ export default function ProfileScreen() {
         ) : <Button testID="profile-logout" label="Log out" icon="log-out" variant="ghost" onPress={() => setConfirmOut(true)} style={{ marginTop: 8 }} />}
       </View>
       <Button testID="profile-home" label="Back to Home" icon="home" variant="ghost" onPress={() => router.replace('/')} style={{ marginTop: 12 }} />
+      <LegalLinks />
       <RenameDialog visible={renaming} initial={user.firstName ?? ''} onClose={() => setRenaming(false)} onSave={rename} />
     </ScrollView>
   );

@@ -11,6 +11,28 @@ tags:
   - name: health
     description: Health operations
 paths:
+  /legal/privacy:
+    get:
+      operationId: getPublicPrivacyPolicy
+      summary: Public pre-release privacy policy HTML, accessible without authentication
+      responses:
+        "200":
+          description: Public privacy draft
+          content:
+            text/html:
+              schema:
+                type: string
+  /legal/delete-account:
+    get:
+      operationId: getPublicAccountDeletion
+      summary: Public instructions and email composition link for manual account-deletion requests
+      responses:
+        "200":
+          description: Account-deletion request instructions; this GET never deletes data
+          content:
+            text/html:
+              schema:
+                type: string
   /bird-shares/batch:
     post:
       operationId: createBirdShareBatch

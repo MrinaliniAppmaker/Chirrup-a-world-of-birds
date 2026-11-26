@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { Button, Eyebrow, tap } from '@/components/ui';
 import { CHIRRUP_TAGLINE, ChirrupBrand, ChirrupLogo } from '@/components/ChirrupBrand';
 import { AccountChip } from '@/components/AccountMenu';
+import { LegalLinks } from '@/components/LegalLinks';
 import { useColors } from '@/hooks/useColors';
 import { useCollection } from '@/context/CollectionContext';
 export { ScreenRecovery as ErrorBoundary } from '@/components/ScreenRecovery';
@@ -59,6 +60,7 @@ export default function HomeScreen() {
           </Pressable>
         ))}
       </View>
+      <LegalLinks />
     </ScrollView>
   );
 }

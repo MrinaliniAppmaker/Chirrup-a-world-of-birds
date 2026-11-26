@@ -9,6 +9,18 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Public pre-release privacy policy HTML, accessible without authentication
+ */
+export const GetPublicPrivacyPolicyResponse = zod.unknown()
+
+
+/**
+ * @summary Public instructions and email composition link for manual account-deletion requests
+ */
+export const GetPublicAccountDeletionResponse = zod.unknown()
+
+
+/**
  * @summary Create one seven-day link for selected saved birds
  */
 export const createBirdShareBatchBodyBirdIdsItemMax = 128;
