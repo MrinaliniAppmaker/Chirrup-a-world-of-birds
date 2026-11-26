@@ -265,8 +265,13 @@ export function useProfileActions() {
     photoLock.current = true;
     setPhotoError(null); setPhotoNotice(null);
     try {
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) { setPhotoError('Photo access is off. Allow photo access in Settings to choose a profile picture.'); return; }
+      // Android's system picker grants access to the selected image only.
+      // Do not request broad storage access (also keep the web picker in the
+      // original click gesture). Retain iOS's existing permission handling.
+      if (Platform.OS === 'ios') {
+        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!perm.granted) { setPhotoError('Photo access is off. Allow photo access in Settings to choose a profile picture.'); return; }
+      }
       const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: true, aspect: [1, 1], quality: 0.7, base64: true });
       if (res.canceled || !res.assets[0]) return;
       const a = res.assets[0];
