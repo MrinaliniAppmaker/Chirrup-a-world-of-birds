@@ -14,6 +14,8 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(functio
   const [focused, setFocused] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const highlighted = highlightRanges !== undefined;
+  const highlightParts = traitHighlightParts(props.value ?? '', highlightRanges ?? []);
+  const hasInvalidHighlights = highlightParts.some((part) => part.invalid);
   const flat = StyleSheet.flatten(style) ?? {};
   const border = flat.borderWidth ?? 0;
   const padLeft = flat.paddingLeft ?? flat.paddingHorizontal ?? flat.padding ?? 0;
@@ -92,7 +94,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(functio
       marginLeft: flat.marginLeft, marginRight: flat.marginRight,
       backgroundColor: focused ? c.secondary : flat.backgroundColor,
     }}>
-      <View pointerEvents="none" accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
+      {hasInvalidHighlights && <View pointerEvents="none" accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants"
         testID={`${props.testID}-highlights`} style={{
           position: 'absolute', overflow: 'hidden', opacity: 0.24,
           top: Number(padTop) + Number(border), bottom: Number(padBottom) + Number(border),
@@ -107,12 +109,17 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(functio
             fontSize: Math.max(16, flat.fontSize ?? 16), lineHeight: 24, includeFontPadding: false,
             letterSpacing: flat.letterSpacing, textAlign: flat.textAlign, color: 'transparent', flexShrink: 0,
           }}>
-            {traitHighlightParts(props.value ?? '', highlightRanges ?? []).map((part, i) => (
-              <Text key={i} style={part.invalid ? { backgroundColor: c.destructive } : undefined}>{part.text}</Text>
+            {highlightParts.map((part, i) => (
+              // Explicit on EVERY native span: Android can otherwise paint a
+              // faint second copy instead of inheriting the transparent color.
+              <Text key={i} style={{
+                color: 'transparent', textShadowColor: 'transparent', textShadowRadius: 0,
+                backgroundColor: part.invalid ? c.destructive : 'transparent',
+              }}>{part.text}</Text>
             ))}
           </Text>
         </View>
-      </View>
+      </View>}
       {control}
     </View>
   );

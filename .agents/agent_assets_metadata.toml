@@ -2,20 +2,6 @@ uploads = []
 generated = []
 
 [[outputs]]
-id = "WI4nI6a2ihe0zUOlpWMRJ"
-uri = "file://.local/generated-artifacts/anatomy-guided-example.png"
-type = "image"
-title = "Bird generated with visual anatomy guides"
-description = "Live example with an upturned violet bill and requested zygodactyl feet. Upward bill curvature is visible; overlapping toes mean the exact toe arrangement is not fully verified. This example was not saved to your journal."
-logical_id = "92c88a73-cf17-4626-a7a1-394c79a036b2"
-content_hash = "sha256:90d037d991a2dd1d0568dc9e4ea29e6cadf3a4214e6301d6de744c9f9e51eb60"
-size = 1363807
-mtime_ms = 1794913775126
-storage_uri = "gcs://replit-rams-assets-pike/rams/assets/repl:5c3e6851-70e1-49d1-9fd4-c363e33cb61d/92c88a73-cf17-4626-a7a1-394c79a036b2/4cad4a86-6a3b-4945-a138-eeaf31316a5e"
-storage_version_token = "1794913793403290"
-content_type = "image/png"
-
-[[outputs]]
 id = "vM5JLf6blwvSvegpXhqPJ"
 uri = "file://generated-artifacts/chirrup-1.0.0-1-production.aab"
 type = "unspecified"
