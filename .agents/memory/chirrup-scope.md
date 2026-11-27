@@ -54,6 +54,12 @@ The library is intended to hold up to 100 saved birds.
 
 **How to apply:** Retain existing birds when improving storage, support the 100th save, and block additional saves clearly without deleting older birds.
 
+Library searches are temporary: discard the query when the user leaves Library for another tab or page.
+
+**Why:** The user explicitly described leaving the tab as disinterest in the old search and requested an empty search box on returning.
+
+**How to apply:** Clear on route departure, not on typing or collection refreshes. Restore the full list without changing saved birds. Do not generalize this reset policy to unsaved Create drafts or other form fields.
+
 Backend collections belong to signed-in accounts and contain saved journal birds only, not every generated bird. Existing per-installation journals must be preserved and securely transferred into the first account that claims them.
 
 **Why:** The user initially requested storage per phone and explicitly chose “Saved journal birds.” They subsequently asked to change this individualization to accounts, with a profile photo/name beside the Home branding and a menu for viewing, renaming, and logging out.

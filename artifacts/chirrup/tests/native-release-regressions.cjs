@@ -126,7 +126,65 @@ function checkHighlightRendering() {
   console.log('PASS: no duplicate glyph layer in valid fields; invalid spans transparent, noninteractive and editable');
 }
 
+function checkLibrarySearchLifecycle() {
+  let query = '';
+  let focusEffect;
+  const birds = [
+    { id: 'duck', name: 'Mallard', habitat: 'Pond' },
+    { id: 'owl', name: 'Owl', habitat: 'Forest' },
+  ];
+  const react = {
+    createElement: (type, props, ...children) => ({ type, props: props ?? {}, children }),
+    useCallback: (fn) => fn, useMemo: (fn) => fn(),
+    useState: () => [query, (text) => { query = text; }],
+  };
+  const { default: Library } = load('app/(tabs)/library.tsx', {
+    react,
+    'react-native': {
+      FlatList: 'FlatList', Image: 'Image', Platform: { OS: 'android' },
+      Pressable: 'Pressable', Text: 'Text', View: 'View',
+      StyleSheet: { create: (styles) => styles, hairlineWidth: 1 },
+    },
+    'react-native-safe-area-context': { useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) },
+    '@expo/vector-icons': { Feather: 'Icon' },
+    'expo-router': { useRouter: () => ({}), useFocusEffect: (fn) => { focusEffect = fn; } },
+    '@/components/ui': { Button: 'Button', Eyebrow: 'Eyebrow', tap: () => {} },
+    '@/components/ChirrupBrand': { ChirrupBrand: 'Brand' },
+    '@/hooks/useColors': { useColors: () => ({ radius: 8 }) },
+    '@/context/CollectionContext': { useCollection: () => ({ birds, loaded: true }) },
+    '@/constants/fonts': { sans: {}, serif: 'Serif' },
+    '@/lib/collectionStorage': { MAX_BIRDS: 100 },
+    '@/components/FieldInput': { FieldInput: 'FieldInput' },
+    '@/components/ScreenRecovery': { ScreenRecovery: 'ScreenRecovery' },
+  });
+  function nodes(node) {
+    if (!node || typeof node !== 'object') return [];
+    return [node, ...(node.children ?? []).flat(Infinity).flatMap(nodes)];
+  }
+  const render = () => nodes(Library());
+  const initial = render();
+  assert.equal(initial.find(n => n.props.testID === 'search').props.value, '');
+  const leaveLibrary = focusEffect();
+  initial.find(n => n.props.testID === 'search').props.onChangeText('mallard');
+  const searching = render();
+  assert.equal(searching.find(n => n.props.testID === 'search').props.value, 'mallard');
+  assert.equal(searching.find(n => n.type === 'FlatList').props.data.length, 1);
+  assert.equal(query, 'mallard', 'Rerenders must not interrupt an active search');
+  leaveLibrary();
+  const returned = render();
+  assert.equal(returned.find(n => n.props.testID === 'search').props.value, '');
+  assert.equal(returned.find(n => n.type === 'FlatList').props.data.length, 2);
+  const leaveAgain = focusEffect();
+  returned.find(n => n.props.testID === 'search').props.onChangeText('owl');
+  assert.equal(render().find(n => n.type === 'FlatList').props.data.length, 1);
+  leaveAgain();
+  assert.equal(render().find(n => n.props.testID === 'search').props.value, '');
+  assert.equal(birds.length, 2, 'Clearing a search must not remove saved birds');
+  console.log('PASS: library filters while typing, clears on route departure, restores all birds and resets on repeated visits');
+}
+
 (async () => {
   await checkPortraits();
   checkHighlightRendering();
+  checkLibrarySearchLifecycle();
 })().catch((error) => { console.error(error); process.exitCode = 1; });

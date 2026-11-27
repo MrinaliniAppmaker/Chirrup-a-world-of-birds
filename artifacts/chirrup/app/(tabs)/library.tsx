@@ -1,8 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FlatList, Image, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Button, Eyebrow, tap } from '@/components/ui';
 import { ChirrupBrand } from '@/components/ChirrupBrand';
 import { useColors } from '@/hooks/useColors';
@@ -20,6 +20,11 @@ export default function LibraryScreen() {
   const router = useRouter();
   const { birds, loaded, error, syncing, syncError, retrySync } = useCollection();
   const [q, setQ] = useState<string>('');
+  // Tabs retain their screens. Clear the filter when this route loses focus,
+  // not on typing, collection refreshes or ordinary component rerenders.
+  useFocusEffect(useCallback(() => {
+    return () => setQ('');
+  }, []));
   const topPad = Platform.OS === 'web' ? 67 : insets.top;
   const bottomPad = Platform.OS === 'web' ? 34 + 84 : insets.bottom + 90;
 
