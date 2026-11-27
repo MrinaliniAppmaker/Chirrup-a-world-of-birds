@@ -3,10 +3,11 @@ import type { Part } from "@google/genai";
 import type { BirdTraits } from "./birdDesign";
 import { requestedAnatomyFeatures, type AnatomyFeature } from "./anatomyGuidance";
 import { portraitPrompt } from "./birdDesign";
-import { anatomyPoseGuide, billGuide, lobedToeGuide, toeGuide } from "./anatomyGuideDrawings";
+import { anatomyPoseGuide, billGuide, lobedToeGuide, spoonbillGuide, toeGuide } from "./anatomyGuideDrawings";
 
 type Guide = { id: AnatomyFeature; caption: string; svg: string };
 const guides: Guide[] = [
+  { id: "spoonbill", caption: "BILL SHAPE ONLY: the TOP view shows the essential sideways expansion into a broad rounded spoon at the end of a long narrow shaft. BOTH mandibles are flat and spoon-ended, not pointed probes. The side view explains why width disappears in profile: expose the top surface from a slightly elevated three-quarter angle in the final portrait. Copy bill shape only, not the grey head, colors, labels or two-panel layout. Keep every other selected trait.", svg: spoonbillGuide() },
   { id: "lobed", caption: "TOE SURFACE ONLY - COOT FOOT REFERENCE: each drawing is one isolated toe surface example, not a toe-count diagram. Use the coot's broad, flat leaf-like lateral skin flaps and shallow joint notches, with a narrow scaled central toe and a terminal claw. Copy the attached scalloped flanges down the sides of EACH requested digit, not spikes, beads, plates or feathers. Preserve open gaps between neighboring toes; do not join them into a shared skin sheet. Keep the toe count and directions from the user's selections or other toe-layout guides. Repeat the lobed surface on BOTH feet with natural skin and claws. Copy coot FOOT geometry only, never a coot's body, head, bill, black plumage, white forehead or green legs. Do not copy gray, labels, illustration style or diagram panels.", svg: lobedToeGuide() },
   { id: "upcurved", caption: "BILL SHAPE ONLY, side view facing right: copy the continuous UPWARD sweep to the raised tip, with the head level. The grey oval is orientation context only, not the requested head shape. Do not copy grey coloring, scale or illustration style.", svg: billGuide(true) },
   { id: "downcurved", caption: "BILL SHAPE ONLY, side view facing right: copy the continuous DOWNWARD bill curve. Grey head is orientation context only; keep the user's own head shape, bill dimensions and palette.", svg: billGuide(false) },

@@ -380,7 +380,7 @@ export default function CreateScreen() {
               {KEYS.map((k, i) => (
                 <View key={k} style={[st.reviewRow, i > 0 && { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: c.border }]}>
                   <Text style={[st.reviewKey, { color: c.mutedForeground }]}>{TRAIT_LABELS[k]}</Text>
-                  <Text style={[st.reviewVal, { color: c.foreground }]}>{traits[k] as string}</Text>
+                  <Text style={[st.reviewVal, { color: c.foreground }]}>{mode === 'visual' ? optionFor(k, sel[k])?.reviewLabel ?? traits[k] : traits[k]}</Text>
                 </View>
               ))}
               {traits.extra ? (

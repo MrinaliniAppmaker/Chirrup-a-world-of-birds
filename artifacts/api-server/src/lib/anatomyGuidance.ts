@@ -34,6 +34,12 @@ const definitions = [
     meaning: "Totipalmate: continuous swimming membranes connect ALL FOUR toes, including the innermost toe, not only the usual three front toes.",
   },
   {
+    id: "spoonbill",
+    part: "beak",
+    term: /\b(?:spoon[- ]?(?:bill|shaped|tipped)|spatulate)\b/i,
+    meaning: "Spoon-shaped / spatulate bill: BOTH closed mandibles have a long narrow flattened shaft ending in a broad rounded spoon, widened SIDEWAYS at the distal tip. The distal paddle is visibly wider than the shaft, not a thin pointed probe. Show its top surface at a slightly elevated three-quarter angle so the widening can be seen; a pure side silhouette hides the essential feature. Copy only this bill geometry, never a spoonbill's customary white plumage, head, neck, legs or feet.",
+  },
+  {
     id: "upcurved",
     part: "beak",
     term: /\b(?:up[- ]?(?:turned|curved|curving)|recurved)\b/i,

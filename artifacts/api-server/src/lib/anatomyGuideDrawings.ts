@@ -147,6 +147,22 @@ export const billGuide = (up: boolean) => {
   `);
 };
 
+export const spoonbillGuide = () => sheet(`
+  ${label(65, 65, "BILL SHAPE ONLY: NARROW SHAFT + BROAD SPOON TIP", 32)}
+  ${label(65, 120, "TOP VIEW: the distal end widens SIDEWAYS; it never tapers to a probing point.")}
+  <ellipse cx="235" cy="370" rx="140" ry="120" fill="#eeeeee" stroke="#555555" stroke-width="4"/>
+  <path d="M350 329 L890 329 C965 329 1000 257 1115 257 C1290 257 1290 483 1115 483 C1000 483 965 411 890 411 L350 411Z"
+    fill="url(#skin)" stroke="#222222" stroke-width="5"/>
+  ${label(480, 520, "LONG NARROW SHAFT", 28)}
+  ${label(980, 555, "WIDE ROUNDED TIP", 27)}
+  ${label(65, 670, "SIDE VIEW: thin and flat; side view alone HIDES the spoon width.")}
+  <ellipse cx="235" cy="800" rx="140" ry="100" fill="#eeeeee" stroke="#555555" stroke-width="4"/>
+  <path d="M350 780 L1180 780 Q1270 800 1180 820 L350 820Z" fill="url(#skin)" stroke="#222222" stroke-width="4"/>
+  <path d="M350 800 H1220" fill="none" stroke="#444444" stroke-width="2"/>
+  ${label(65, 960, "Show the top surface in the final portrait. BOTH mandibles carry the spoon shape.", 27)}
+  ${label(65, 1035, "Bill geometry only. Keep the selected body, feet and colors. No panels or labels.", 26)}
+`);
+
 // A spatial construction reference eliminates the extra top-view -> posed-foot
 // interpretation step. It is an invented scaffold, not a real species portrait.
 export function anatomyPoseGuide(forward: number[], backward: number[], bill: "upcurved" | "downcurved" | undefined, body: string, lobed = false): string {

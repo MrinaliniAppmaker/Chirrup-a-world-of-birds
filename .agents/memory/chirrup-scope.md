@@ -126,6 +126,12 @@ Do not use automated visual rejection and quality-retry loops as the solution to
 
 **How to apply:** Improve the generation input itself. Genuine provider failures must still be reported, but do not reintroduce an AI trait judge that blocks portraits or silently regenerates them without discussing a different approach with the user.
 
+For a visually selected lobed foot, Review should say “lobed, scalloped paddling toes.” Keep the detailed coot-foot conditioning for generation.
+
+**Why:** The user explicitly requested a short understandable review label without weakening the coot-based image guidance.
+
+**How to apply:** Separate display summaries from generation constraints. Preserve users' custom typed traits rather than replacing their text with preset summaries.
+
 A bird must remain the same recognizable individual across its journal portrait and interaction scenes.
 
 **Why:** The user reported that birds' appearance varied greatly between the journal and other generated scenes.
